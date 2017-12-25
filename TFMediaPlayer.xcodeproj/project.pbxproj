@@ -1,0 +1,465 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
+		18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */; };
+		18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA11FF0F1F6002BFBBC /* Main.storyboard */; };
+		18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA41FF0F1F6002BFBBC /* Assets.xcassets */; };
+		18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA61FF0F1F6002BFBBC /* LaunchScreen.storyboard */; };
+		18C66DB31FF0F1F6002BFBBC /* TFMediaPlayerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */; };
+		18C66DC51FF0F27C002BFBBC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DC41FF0F27C002BFBBC /* TFMediaPlayer.mm */; };
+		18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */; };
+		18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */; };
+		18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		18C66DAF1FF0F1F6002BFBBC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18C66D8D1FF0F1F6002BFBBC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 18C66D941FF0F1F6002BFBBC;
+			remoteInfo = TFMediaPlayer;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TFMediaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		18C66D991FF0F1F6002BFBBC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		18C66D9B1FF0F1F6002BFBBC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		18C66DA21FF0F1F6002BFBBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		18C66DA41FF0F1F6002BFBBC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		18C66DA71FF0F1F6002BFBBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		18C66DA91FF0F1F6002BFBBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFMediaPlayerUITests.m; sourceTree = "<group>"; };
+		18C66DB41FF0F1F6002BFBBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		18C66DC31FF0F27C002BFBBC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
+		18C66DC41FF0F27C002BFBBC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
+		18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayController.cpp; sourceTree = "<group>"; };
+		18C66DC81FF0F5A2002BFBBC /* PlayController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlayController.hpp; sourceTree = "<group>"; };
+		18C66DCD1FF0F84B002BFBBC /* ExampleMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleMenuViewController.h; sourceTree = "<group>"; };
+		18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleMenuViewController.m; sourceTree = "<group>"; };
+		18C66DD01FF0F96F002BFBBC /* TFNetMp4PlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFNetMp4PlayViewController.h; sourceTree = "<group>"; };
+		18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFNetMp4PlayViewController.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		18C66D921FF0F1F6002BFBBC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18C66DAB1FF0F1F6002BFBBC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		18C66D8C1FF0F1F6002BFBBC = {
+			isa = PBXGroup;
+			children = (
+				18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */,
+				18C66DB11FF0F1F6002BFBBC /* TFMediaPlayerUITests */,
+				18C66D961FF0F1F6002BFBBC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		18C66D961FF0F1F6002BFBBC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */,
+				18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				18C66DCD1FF0F84B002BFBBC /* ExampleMenuViewController.h */,
+				18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */,
+				18C66DD01FF0F96F002BFBBC /* TFNetMp4PlayViewController.h */,
+				18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */,
+				18C66DC21FF0F253002BFBBC /* Player */,
+				18C66D981FF0F1F6002BFBBC /* Supporting Files */,
+			);
+			path = TFMediaPlayer;
+			sourceTree = "<group>";
+		};
+		18C66D981FF0F1F6002BFBBC /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				18C66D9B1FF0F1F6002BFBBC /* AppDelegate.h */,
+				18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */,
+				18C66DA11FF0F1F6002BFBBC /* Main.storyboard */,
+				18C66DA41FF0F1F6002BFBBC /* Assets.xcassets */,
+				18C66DA61FF0F1F6002BFBBC /* LaunchScreen.storyboard */,
+				18C66DA91FF0F1F6002BFBBC /* Info.plist */,
+				18C66D991FF0F1F6002BFBBC /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		18C66DB11FF0F1F6002BFBBC /* TFMediaPlayerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */,
+				18C66DB41FF0F1F6002BFBBC /* Info.plist */,
+			);
+			path = TFMediaPlayerUITests;
+			sourceTree = "<group>";
+		};
+		18C66DC21FF0F253002BFBBC /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				18C66DC61FF0F515002BFBBC /* Core */,
+				18C66DC31FF0F27C002BFBBC /* TFMediaPlayer.h */,
+				18C66DC41FF0F27C002BFBBC /* TFMediaPlayer.mm */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		18C66DC61FF0F515002BFBBC /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */,
+				18C66DC81FF0F5A2002BFBBC /* PlayController.hpp */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18C66DB71FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayer" */;
+			buildPhases = (
+				18C66D911FF0F1F6002BFBBC /* Sources */,
+				18C66D921FF0F1F6002BFBBC /* Frameworks */,
+				18C66D931FF0F1F6002BFBBC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TFMediaPlayer;
+			productName = TFMediaPlayer;
+			productReference = 18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		18C66DAD1FF0F1F6002BFBBC /* TFMediaPlayerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18C66DBA1FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayerUITests" */;
+			buildPhases = (
+				18C66DAA1FF0F1F6002BFBBC /* Sources */,
+				18C66DAB1FF0F1F6002BFBBC /* Frameworks */,
+				18C66DAC1FF0F1F6002BFBBC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				18C66DB01FF0F1F6002BFBBC /* PBXTargetDependency */,
+			);
+			name = TFMediaPlayerUITests;
+			productName = TFMediaPlayerUITests;
+			productReference = 18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		18C66D8D1FF0F1F6002BFBBC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0810;
+				ORGANIZATIONNAME = shiwei;
+				TargetAttributes = {
+					18C66D941FF0F1F6002BFBBC = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UML9BQURX9;
+						ProvisioningStyle = Automatic;
+					};
+					18C66DAD1FF0F1F6002BFBBC = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UML9BQURX9;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 18C66D941FF0F1F6002BFBBC;
+					};
+				};
+			};
+			buildConfigurationList = 18C66D901FF0F1F6002BFBBC /* Build configuration list for PBXProject "TFMediaPlayer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 18C66D8C1FF0F1F6002BFBBC;
+			productRefGroup = 18C66D961FF0F1F6002BFBBC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */,
+				18C66DAD1FF0F1F6002BFBBC /* TFMediaPlayerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		18C66D931FF0F1F6002BFBBC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
+				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
+				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18C66DAC1FF0F1F6002BFBBC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		18C66D911FF0F1F6002BFBBC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */,
+				18C66DC51FF0F27C002BFBBC /* TFMediaPlayer.mm in Sources */,
+				18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */,
+				18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */,
+				18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */,
+				18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18C66DAA1FF0F1F6002BFBBC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18C66DB31FF0F1F6002BFBBC /* TFMediaPlayerUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		18C66DB01FF0F1F6002BFBBC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */;
+			targetProxy = 18C66DAF1FF0F1F6002BFBBC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		18C66DA11FF0F1F6002BFBBC /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				18C66DA21FF0F1F6002BFBBC /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		18C66DA61FF0F1F6002BFBBC /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				18C66DA71FF0F1F6002BFBBC /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		18C66DB51FF0F1F6002BFBBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		18C66DB61FF0F1F6002BFBBC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		18C66DB81FF0F1F6002BFBBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		18C66DB91FF0F1F6002BFBBC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		18C66DBB1FF0F1F6002BFBBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayerUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = TFMediaPlayer;
+			};
+			name = Debug;
+		};
+		18C66DBC1FF0F1F6002BFBBC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayerUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = TFMediaPlayer;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		18C66D901FF0F1F6002BFBBC /* Build configuration list for PBXProject "TFMediaPlayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18C66DB51FF0F1F6002BFBBC /* Debug */,
+				18C66DB61FF0F1F6002BFBBC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18C66DB71FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18C66DB81FF0F1F6002BFBBC /* Debug */,
+				18C66DB91FF0F1F6002BFBBC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		18C66DBA1FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18C66DBB1FF0F1F6002BFBBC /* Debug */,
+				18C66DBC1FF0F1F6002BFBBC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 18C66D8D1FF0F1F6002BFBBC /* Project object */;
+}
