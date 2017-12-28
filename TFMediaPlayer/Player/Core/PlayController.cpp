@@ -7,11 +7,22 @@
 //
 
 #include "PlayController.hpp"
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+
+#include "DebugFuncs.h"
 
 using namespace tfmpcore;
 
-void PlayController::connectAndOpenMedia(std::string mediaPath){
+bool PlayController::connectAndOpenMedia(std::string mediaPath){
+    av_register_all();
     
+    AVFormatContext *fmtCtx = avformat_alloc_context();
+    int retval= avformat_open_input(&fmtCtx, mediaPath.c_str(), NULL, NULL);
+    TFCheckRetvalAndGotoFail("avformat_open_input");
+    
+Fail:
+    return false;
 }
 
 void PlayController::play(){

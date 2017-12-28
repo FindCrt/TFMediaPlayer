@@ -8,6 +8,7 @@
 
 #import "ExampleMenuViewController.h"
 #import "TFNetMp4PlayViewController.h"
+#import "TFLocalMp4ViewController.h"
 
 @interface ExampleMenuViewController (){
     NSArray *_exampleInfos;
@@ -21,6 +22,7 @@
     [super viewDidLoad];
     
     _exampleInfos = @[
+                      @{@"title": @"本地mp4视频", @"actionVC": @"TFLocalMp4ViewController"},
                       @{@"title": @"播放网络mp4视频", @"actionVC": @"TFNetMp4PlayViewController"}
                       ];
 }

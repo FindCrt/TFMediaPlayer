@@ -18,7 +18,7 @@ namespace tfmpcore {
         std::string _mediaPath;
         
     public:
-        void connectAndOpenMedia(std::string mediaPath);
+        bool connectAndOpenMedia(std::string mediaPath);
         
         void play();
         void pause();

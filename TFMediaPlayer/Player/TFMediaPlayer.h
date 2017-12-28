@@ -20,7 +20,7 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 
 @property (nonatomic, strong) NSURL *mediaURL;
 
-@property (nonatomic, strong) UIView *displayView;
+@property (nonatomic, strong, readonly) UIView *displayView;
 
 -(void)preparePlay;
 
