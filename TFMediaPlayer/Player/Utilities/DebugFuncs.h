@@ -10,19 +10,19 @@
 #define DebugFuncs_h
 
 #define TFCheckRetval(statement)\
-if (retval != 0) {\
-printf("%s\n",statement);\
+if (retval < 0) {\
+printf("%s error(%d)\n",statement,retval);\
 }\
 
 #define TFCheckRetvalAndReturn(statement)\
-if (retval != 0) {\
-printf("%s\n",statement);\
+if (retval < 0) {\
+printf("%s error(%d)\n",statement,retval);\
 return;\
 }\
 
 #define TFCheckRetvalAndGotoFail(statement)\
-if (retval != 0) {\
-printf("%s\n",statement);\
+if (retval < 0) {\
+printf("%s error(%d)\n",statement,retval);\
 goto Fail;\
 }\
 

@@ -20,10 +20,18 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.view.backgroundColor = [UIColor whiteColor];
+    
     _player = [[TFMediaPlayer alloc] init];
     _player.displayView.frame = CGRectMake(0, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
     
     [self.view addSubview:_player.displayView];
+}
+
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    
+    [self startPlay];
 }
 
 -(void)startPlay{

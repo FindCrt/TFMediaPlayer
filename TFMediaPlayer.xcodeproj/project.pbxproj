@@ -19,6 +19,7 @@
 		180FA4FD1FF4CB3300AFB5F9 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FC1FF4CB3300AFB5F9 /* AVFoundation.framework */; };
 		180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */; };
 		180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */; };
+		180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5021FF4D16800AFB5F9 /* Decoder.cpp */; };
 		184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72E1FF48A95007D5826 /* libavcodec.a */; };
 		184FF73E1FF48A95007D5826 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72F1FF48A95007D5826 /* libavdevice.a */; };
 		184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7301FF48A95007D5826 /* libavfilter.a */; };
@@ -63,6 +64,10 @@
 		180FA4FC1FF4CB3300AFB5F9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		180FA5021FF4D16800AFB5F9 /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
+		180FA5031FF4D16800AFB5F9 /* Decoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Decoder.hpp; sourceTree = "<group>"; };
+		180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadConvience.h; sourceTree = "<group>"; };
+		180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RecycleBuffer.hpp; sourceTree = "<group>"; };
 		184FF6BD1FF48A95007D5826 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		184FF6BE1FF48A95007D5826 /* avdct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avdct.h; sourceTree = "<group>"; };
 		184FF6BF1FF48A95007D5826 /* avfft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avfft.h; sourceTree = "<group>"; };
@@ -483,6 +488,7 @@
 			isa = PBXGroup;
 			children = (
 				184FF7531FF4A190007D5826 /* DebugFuncs.h */,
+				180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -562,6 +568,9 @@
 			children = (
 				18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */,
 				18C66DC81FF0F5A2002BFBBC /* PlayController.hpp */,
+				180FA5021FF4D16800AFB5F9 /* Decoder.cpp */,
+				180FA5031FF4D16800AFB5F9 /* Decoder.hpp */,
+				180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -673,6 +682,7 @@
 			files = (
 				18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */,
 				18C66DC51FF0F27C002BFBBC /* TFMediaPlayer.mm in Sources */,
+				180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */,
 				18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */,
 				184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */,
 				18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */,
