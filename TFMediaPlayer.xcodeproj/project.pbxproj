@@ -7,20 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		180FA4EA1FF4C9FE00AFB5F9 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4E91FF4C9FE00AFB5F9 /* libz.tbd */; };
+		180FA4EC1FF4CA0700AFB5F9 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4EB1FF4CA0700AFB5F9 /* libbz2.tbd */; };
+		180FA4EE1FF4CA0D00AFB5F9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4ED1FF4CA0D00AFB5F9 /* CoreVideo.framework */; };
+		180FA4F01FF4CA1700AFB5F9 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4EF1FF4CA1700AFB5F9 /* CoreAudio.framework */; };
+		180FA4F21FF4CA1E00AFB5F9 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4F11FF4CA1E00AFB5F9 /* MobileCoreServices.framework */; };
+		180FA4F41FF4CA2400AFB5F9 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4F31FF4CA2400AFB5F9 /* OpenGLES.framework */; };
+		180FA4F61FF4CA3000AFB5F9 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4F51FF4CA3000AFB5F9 /* VideoToolbox.framework */; };
+		180FA4F81FF4CA3600AFB5F9 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4F71FF4CA3600AFB5F9 /* CoreMedia.framework */; };
+		180FA4FB1FF4CB2700AFB5F9 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FA1FF4CB2700AFB5F9 /* libiconv.tbd */; };
+		180FA4FD1FF4CB3300AFB5F9 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FC1FF4CB3300AFB5F9 /* AVFoundation.framework */; };
+		180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */; };
+		180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */; };
 		184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72E1FF48A95007D5826 /* libavcodec.a */; };
 		184FF73E1FF48A95007D5826 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72F1FF48A95007D5826 /* libavdevice.a */; };
 		184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7301FF48A95007D5826 /* libavfilter.a */; };
 		184FF7401FF48A95007D5826 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7311FF48A95007D5826 /* libavformat.a */; };
-		184FF7411FF48A95007D5826 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7321FF48A95007D5826 /* libavutil.a */; };
+		184FF7411FF48A95007D5826 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7321FF48A95007D5826 /* libavutil.a */; settings = {ATTRIBUTES = (Required, ); }; };
 		184FF7421FF48A95007D5826 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7331FF48A95007D5826 /* libswresample.a */; };
 		184FF7431FF48A95007D5826 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7341FF48A95007D5826 /* libswscale.a */; };
-		184FF7441FF48A95007D5826 /* libavcodec.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7361FF48A95007D5826 /* libavcodec.pc */; };
-		184FF7451FF48A95007D5826 /* libavdevice.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7371FF48A95007D5826 /* libavdevice.pc */; };
-		184FF7461FF48A95007D5826 /* libavfilter.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7381FF48A95007D5826 /* libavfilter.pc */; };
-		184FF7471FF48A95007D5826 /* libavformat.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7391FF48A95007D5826 /* libavformat.pc */; };
-		184FF7481FF48A95007D5826 /* libavutil.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF73A1FF48A95007D5826 /* libavutil.pc */; };
-		184FF7491FF48A95007D5826 /* libswresample.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF73B1FF48A95007D5826 /* libswresample.pc */; };
-		184FF74A1FF48A95007D5826 /* libswscale.pc in Resources */ = {isa = PBXBuildFile; fileRef = 184FF73C1FF48A95007D5826 /* libswscale.pc */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
@@ -46,6 +51,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		180FA4E91FF4C9FE00AFB5F9 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		180FA4EB1FF4CA0700AFB5F9 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
+		180FA4ED1FF4CA0D00AFB5F9 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		180FA4EF1FF4CA1700AFB5F9 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		180FA4F11FF4CA1E00AFB5F9 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		180FA4F31FF4CA2400AFB5F9 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		180FA4F51FF4CA3000AFB5F9 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		180FA4F71FF4CA3600AFB5F9 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		180FA4FA1FF4CB2700AFB5F9 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		180FA4FC1FF4CB3300AFB5F9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		184FF6BD1FF48A95007D5826 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		184FF6BE1FF48A95007D5826 /* avdct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avdct.h; sourceTree = "<group>"; };
 		184FF6BF1FF48A95007D5826 /* avfft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avfft.h; sourceTree = "<group>"; };
@@ -196,6 +213,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */,
+				180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */,
+				180FA4FD1FF4CB3300AFB5F9 /* AVFoundation.framework in Frameworks */,
+				180FA4F81FF4CA3600AFB5F9 /* CoreMedia.framework in Frameworks */,
+				180FA4F61FF4CA3000AFB5F9 /* VideoToolbox.framework in Frameworks */,
+				180FA4F41FF4CA2400AFB5F9 /* OpenGLES.framework in Frameworks */,
+				180FA4F21FF4CA1E00AFB5F9 /* MobileCoreServices.framework in Frameworks */,
+				180FA4F01FF4CA1700AFB5F9 /* CoreAudio.framework in Frameworks */,
+				180FA4EE1FF4CA0D00AFB5F9 /* CoreVideo.framework in Frameworks */,
+				180FA4FB1FF4CB2700AFB5F9 /* libiconv.tbd in Frameworks */,
+				180FA4EC1FF4CA0700AFB5F9 /* libbz2.tbd in Frameworks */,
+				180FA4EA1FF4C9FE00AFB5F9 /* libz.tbd in Frameworks */,
 				184FF7411FF48A95007D5826 /* libavutil.a in Frameworks */,
 				184FF7431FF48A95007D5826 /* libswscale.a in Frameworks */,
 				184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */,
@@ -216,6 +245,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		180FA4E81FF4C9FE00AFB5F9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */,
+				180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */,
+				180FA4FC1FF4CB3300AFB5F9 /* AVFoundation.framework */,
+				180FA4FA1FF4CB2700AFB5F9 /* libiconv.tbd */,
+				180FA4F71FF4CA3600AFB5F9 /* CoreMedia.framework */,
+				180FA4F51FF4CA3000AFB5F9 /* VideoToolbox.framework */,
+				180FA4F31FF4CA2400AFB5F9 /* OpenGLES.framework */,
+				180FA4F11FF4CA1E00AFB5F9 /* MobileCoreServices.framework */,
+				180FA4EF1FF4CA1700AFB5F9 /* CoreAudio.framework */,
+				180FA4ED1FF4CA0D00AFB5F9 /* CoreVideo.framework */,
+				180FA4EB1FF4CA0700AFB5F9 /* libbz2.tbd */,
+				180FA4E91FF4C9FE00AFB5F9 /* libz.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		184FF6BA1FF48A95007D5826 /* FFmpeg */ = {
 			isa = PBXGroup;
 			children = (
@@ -445,6 +493,7 @@
 				18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */,
 				18C66DB11FF0F1F6002BFBBC /* TFMediaPlayerUITests */,
 				18C66D961FF0F1F6002BFBBC /* Products */,
+				180FA4E81FF4C9FE00AFB5F9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -602,16 +651,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
-				184FF7491FF48A95007D5826 /* libswresample.pc in Resources */,
-				184FF7481FF48A95007D5826 /* libavutil.pc in Resources */,
-				184FF74A1FF48A95007D5826 /* libswscale.pc in Resources */,
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
-				184FF7441FF48A95007D5826 /* libavcodec.pc in Resources */,
-				184FF7461FF48A95007D5826 /* libavfilter.pc in Resources */,
-				184FF7451FF48A95007D5826 /* libavdevice.pc in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
 				184FF7511FF48BC0007D5826 /* game.mp4 in Resources */,
-				184FF7471FF48A95007D5826 /* libavformat.pc in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
