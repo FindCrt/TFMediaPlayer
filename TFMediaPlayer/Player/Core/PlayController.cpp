@@ -67,6 +67,15 @@ void PlayController::play(){
     }
     
     startReadingFrames();
+    if (videoDecoder) {
+        videoDecoder->startDecode();
+    }
+    if (audioDecoder) {
+        audioDecoder->startDecode();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->startDecode();
+    }
 }
 
 void PlayController::pause(){

@@ -20,6 +20,7 @@
 		180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */; };
 		180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */; };
 		180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5021FF4D16800AFB5F9 /* Decoder.cpp */; };
+		18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A1A1FF5D5F6007095AC /* UnitTest.mm */; };
 		184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72E1FF48A95007D5826 /* libavcodec.a */; };
 		184FF73E1FF48A95007D5826 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72F1FF48A95007D5826 /* libavdevice.a */; };
 		184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7301FF48A95007D5826 /* libavfilter.a */; };
@@ -29,12 +30,12 @@
 		184FF7431FF48A95007D5826 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7341FF48A95007D5826 /* libswscale.a */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
+		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
 		18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */; };
 		18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA11FF0F1F6002BFBBC /* Main.storyboard */; };
 		18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA41FF0F1F6002BFBBC /* Assets.xcassets */; };
 		18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA61FF0F1F6002BFBBC /* LaunchScreen.storyboard */; };
-		18C66DB31FF0F1F6002BFBBC /* TFMediaPlayerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */; };
 		18C66DC51FF0F27C002BFBBC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DC41FF0F27C002BFBBC /* TFMediaPlayer.mm */; };
 		18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */; };
 		18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */; };
@@ -42,7 +43,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		18C66DAF1FF0F1F6002BFBBC /* PBXContainerItemProxy */ = {
+		185EB3331FF5CD22001E37F7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 18C66D8D1FF0F1F6002BFBBC /* Project object */;
 			proxyType = 1;
@@ -68,6 +69,8 @@
 		180FA5031FF4D16800AFB5F9 /* Decoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Decoder.hpp; sourceTree = "<group>"; };
 		180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadConvience.h; sourceTree = "<group>"; };
 		180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RecycleBuffer.hpp; sourceTree = "<group>"; };
+		18415A191FF5D5F6007095AC /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTest.h; sourceTree = "<group>"; };
+		18415A1A1FF5D5F6007095AC /* UnitTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UnitTest.mm; sourceTree = "<group>"; };
 		184FF6BD1FF48A95007D5826 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		184FF6BE1FF48A95007D5826 /* avdct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avdct.h; sourceTree = "<group>"; };
 		184FF6BF1FF48A95007D5826 /* avfft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avfft.h; sourceTree = "<group>"; };
@@ -192,6 +195,9 @@
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLocalMp4ViewController.m; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* DebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DebugFuncs.h; sourceTree = "<group>"; };
+		185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
+		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TFMediaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18C66D991FF0F1F6002BFBBC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		18C66D9B1FF0F1F6002BFBBC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -200,9 +206,6 @@
 		18C66DA41FF0F1F6002BFBBC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		18C66DA71FF0F1F6002BFBBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		18C66DA91FF0F1F6002BFBBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFMediaPlayerUITests.m; sourceTree = "<group>"; };
-		18C66DB41FF0F1F6002BFBBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18C66DC31FF0F27C002BFBBC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
 		18C66DC41FF0F27C002BFBBC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
 		18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayController.cpp; sourceTree = "<group>"; };
@@ -214,6 +217,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		185EB32B1FF5CD22001E37F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18C66D921FF0F1F6002BFBBC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -237,13 +247,6 @@
 				184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */,
 				184FF7421FF48A95007D5826 /* libswresample.a in Frameworks */,
 				184FF7401FF48A95007D5826 /* libavformat.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		18C66DAB1FF0F1F6002BFBBC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,11 +496,20 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		185EB32F1FF5CD22001E37F7 /* TFMediaPlayerTests */ = {
+			isa = PBXGroup;
+			children = (
+				185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */,
+				185EB3321FF5CD22001E37F7 /* Info.plist */,
+			);
+			path = TFMediaPlayerTests;
+			sourceTree = "<group>";
+		};
 		18C66D8C1FF0F1F6002BFBBC = {
 			isa = PBXGroup;
 			children = (
 				18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */,
-				18C66DB11FF0F1F6002BFBBC /* TFMediaPlayerUITests */,
+				185EB32F1FF5CD22001E37F7 /* TFMediaPlayerTests */,
 				18C66D961FF0F1F6002BFBBC /* Products */,
 				180FA4E81FF4C9FE00AFB5F9 /* Frameworks */,
 			);
@@ -507,7 +519,7 @@
 			isa = PBXGroup;
 			children = (
 				18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */,
-				18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */,
+				185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -524,6 +536,8 @@
 				18C66DC21FF0F253002BFBBC /* Player */,
 				184FF6BA1FF48A95007D5826 /* FFmpeg */,
 				18C66D981FF0F1F6002BFBBC /* Supporting Files */,
+				18415A191FF5D5F6007095AC /* UnitTest.h */,
+				18415A1A1FF5D5F6007095AC /* UnitTest.mm */,
 			);
 			path = TFMediaPlayer;
 			sourceTree = "<group>";
@@ -541,15 +555,6 @@
 				18C66D991FF0F1F6002BFBBC /* main.m */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		18C66DB11FF0F1F6002BFBBC /* TFMediaPlayerUITests */ = {
-			isa = PBXGroup;
-			children = (
-				18C66DB21FF0F1F6002BFBBC /* TFMediaPlayerUITests.m */,
-				18C66DB41FF0F1F6002BFBBC /* Info.plist */,
-			);
-			path = TFMediaPlayerUITests;
 			sourceTree = "<group>";
 		};
 		18C66DC21FF0F253002BFBBC /* Player */ = {
@@ -578,6 +583,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		185EB32D1FF5CD22001E37F7 /* TFMediaPlayerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 185EB3351FF5CD22001E37F7 /* Build configuration list for PBXNativeTarget "TFMediaPlayerTests" */;
+			buildPhases = (
+				185EB32A1FF5CD22001E37F7 /* Sources */,
+				185EB32B1FF5CD22001E37F7 /* Frameworks */,
+				185EB32C1FF5CD22001E37F7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				185EB3341FF5CD22001E37F7 /* PBXTargetDependency */,
+			);
+			name = TFMediaPlayerTests;
+			productName = TFMediaPlayerTests;
+			productReference = 185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 18C66DB71FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayer" */;
@@ -595,24 +618,6 @@
 			productReference = 18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		18C66DAD1FF0F1F6002BFBBC /* TFMediaPlayerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 18C66DBA1FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayerUITests" */;
-			buildPhases = (
-				18C66DAA1FF0F1F6002BFBBC /* Sources */,
-				18C66DAB1FF0F1F6002BFBBC /* Frameworks */,
-				18C66DAC1FF0F1F6002BFBBC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				18C66DB01FF0F1F6002BFBBC /* PBXTargetDependency */,
-			);
-			name = TFMediaPlayerUITests;
-			productName = TFMediaPlayerUITests;
-			productReference = 18C66DAE1FF0F1F6002BFBBC /* TFMediaPlayerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -622,16 +627,16 @@
 				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = shiwei;
 				TargetAttributes = {
-					18C66D941FF0F1F6002BFBBC = {
-						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = UML9BQURX9;
-						ProvisioningStyle = Automatic;
-					};
-					18C66DAD1FF0F1F6002BFBBC = {
+					185EB32D1FF5CD22001E37F7 = {
 						CreatedOnToolsVersion = 8.1;
 						DevelopmentTeam = UML9BQURX9;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 18C66D941FF0F1F6002BFBBC;
+					};
+					18C66D941FF0F1F6002BFBBC = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UML9BQURX9;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -649,12 +654,19 @@
 			projectRoot = "";
 			targets = (
 				18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */,
-				18C66DAD1FF0F1F6002BFBBC /* TFMediaPlayerUITests */,
+				185EB32D1FF5CD22001E37F7 /* TFMediaPlayerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		185EB32C1FF5CD22001E37F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18C66D931FF0F1F6002BFBBC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -666,20 +678,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		18C66DAC1FF0F1F6002BFBBC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		185EB32A1FF5CD22001E37F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18C66D911FF0F1F6002BFBBC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */,
 				18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */,
 				18C66DC51FF0F27C002BFBBC /* TFMediaPlayer.mm in Sources */,
 				180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */,
@@ -691,21 +705,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		18C66DAA1FF0F1F6002BFBBC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18C66DB31FF0F1F6002BFBBC /* TFMediaPlayerUITests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		18C66DB01FF0F1F6002BFBBC /* PBXTargetDependency */ = {
+		185EB3341FF5CD22001E37F7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 18C66D941FF0F1F6002BFBBC /* TFMediaPlayer */;
-			targetProxy = 18C66DAF1FF0F1F6002BFBBC /* PBXContainerItemProxy */;
+			targetProxy = 185EB3331FF5CD22001E37F7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -729,6 +735,32 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		185EB3361FF5CD22001E37F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TFMediaPlayer.app/TFMediaPlayer";
+			};
+			name = Debug;
+		};
+		185EB3371FF5CD22001E37F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = UML9BQURX9;
+				INFOPLIST_FILE = TFMediaPlayerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TFMediaPlayer.app/TFMediaPlayer";
+			};
+			name = Release;
+		};
 		18C66DB51FF0F1F6002BFBBC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -853,33 +885,18 @@
 			};
 			name = Release;
 		};
-		18C66DBB1FF0F1F6002BFBBC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = UML9BQURX9;
-				INFOPLIST_FILE = TFMediaPlayerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = TFMediaPlayer;
-			};
-			name = Debug;
-		};
-		18C66DBC1FF0F1F6002BFBBC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = UML9BQURX9;
-				INFOPLIST_FILE = TFMediaPlayerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = TFMediaPlayer;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		185EB3351FF5CD22001E37F7 /* Build configuration list for PBXNativeTarget "TFMediaPlayerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				185EB3361FF5CD22001E37F7 /* Debug */,
+				185EB3371FF5CD22001E37F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		18C66D901FF0F1F6002BFBBC /* Build configuration list for PBXProject "TFMediaPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -894,15 +911,6 @@
 			buildConfigurations = (
 				18C66DB81FF0F1F6002BFBBC /* Debug */,
 				18C66DB91FF0F1F6002BFBBC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		18C66DBA1FF0F1F6002BFBBC /* Build configuration list for PBXNativeTarget "TFMediaPlayerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				18C66DBB1FF0F1F6002BFBBC /* Debug */,
-				18C66DBC1FF0F1F6002BFBBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

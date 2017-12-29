@@ -38,6 +38,16 @@
                ReferencedContainer = "container:TFMediaPlayer.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "185EB32D1FF5CD22001E37F7"
+               BuildableName = "TFMediaPlayerTests.xctest"
+               BlueprintName = "TFMediaPlayerTests"
+               ReferencedContainer = "container:TFMediaPlayer.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

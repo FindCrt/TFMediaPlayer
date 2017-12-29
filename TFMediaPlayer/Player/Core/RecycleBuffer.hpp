@@ -10,7 +10,6 @@
 #define RecycleBuffer_hpp
 
 #include <stdio.h>
-#include <queue>
 
 /* |->--front-----back------>| */
 
@@ -26,14 +25,12 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
-        RecycleNode *list;
+        size_t limitSize = 0;
+        size_t allocedSize = 0;
+        size_t usedSize = 0;
         
-        size_t limitSize;
-        size_t allocedSize;
-        size_t usedSize;
-        
-        RecycleNode *frontNode;  //the newest used node
-        RecycleNode *backNode;  //the oldest used node
+        RecycleNode *frontNode = nullptr;  //the newest used node
+        RecycleNode *backNode = nullptr;  // the oldest used node
         
         bool expand(){
             if (allocedSize >= limitSize) {
@@ -45,6 +42,7 @@ namespace tfmpcore {
             RecycleNode *nextNode = frontNode;
             RecycleNode *closeNode = frontNode->pre;
             
+            //construct from next to pre.  new node(pre) <----- front(next).
             for (size_t i = 0; i<expandSize; i++) {
                 RecycleNode *node = new RecycleNode();
                 nextNode->pre = node;
@@ -54,11 +52,11 @@ namespace tfmpcore {
                     node->pre = closeNode;
                     closeNode->next = node;
                 }
+                
+                nextNode = node;
             }
             
             allocedSize += expandSize;
-            
-            std::queue<int> qq;
             
             return true;
             
@@ -79,19 +77,38 @@ namespace tfmpcore {
                 allocedSize = 8; //init size
             }
             
-            list = (RecycleNode *)malloc(sizeof(RecycleNode) * allocedSize);
             
-            frontNode = backNode = list;
+            frontNode = new RecycleNode();
+            RecycleNode *lastNode = frontNode;
+            
+            for (size_t i = 1; i<allocedSize; i++) {
+                RecycleNode *node = new RecycleNode();
+                
+                lastNode->next = node;
+                node->pre = lastNode;
+                
+                if (i == allocedSize-1) { //link last node with the other node of break.
+                    node->next = frontNode;
+                    frontNode->pre = node;
+                }
+                
+                lastNode = node;
+            }
+            
+            backNode = frontNode->pre;
         }
         
-        bool canIn = true;
+        bool isFull(){
+            return usedSize == limitSize;
+        };
+        bool isEmpty(){
+            return usedSize == 0;
+        }
         
-        //TODO: thread safety problem
-        bool in(T val){
+        bool insert(T val){
             if (usedSize == allocedSize) {
                 if (!expand()) {
                     //stop pushing until there is unused node.
-                    canIn = false;
                     return false;
                 }
             }
@@ -104,14 +121,17 @@ namespace tfmpcore {
             return true;
         }
         
-        bool out(T *valP){
+        bool getOut(T *valP){
             
             if (usedSize == 0) {
                 return false;
             }
             
             *valP = backNode->val;
+            
             backNode = backNode->pre;
+            
+            usedSize--;
             
             return true;
         }

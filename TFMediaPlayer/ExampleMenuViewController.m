@@ -10,6 +10,8 @@
 #import "TFNetMp4PlayViewController.h"
 #import "TFLocalMp4ViewController.h"
 
+#import "UnitTest.h"
+
 @interface ExampleMenuViewController (){
     NSArray *_exampleInfos;
 }
@@ -25,6 +27,13 @@
                       @{@"title": @"本地mp4视频", @"actionVC": @"TFLocalMp4ViewController"},
                       @{@"title": @"播放网络mp4视频", @"actionVC": @"TFNetMp4PlayViewController"}
                       ];
+    
+    //test
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        UnitTest *test = [[UnitTest alloc] init];
+        [test testRecycleBuffer];
+    });
 }
 
 - (void)didReceiveMemoryWarning {

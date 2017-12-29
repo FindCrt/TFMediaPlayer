@@ -9,6 +9,7 @@
 #include "Decoder.hpp"
 #include "DebugFuncs.h"
 
+
 using namespace tfmpcore;
 
 bool Decoder::prepareDecode(){
@@ -32,13 +33,24 @@ bool Decoder::prepareDecode(){
     return true;
 }
 
+void Decoder::startDecode(){
+    pthread_create(&decodeThread, NULL, decodeLoop, this);
+}
+
 void Decoder::decodePacket(AVPacket *packet){
-    pktBuffer.in(*packet);
+    
+    pktBuffer.insert(*packet);
+    
+}
+
+void *Decoder::decodeLoop(void *context){
+    
+    Decoder *decoder = (Decoder *)context;
     
     AVPacket pkt;
-    pktBuffer.out(&pkt);
+    while (decoder->pktBuffer.getOut(&pkt)) {
+        
+    }
     
-    pktBuffer.front(&pkt);
-    pktBuffer.back(&pkt);
-    
+    return 0;
 }

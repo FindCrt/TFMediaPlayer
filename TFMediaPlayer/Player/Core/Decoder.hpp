@@ -16,6 +16,7 @@ extern "C"{
 }
 
 #include "RecycleBuffer.hpp"
+#include <pthread.h>
 
 namespace tfmpcore {
     class Decoder{
@@ -27,13 +28,20 @@ namespace tfmpcore {
         
         RecycleBuffer<AVPacket> pktBuffer;
         
+        RecycleBuffer<AVFrame> frameBuffer;
+        
+        pthread_t decodeThread;
+        static void *decodeLoop(void *context);
+        
     public:
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
         
         bool prepareDecode();
         
+        void startDecode();
         void decodePacket(AVPacket *packet);
+        
     };
 }
 
