@@ -39,8 +39,10 @@ void Decoder::startDecode(){
 
 void Decoder::decodePacket(AVPacket *packet){
     
-    pktBuffer.insert(*packet);
+    AVPacket refPacket;
+    av_packet_ref(&refPacket, packet);
     
+    pktBuffer.insert(refPacket);
 }
 
 void *Decoder::decodeLoop(void *context){
@@ -48,8 +50,21 @@ void *Decoder::decodeLoop(void *context){
     Decoder *decoder = (Decoder *)context;
     
     AVPacket pkt;
+    AVFrame frame;
+    
     while (decoder->pktBuffer.getOut(&pkt)) {
+        int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
+        if (retval != 0) {
+            printf("avcodec_send_packet\n");
+            continue;
+        }
         
+        AVFrame refFrame;
+        av_frame_ref(&refFrame, &frame);
+        avcodec_receive_frame(decoder->codecCtx, &refFrame);
+        
+        decoder->frameBuffer.insert(frame);
+        av_packet_unref(&pkt);
     }
     
     return 0;

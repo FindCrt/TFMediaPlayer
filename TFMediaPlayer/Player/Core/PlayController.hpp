@@ -18,6 +18,8 @@ extern "C"{
 #include <string>
 #include "Decoder.hpp"
 #include <pthread.h>
+#include <functional>
+#include "DisplayController.hpp"
 
 namespace tfmpcore {
     class PlayController{
@@ -35,6 +37,8 @@ namespace tfmpcore {
         Decoder *audioDecoder;
         Decoder *subtitleDecoder;
         
+        DisplayController *displayer = new DisplayController();
+        
         bool prapareOK;
         
         void startReadingFrames();
@@ -44,11 +48,26 @@ namespace tfmpcore {
         static void * readFrame(void *context);
         
     public:
+        
+        /** controls **/
+        
         bool connectAndOpenMedia(std::string mediaPath);
+        std::function<void(PlayController)> connectCompleted;
         
         void play();
         void pause();
         void stop();
+        
+        
+        /** properties **/
+        
+        //only work before the call of connectAndOpenMedia.
+        bool isAudioMajor = true;
+        
+        void *displayContext;
+        VideoFrameDisplayFunc displayVideoFrame;
+        AudioFrameDisplayFunc displayAudioFrame;
+        
     };
 }
 

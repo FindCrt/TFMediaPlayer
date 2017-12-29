@@ -11,10 +11,6 @@
 #include "ThreadConvience.h"
 
 using namespace tfmpcore;
-//
-//namespace tfmpcore {
-//    void * readFrame(void *context);
-//}
 
 bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
@@ -54,10 +50,28 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         return false;
     }
     
+    if (videoDecoder != nullptr && displayVideoFrame == nullptr) {
+        return false;
+    }else{
+        displayer->displayVideoFrame = displayVideoFrame;
+    }
+    
+    if (audioDecoder != nullptr && displayAudioFrame == nullptr) {
+        return false;
+    }else{
+        displayer->displayAudioFrame = displayAudioFrame;
+    }
+    
+    displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
+    displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
+    
+    displayer->syncClock = new SyncClock(isAudioMajor);
+    
+    
     prapareOK = true;
     return true;
     
-Fail:
+fail:
     return false;
 }
 
@@ -76,6 +90,8 @@ void PlayController::play(){
     if (subtitleDecoder) {
         subtitleDecoder->startDecode();
     }
+    
+    displayer->startDisplay();
 }
 
 void PlayController::pause(){
@@ -85,6 +101,8 @@ void PlayController::pause(){
 void PlayController::stop(){
     
 }
+
+/***** properties *****/
 
 
 

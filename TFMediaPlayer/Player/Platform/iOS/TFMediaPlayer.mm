@@ -8,12 +8,14 @@
 
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"
-
+#import "TFOPGLESDisplayView.h"
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
     
     BOOL _innerPlayWhenReady;
+    
+    TFOPGLESDisplayView *_displayView;
 }
 
 @end
@@ -22,10 +24,24 @@
 
 -(instancetype)init{
     if (self = [super init]) {
+        
+        _displayView = [[TFOPGLESDisplayView alloc] init];
+        
         _playController = new tfmpcore::PlayController();
+        
+        _playController->displayContext = (__bridge void *)self;
+        _playController->displayVideoFrame = displayVideoFrame_iOS;
+        
+        _playController->connectCompleted = [](tfmpcore::PlayController *playController){
+            
+        };
     }
     
     return self;
+}
+
+-(UIView *)displayView{
+    return _displayView;
 }
 
 -(void)setMediaURL:(NSURL *)mediaURL{
@@ -85,6 +101,16 @@
         default:
             break;
     }
+}
+
+#pragma mark - platform special
+
+int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
+    TFMediaPlayer *player = (__bridge TFMediaPlayer *)context;
+    
+    [player->_displayView displayFrameBuffer:frameBuf];
+    
+    return 0;
 }
 
 @end

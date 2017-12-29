@@ -23,7 +23,7 @@ return;\
 #define TFCheckRetvalAndGotoFail(statement)\
 if (retval < 0) {\
 printf("%s error(%d)\n",statement,retval);\
-goto Fail;\
+goto fail;\
 }\
 
 

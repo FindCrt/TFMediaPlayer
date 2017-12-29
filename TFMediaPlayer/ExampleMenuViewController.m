@@ -30,15 +30,10 @@
     
     //test
     
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        UnitTest *test = [[UnitTest alloc] init];
-        [test testRecycleBuffer];
-    });
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+//        UnitTest *test = [[UnitTest alloc] init];
+//        [test testRecycleBuffer];
+//    });
 }
 
 #pragma mark - Table view data source

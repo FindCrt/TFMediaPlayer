@@ -127,7 +127,7 @@ namespace tfmpcore {
                 return false;
             }
             
-            *valP = backNode->val;
+            if (valP) *valP = backNode->val;
             
             backNode = backNode->pre;
             
