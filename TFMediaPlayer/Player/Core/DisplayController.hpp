@@ -47,8 +47,8 @@ namespace tfmpcore {
         VideoFrameDisplayFunc displayVideoFrame;
         AudioFrameDisplayFunc displayAudioFrame;
         
-        RecycleBuffer<AVFrame> *shareVideoBuffer;
-        RecycleBuffer<AVFrame> *shareAudioBuffer;
+        RecycleBuffer<AVFrame*> *shareVideoBuffer;
+        RecycleBuffer<AVFrame*> *shareAudioBuffer;
         
         SyncClock *syncClock;
 

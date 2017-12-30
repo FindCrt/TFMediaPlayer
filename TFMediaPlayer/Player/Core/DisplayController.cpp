@@ -49,10 +49,10 @@ void *DisplayController::displayLoop(void *context){
         
         //just check, don't use.
         if (showVideo) {
-            controller->shareVideoBuffer->blockGetOut(videoFrame);
+            controller->shareVideoBuffer->blockGetOut(&videoFrame);
         }
         if (showAudio) {
-            controller->shareAudioBuffer->blockGetOut(audioFrame);
+            controller->shareAudioBuffer->blockGetOut(&audioFrame);
         }
         
         int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame->pts, audioFrame->pts);
@@ -60,14 +60,14 @@ void *DisplayController::displayLoop(void *context){
         if (showVideo) {
             while (videoFrame->pts < nextMediaPts) {
                 controller->shareVideoBuffer->getOut(nullptr);
-                controller->shareVideoBuffer->back(videoFrame);
+                controller->shareVideoBuffer->back(&videoFrame);
             }
         }
         
         if (showAudio) {
             while (audioFrame->pts < nextMediaPts) {
                 controller->shareAudioBuffer->getOut(nullptr);
-                controller->shareAudioBuffer->back(audioFrame);
+                controller->shareAudioBuffer->back(&audioFrame);
             }
         }
         
@@ -104,8 +104,8 @@ void *DisplayController::displayLoop(void *context){
         //TODO: audio
         
         controller->syncClock->correctWithPresent(videoFrame->pts, audioFrame->pts);
-//        if(showVideo) av_frame_unref(videoFrame);
-//        if(showAudio) av_frame_unref(audioFrame);
+        if(showVideo) av_frame_unref(videoFrame);
+        if(showAudio) av_frame_unref(audioFrame);
     }
     
     return 0;

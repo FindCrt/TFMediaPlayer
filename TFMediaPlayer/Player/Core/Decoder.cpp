@@ -59,26 +59,27 @@ void *Decoder::decodeLoop(void *context){
     Decoder *decoder = (Decoder *)context;
     
     AVPacket pkt;
-    AVFrame *frame = av_frame_alloc();
+    AVFrame *frame;
     
     while (decoder->shouldDecode) {
         
         decoder->pktBuffer.blockGetOut(&pkt);
         int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
         if (retval != 0) {
-            printf("avcodec_send_packet\n");
+            printf("avcodec_send_packet error\n");
             continue;
         }
         
+        frame = av_frame_alloc();
         retval = avcodec_receive_frame(decoder->codecCtx, frame);
         
         
         if (retval != 0) {
-            printf("avcodec_receive_frame\n");
+            printf("avcodec_receive_frame error\n");
             continue;
         }
         
-        decoder->frameBuffer.blockInsert(*frame);
+        decoder->frameBuffer.blockInsert(frame);
         av_packet_unref(&pkt);
     }
     

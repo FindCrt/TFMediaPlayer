@@ -28,7 +28,7 @@ namespace tfmpcore {
         
         RecycleBuffer<AVPacket> pktBuffer;
         
-        RecycleBuffer<AVFrame> frameBuffer;
+        RecycleBuffer<AVFrame*> frameBuffer;
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
@@ -39,7 +39,7 @@ namespace tfmpcore {
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
         
-        RecycleBuffer<AVFrame> *sharedFrameBuffer(){
+        RecycleBuffer<AVFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };
         
