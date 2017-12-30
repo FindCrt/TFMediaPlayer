@@ -50,25 +50,31 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         return false;
     }
     
-    if (videoDecoder != nullptr && displayVideoFrame == nullptr) {
+    //check whether stream can display.
+    if ((displayMediaType & TFMP_MEDIA_TYPE_VIDEO) && videoDecoder != nullptr && displayVideoFrame == nullptr) {
         return false;
     }else{
         displayer->displayVideoFrame = displayVideoFrame;
     }
     
-    if (audioDecoder != nullptr && displayAudioFrame == nullptr) {
+    if ((displayMediaType & TFMP_MEDIA_TYPE_AUDIO) && audioDecoder != nullptr && displayAudioFrame == nullptr) {
         return false;
     }else{
         displayer->displayAudioFrame = displayAudioFrame;
     }
     
+    displayer->displayContext = displayContext;
     displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
     displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
     
     displayer->syncClock = new SyncClock(isAudioMajor);
-    
-    
+
     prapareOK = true;
+    
+    if (connectCompleted != nullptr) {
+        connectCompleted(this);
+    }
+    
     return true;
     
 fail:
@@ -99,12 +105,25 @@ void PlayController::pause(){
 }
 
 void PlayController::stop(){
+    if (videoDecoder) {
+        videoDecoder->stopDecode();
+    }
+    if (audioDecoder) {
+        audioDecoder->stopDecode();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->stopDecode();
+    }
     
+    displayer->stopDisplay();
 }
 
 /***** properties *****/
 
-
+void PlayController::setDisplayMediaType(TFMPMediaType displayMediaType){
+    this->displayMediaType = displayMediaType;
+    displayer->displayMediaType = displayMediaType;
+}
 
 /***** private ******/
 
@@ -116,21 +135,21 @@ void * PlayController::readFrame(void *context){
     
     PlayController *controller = (PlayController *)context;
     
-    AVPacket packet;
+    AVPacket *packet = av_packet_alloc();
     
-    while (av_read_frame(controller->fmtCtx, &packet) > 0) {
+    while (av_read_frame(controller->fmtCtx, packet) == 0) {
         
-        if (packet.stream_index == controller->videoStrem) {
+        if (packet->stream_index == controller->videoStrem) {
             
-            controller->videoDecoder->decodePacket(&packet);
+            controller->videoDecoder->decodePacket(packet);
             
-        }else if (packet.stream_index == controller->audioStream){
+        }else if (packet->stream_index == controller->audioStream){
             
-            controller->audioDecoder->decodePacket(&packet);
+            controller->audioDecoder->decodePacket(packet);
             
-        }else if (packet.stream_index == controller->subTitleStream){
+        }else if (packet->stream_index == controller->subTitleStream){
             
-            controller->subtitleDecoder->decodePacket(&packet);
+            controller->subtitleDecoder->decodePacket(packet);
         }
     }
     

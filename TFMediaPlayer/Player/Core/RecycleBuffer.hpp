@@ -10,6 +10,8 @@
 #define RecycleBuffer_hpp
 
 #include <stdio.h>
+#include <pthread.h>
+#include <limits.h>
 
 /* |->--front-----back------>| */
 
@@ -25,25 +27,28 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
-        size_t limitSize = 0;
-        size_t allocedSize = 0;
-        size_t usedSize = 0;
+        long limitSize = LONG_MAX;
+        long allocedSize = 0;
+        long usedSize = 0;
         
         RecycleNode *frontNode = nullptr;  //the newest used node
         RecycleNode *backNode = nullptr;  // the oldest used node
+        
+        pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
         bool expand(){
             if (allocedSize >= limitSize) {
                 return false;
             }
             
-            size_t expandSize = allocedSize < (limitSize-allocedSize) ? allocedSize : (limitSize-allocedSize);
+            long expandSize = allocedSize < (limitSize-allocedSize) ? allocedSize : (limitSize-allocedSize);
             
             RecycleNode *nextNode = frontNode;
             RecycleNode *closeNode = frontNode->pre;
             
             //construct from next to pre.  new node(pre) <----- front(next).
-            for (size_t i = 0; i<expandSize; i++) {
+            for (long i = 0; i<expandSize; i++) {
                 RecycleNode *node = new RecycleNode();
                 nextNode->pre = node;
                 node->next = nextNode;
@@ -65,7 +70,7 @@ namespace tfmpcore {
         
     public:
         
-        RecycleBuffer(size_t limitSize = 0, bool allocToLimit = false){
+        RecycleBuffer(long limitSize = 0, bool allocToLimit = false){
             if (limitSize > 0) {
                 this->limitSize = limitSize;
             }
@@ -81,7 +86,7 @@ namespace tfmpcore {
             frontNode = new RecycleNode();
             RecycleNode *lastNode = frontNode;
             
-            for (size_t i = 1; i<allocedSize; i++) {
+            for (long i = 1; i<allocedSize; i++) {
                 RecycleNode *node = new RecycleNode();
                 
                 lastNode->next = node;
@@ -134,6 +139,30 @@ namespace tfmpcore {
             usedSize--;
             
             return true;
+        }
+        
+        void blockInsert(T val){
+            
+            if (usedSize >= limitSize) {
+                pthread_mutex_lock(&mutex);
+                pthread_cond_wait(&cond, &mutex);
+                pthread_mutex_unlock(&mutex);
+            }
+            
+            insert(val);
+            pthread_cond_signal(&cond);
+        }
+        
+        void blockGetOut(T *valP){
+            
+            if (usedSize == 0) {
+                pthread_mutex_lock(&mutex);
+                pthread_cond_wait(&cond, &mutex);
+                pthread_mutex_unlock(&mutex);
+            }
+            
+            getOut(valP);
+            pthread_cond_signal(&cond);
         }
         
         bool back(T *valP){

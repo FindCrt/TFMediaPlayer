@@ -22,6 +22,7 @@ extern "C"{
 #include "DisplayController.hpp"
 
 namespace tfmpcore {
+    
     class PlayController{
         
         std::string mediaPath;
@@ -47,12 +48,14 @@ namespace tfmpcore {
         
         static void * readFrame(void *context);
         
+        TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+        
     public:
         
         /** controls **/
         
         bool connectAndOpenMedia(std::string mediaPath);
-        std::function<void(PlayController)> connectCompleted;
+        std::function<void(PlayController*)> connectCompleted;
         
         void play();
         void pause();
@@ -63,6 +66,9 @@ namespace tfmpcore {
         
         //only work before the call of connectAndOpenMedia.
         bool isAudioMajor = true;
+        
+        
+        void setDisplayMediaType(TFMPMediaType displayMediaType);
         
         void *displayContext;
         VideoFrameDisplayFunc displayVideoFrame;

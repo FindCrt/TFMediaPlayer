@@ -34,6 +34,10 @@
     [self startPlay];
 }
 
+-(void)viewWillDisappear:(BOOL)animated{
+    [_player stop];
+}
+
 -(void)startPlay{
     NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
     _player.mediaURL = videoURL;

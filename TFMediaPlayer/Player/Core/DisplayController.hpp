@@ -21,6 +21,13 @@ extern "C"{
 
 namespace tfmpcore {
     
+    typedef enum{
+        TFMP_MEDIA_TYPE_VIDEO = 1 << 0,
+        TFMP_MEDIA_TYPE_AUDIO = 1 << 1,
+        TFMP_MEDIA_TYPE_SUBTITLE = 1 << 2,
+        TFMP_MEDIA_TYPE_ALL_AVIABLE = TFMP_MEDIA_TYPE_VIDEO | TFMP_MEDIA_TYPE_AUDIO | TFMP_MEDIA_TYPE_SUBTITLE,
+    }TFMPMediaType;
+    
     typedef int (*VideoFrameDisplayFunc)(TFMPVideoFrameBuffer *, void *context);
     typedef int (*AudioFrameDisplayFunc)(void *context);
     
@@ -32,6 +39,8 @@ namespace tfmpcore {
         bool shouldDisplay;
         
     public:
+        
+        TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
         //the real display func different with different platform
         void *displayContext;

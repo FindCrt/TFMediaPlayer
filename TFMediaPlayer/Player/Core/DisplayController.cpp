@@ -41,44 +41,61 @@ void *DisplayController::displayLoop(void *context){
     
     DisplayController *controller = (DisplayController *)context;
     
-    AVFrame videoFrame, audioFrame;
+    AVFrame *videoFrame = av_frame_alloc(), *audioFrame = av_frame_alloc();
+    bool showVideo = controller->displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
+    bool showAudio = controller->displayMediaType & TFMP_MEDIA_TYPE_AUDIO;
     
     while (controller->shouldDisplay) {
         
         //just check, don't use.
-        controller->shareVideoBuffer->back(&videoFrame);
-        controller->shareAudioBuffer->back(&audioFrame);
-        
-        int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame.pts, audioFrame.pts);
-        
-        while (videoFrame.pts < nextMediaPts) {
-            controller->shareVideoBuffer->getOut(nullptr);
-            controller->shareVideoBuffer->back(&videoFrame);
+        if (showVideo) {
+            controller->shareVideoBuffer->blockGetOut(videoFrame);
+        }
+        if (showAudio) {
+            controller->shareAudioBuffer->blockGetOut(audioFrame);
         }
         
-        while (audioFrame.pts < nextMediaPts) {
-            controller->shareAudioBuffer->getOut(nullptr);
-            controller->shareAudioBuffer->back(&audioFrame);
+        int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame->pts, audioFrame->pts);
+        
+        if (showVideo) {
+            while (videoFrame->pts < nextMediaPts) {
+                controller->shareVideoBuffer->getOut(nullptr);
+                controller->shareVideoBuffer->back(videoFrame);
+            }
         }
         
-        int64_t remainTime = controller->syncClock->remainTime(videoFrame.pts, audioFrame.pts);
+        if (showAudio) {
+            while (audioFrame->pts < nextMediaPts) {
+                controller->shareAudioBuffer->getOut(nullptr);
+                controller->shareAudioBuffer->back(audioFrame);
+            }
+        }
+        
+        int64_t remainTime = controller->syncClock->remainTime(videoFrame->pts, audioFrame->pts);
         
         if (remainTime > minExeTime) {
             av_usleep((unsigned int)remainTime);
         }
         
         TFMPVideoFrameBuffer videoFrameBuf;
-        videoFrameBuf.width = videoFrame.width;
-        videoFrame.height = videoFrame.height;
+        videoFrameBuf.width = videoFrame->width;
+        videoFrameBuf.height = videoFrame->height;
+        
+        for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
+            
+            videoFrameBuf.pixels[i] = videoFrame->data[i];
+            videoFrameBuf.linesize[i] = videoFrame->linesize[i];
+        }
+        
         
         //TODO: unsupport format
-        if (videoFrame.format == AV_PIX_FMT_YUV420P) {
+        if (videoFrame->format == AV_PIX_FMT_YUV420P) {
             videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_YUV420P;
-        }else if (videoFrame.format == AV_PIX_FMT_NV12){
+        }else if (videoFrame->format == AV_PIX_FMT_NV12){
             videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_NV12;
-        }else if (videoFrame.format == AV_PIX_FMT_NV21){
+        }else if (videoFrame->format == AV_PIX_FMT_NV21){
             videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_NV21;
-        }else if (videoFrame.format == AV_PIX_FMT_RGB32){
+        }else if (videoFrame->format == AV_PIX_FMT_RGB32){
             videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_RGB32;
         }
         
@@ -86,10 +103,9 @@ void *DisplayController::displayLoop(void *context){
         
         //TODO: audio
         
-        controller->shareAudioBuffer->getOut(nullptr);
-        controller->shareAudioBuffer->getOut(nullptr);
-        
-        controller->syncClock->correctWithPresent(videoFrame.pts, audioFrame.pts);
+        controller->syncClock->correctWithPresent(videoFrame->pts, audioFrame->pts);
+//        if(showVideo) av_frame_unref(videoFrame);
+//        if(showAudio) av_frame_unref(audioFrame);
     }
     
     return 0;

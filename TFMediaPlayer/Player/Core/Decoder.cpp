@@ -24,11 +24,16 @@ bool Decoder::prepareDecode(){
         printf("alloc codecContext type: %d error\n",type);
         return false;
     }
+    
+    avcodec_parameters_to_context(codecCtx, fmtCtx->streams[steamIndex]->codecpar);
+    
     int retval = avcodec_open2(codecCtx, codec, NULL);
     if (retval < 0) {
         printf("avcodec_open2 id: %d error\n",codec->id);
         return false;
     }
+    
+    shouldDecode = true;
     
     return true;
 }
@@ -37,12 +42,16 @@ void Decoder::startDecode(){
     pthread_create(&decodeThread, NULL, decodeLoop, this);
 }
 
+void Decoder::stopDecode(){
+    shouldDecode = false;
+}
+
 void Decoder::decodePacket(AVPacket *packet){
     
-    AVPacket refPacket;
-    av_packet_ref(&refPacket, packet);
+    AVPacket *refPacket = av_packet_alloc();
+    av_packet_ref(refPacket, packet);
     
-    pktBuffer.insert(refPacket);
+    pktBuffer.blockInsert(*refPacket);
 }
 
 void *Decoder::decodeLoop(void *context){
@@ -50,20 +59,26 @@ void *Decoder::decodeLoop(void *context){
     Decoder *decoder = (Decoder *)context;
     
     AVPacket pkt;
-    AVFrame frame;
+    AVFrame *frame = av_frame_alloc();
     
-    while (decoder->pktBuffer.getOut(&pkt)) {
+    while (decoder->shouldDecode) {
+        
+        decoder->pktBuffer.blockGetOut(&pkt);
         int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
         if (retval != 0) {
             printf("avcodec_send_packet\n");
             continue;
         }
         
-        AVFrame refFrame;
-        av_frame_ref(&refFrame, &frame);
-        avcodec_receive_frame(decoder->codecCtx, &refFrame);
+        retval = avcodec_receive_frame(decoder->codecCtx, frame);
         
-        decoder->frameBuffer.insert(frame);
+        
+        if (retval != 0) {
+            printf("avcodec_receive_frame\n");
+            continue;
+        }
+        
+        decoder->frameBuffer.blockInsert(*frame);
         av_packet_unref(&pkt);
     }
     

@@ -33,6 +33,8 @@ namespace tfmpcore {
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
         
+        bool shouldDecode;
+        
     public:
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
@@ -41,9 +43,12 @@ namespace tfmpcore {
             return &frameBuffer;
         };
         
+        
+        
         bool prepareDecode();
         
         void startDecode();
+        void stopDecode();
         void decodePacket(AVPacket *packet);
         
     };

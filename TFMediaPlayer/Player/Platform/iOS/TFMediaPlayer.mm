@@ -29,11 +29,21 @@
         
         _playController = new tfmpcore::PlayController();
         
+        _playController->setDisplayMediaType(tfmpcore::TFMP_MEDIA_TYPE_VIDEO);
+        
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
         
-        _playController->connectCompleted = [](tfmpcore::PlayController *playController){
+        _playController->connectCompleted = [self](tfmpcore::PlayController *playController){
             
+            if (_state == TFMediaPlayerStateConnecting) {
+                _state = TFMediaPlayerStateReady;
+            }
+            
+            if (_innerPlayWhenReady || _autoPlayWhenReady) {
+                playController->play();
+                _state = TFMediaPlayerStatePlaying;
+            }
         };
     }
     
@@ -62,14 +72,17 @@
     }
     
     //local file or bundle file need a file reader which is different on different platform.
-    _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
+    bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
+    if (!succeed) {
+        NSLog(@"play media open error");
+    }
 }
 
 -(void)play{
     if (_state == TFMediaPlayerStateNone) {
         
-        [self preparePlay];
         _innerPlayWhenReady = YES;
+        [self preparePlay];
         
     }else if (_state == TFMediaPlayerStateConnecting) {
         _innerPlayWhenReady = YES;
@@ -86,12 +99,13 @@
     
     switch (_state) {
         case TFMediaPlayerStateConnecting:
-            
+            _playController->stop();
             break;
         case TFMediaPlayerStateReady:
-            
+            _playController->stop();
             break;
         case TFMediaPlayerStatePlaying:
+            _playController->stop();
             
             break;
         case TFMediaPlayerStatePause:
