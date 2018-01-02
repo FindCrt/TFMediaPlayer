@@ -30,14 +30,13 @@
 		18415A351FF62648007095AC /* SyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A331FF62648007095AC /* SyncClock.cpp */; };
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
 		184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72E1FF48A95007D5826 /* libavcodec.a */; };
-		184FF73E1FF48A95007D5826 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF72F1FF48A95007D5826 /* libavdevice.a */; };
-		184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7301FF48A95007D5826 /* libavfilter.a */; };
 		184FF7401FF48A95007D5826 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7311FF48A95007D5826 /* libavformat.a */; };
 		184FF7411FF48A95007D5826 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7321FF48A95007D5826 /* libavutil.a */; settings = {ATTRIBUTES = (Required, ); }; };
-		184FF7421FF48A95007D5826 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7331FF48A95007D5826 /* libswresample.a */; };
 		184FF7431FF48A95007D5826 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7341FF48A95007D5826 /* libswscale.a */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
+		1856F0461FFB7F1600B4F2A7 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184FF7331FF48A95007D5826 /* libswresample.a */; };
+		1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856F04C1FFB804D00B4F2A7 /* libx264.a */; };
 		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
 		18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */; };
@@ -217,6 +216,9 @@
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLocalMp4ViewController.m; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* DebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DebugFuncs.h; sourceTree = "<group>"; };
+		1856F0491FFB804D00B4F2A7 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
+		1856F04A1FFB804D00B4F2A7 /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
+		1856F04C1FFB804D00B4F2A7 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
 		185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -259,13 +261,12 @@
 				180FA4EE1FF4CA0D00AFB5F9 /* CoreVideo.framework in Frameworks */,
 				180FA4FB1FF4CB2700AFB5F9 /* libiconv.tbd in Frameworks */,
 				180FA4EC1FF4CA0700AFB5F9 /* libbz2.tbd in Frameworks */,
+				1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */,
 				180FA4EA1FF4C9FE00AFB5F9 /* libz.tbd in Frameworks */,
 				184FF7411FF48A95007D5826 /* libavutil.a in Frameworks */,
 				184FF7431FF48A95007D5826 /* libswscale.a in Frameworks */,
-				184FF73F1FF48A95007D5826 /* libavfilter.a in Frameworks */,
-				184FF73E1FF48A95007D5826 /* libavdevice.a in Frameworks */,
+				1856F0461FFB7F1600B4F2A7 /* libswresample.a in Frameworks */,
 				184FF73D1FF48A95007D5826 /* libavcodec.a in Frameworks */,
-				184FF7421FF48A95007D5826 /* libswresample.a in Frameworks */,
 				184FF7401FF48A95007D5826 /* libavformat.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -549,6 +550,33 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		1856F0471FFB804D00B4F2A7 /* x264 */ = {
+			isa = PBXGroup;
+			children = (
+				1856F0481FFB804D00B4F2A7 /* include */,
+				1856F04B1FFB804D00B4F2A7 /* lib */,
+			);
+			name = x264;
+			path = TFMediaPlayer/x264;
+			sourceTree = SOURCE_ROOT;
+		};
+		1856F0481FFB804D00B4F2A7 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				1856F0491FFB804D00B4F2A7 /* x264.h */,
+				1856F04A1FFB804D00B4F2A7 /* x264_config.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		1856F04B1FFB804D00B4F2A7 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				1856F04C1FFB804D00B4F2A7 /* libx264.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		185EB32F1FF5CD22001E37F7 /* TFMediaPlayerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -587,6 +615,7 @@
 				184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */,
 				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */,
 				18C66DC21FF0F253002BFBBC /* Player */,
+				1856F0471FFB804D00B4F2A7 /* x264 */,
 				184FF6BA1FF48A95007D5826 /* FFmpeg */,
 				18C66D981FF0F1F6002BFBBC /* Supporting Files */,
 				18415A191FF5D5F6007095AC /* UnitTest.h */,
@@ -920,12 +949,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = UML9BQURX9;
+				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/TFMediaPlayer/FFmpeg/include";
 				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/TFMediaPlayer/FFmpeg/lib",
+					"$(PROJECT_DIR)/TFMediaPlayer/x264/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -937,12 +968,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = UML9BQURX9;
+				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/TFMediaPlayer/FFmpeg/include";
 				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/TFMediaPlayer/FFmpeg/lib",
+					"$(PROJECT_DIR)/TFMediaPlayer/x264/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = shiwei.TFMediaPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -1,0 +1,182 @@
+1. --disable-static  默认no,保持默认。
+2. --enable-small 需要，默认no
+3. --disable-runtime-cpudetect 检测cpu，可测试。
+4. --disable-swscale-alpha 图像不做缩放，这个不需要。
+5. --enable-gray 全灰度，可考虑，待测试。
+6. --disable-programs 不需要命令行工具，需要库。
+7. --disable-doc doc只需要一份，且一次。
+8. Component options 组件是否需要得根据实际使用来定，这项优化最后考虑，至少项目运行无问题了。
+9. --enable-libx264 x264编码库
+10. --arch=ARCH 指定架构，arm64
+11. --cpu=CPU 待检测
+12. --enable-cross-compile 交叉编译，待检测，应该是要的
+13. --target-os=OS 目标系统
+14. --cc=CC  --cxx=CXX  --objcc=OCC 编译器指定
+15. --doxygen=DOXYGEN api文档
+16. --extra-cflags=ECFLAGS， --extra-cxxflags=ECFLAGS， --extra-objcflags=FLAGS 3个语言的额外编译标识
+17. --disable-asm asm是cpu的优化，这个不开启，保持默认。也可测试。
+18. --disable-debug 发布包和测试包区别。
+19. --prefix=PREFIX 安装位置
+
+
+* 测试1
+
+./configure --prefix=../compiled/ffmpeg --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --arch=arm64 --enable-cross-compile
+
+*libx264 is gpl and --enable-gpl is not specified.*
+
+* 测试2
+
+./configure --prefix=../compiled/ffmpeg --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl --arch=arm64 --enable-cross-compile
+
+找不到编译结果。 *应该是应为没写make*
+
+* 测试3
+
+./configure --prefix=/Users/apple/AVLibraries/compiled/ffmpeg --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl --arch=arm64 --enable-cross-compile
+
+*invalid instruction mnemonic 'rev16'
+    __asm__("rev16 %w0, %w0" : "+r"(x));*
+
+* 测试4
+
+ ./configure --prefix=/Users/apple/AVLibraries/compiled/ffmpeg --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl --arch=arm64 --enable-cross-compile --enable-libass --enable-libfontconfig
+
+* 测试5
+
+./configure --prefix="/Users/apple/AVLibraries/compiled/ffmpeg" --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl --arch=arm64 --enable-cross-compile --extra-cflags="-archarm64" --as="/usr/local/bin/gas-preprocessor.pl -arch aarch64" target-os=darwin
+
+*找不到gas-preprocessor*
+
+* 测试6
+
+./configure  --prefix="/Users/apple/AVLibraries/compiled/ffmpeg"  --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl  --enable-cross-compile 
+--target-os=darwin --arch=arm64 --cc="xcrun -sdk iphoneos clang" --as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"  --extra-cflags="-archarm64 -mios-version-min=8.0 -fembed-bitcode" 
+
+##增加命令
+1. --cc="xcrun -sdk iphoneos clang" 不适用gcc
+2. --as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" 添加as命令，还要下载gas-preprocessor.pl
+3. --enable-gpl x264依赖
+
+*--target-os=darwin: command not found*
+
+* 测试7
+
+./configure --target-os=darwin --arch=arm64 --cc="xcrun -sdk iphoneos clang" --as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" --enable-small --disable-swscale-alpha --disable-programs --enable-libx264 --enable-gpl  --enable-cross-compile --extra-cflags="-archarm64 -mios-version-min=8.0 fembed-bitcode" --prefix="/Users/apple/AVLibraries/compiled/ffmpeg"
+
+*xcrun -sdk iphoneos clang is unable to create an executable file*
+
+* 测试8
+
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-libx264 \
+--enable-gpl \
+--enable-cross-compile \
+--extra-cflags="-arch arm64 -mios-version-min=8.0" \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0" \
+--prefix="/Users/app/le/AVLibraries/compiled/ffmpeg"
+
+对比脚本：
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-cross-compile \
+--disable-debug \
+--disable-programs \
+--disable-doc \
+--enable-pic \
+--extra-cflags="-arch arm64 -mios-version-min=8.0 -fembed-bitcode" \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0 -fembed-bitcode" \
+--prefix="/Users/apple/AVLibraries/compiled/ffmpeg"
+
+*libx264 not found*
+
+
+
+* 测试9
+
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-libx264 \
+--enable-gpl \
+--enable-cross-compile \
+--extra-cflags="-arch arm64 -mios-version-min=8.0 -I/usr/local/include" \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/usr/local/lib" \
+--prefix="/Users/app/le/AVLibraries/compiled/ffmpeg"
+
+*仍然找不到库，但却是因为库是x84_64的*
+
+[编译对应架构的x264](https://github.com/kewlbear/x264-ios/blob/master/build-x264.sh)
+
+只对arm64: 
+
+export CC="xcrun -sdk iphoneos clang"
+
+export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
+
+./configure \
+--enable-static \
+--enable-pic \
+--disable-cli \
+--host=aarch64-apple-darwin \
+--extra-cflags="-arch arm64 -fembed-bitcode -mios-version-min=8.0" \
+--extra-asflags="-arch arm64 -fembed-bitcode -mios-version-min=8.0" \
+--extra-ldflags="-arch arm64 -fembed-bitcode -mios-version-min=8.0 " \
+--prefix="/Users/apple/AVLibraries/thin-x264/arm64"
+
+
+
+* 测试10
+
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-libx264 \
+--enable-gpl \
+--enable-cross-compile \
+--extra-cflags="-arch arm64 -mios-version-min=8.0 -I/Users/apple/AVLibraries/thin-x264/arm64/include -I/usr/local/include " \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
+--prefix="/Users/app/le/AVLibraries/compiled/ffmpeg"
+
+###成功
+
+
+* 削减不必要的组件 *
+
+* 测试11
+
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-libx264 \
+--enable-gpl \
+--enable-cross-compile \
+--extra-cflags="-arch arm64 -mios-version-min=8.0 -I/Users/apple/AVLibraries/thin-x264/arm64/include -I/usr/local/include " \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
+--prefix="/Users/app/le/AVLibraries/compiled/ffmpeg"
+
