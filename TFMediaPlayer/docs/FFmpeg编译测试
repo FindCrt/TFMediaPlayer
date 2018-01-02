@@ -165,6 +165,9 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 
 * 测试11
 
+ * 只留h264和aac的解码
+ * 暂时不需要h264编码：--enable-libx264 \
+
 ./configure \
 --target-os=darwin \
 --arch=arm64 \
@@ -173,10 +176,24 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 --enable-small \
 --disable-swscale-alpha \
 --disable-programs \
---enable-libx264 \
 --enable-gpl \
 --enable-cross-compile \
+--disable-avdevice \
+--disable-avfilter \
+--disable-encoders \
+--disable-decoders \
+--enable-decoder=h264 \
+--enable-decoder=aac \
+--disable-muxers \
+--enable-muxer=h264 \
+--disable-demuxers \
+--enable-demuxer=h264 \
+--enable-demuxer=aac \
+--enable-demuxer=mov \
+--disable-parsers \
+--enable-parser=h264 \
+--enable-parser=aac \
 --extra-cflags="-arch arm64 -mios-version-min=8.0 -I/Users/apple/AVLibraries/thin-x264/arm64/include -I/usr/local/include " \
 --extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
---prefix="/Users/app/le/AVLibraries/compiled/ffmpeg"
+--prefix="/Users/apple/AVLibraries/compiled/ffmpeg"
 
