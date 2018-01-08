@@ -27,6 +27,12 @@ typedef struct{
     
 }TFMPVideoFrameBuffer;
 
+typedef struct{
+    double sampleRate;
+    char formatFlags;  //bit 1 for is int, bit 2 for is signed, bit 3 for is bigEndian.
+    int bitsPerChannel;
+    int channelPerFrame;
+}TFMPAudioStreamDescription;
 
 typedef enum{
     TFMP_MEDIA_TYPE_VIDEO = 1 << 0,

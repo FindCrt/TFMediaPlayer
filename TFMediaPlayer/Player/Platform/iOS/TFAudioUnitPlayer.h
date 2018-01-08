@@ -9,11 +9,13 @@
 /** A pull-mode audio player based on audio unit. */
 
 #import <Foundation/Foundation.h>
-#import "TFMPAVFormat.hpp"
+#import "TFMPAVFormat.h"
 
 @interface TFAudioUnitPlayer : NSObject
 
 @property (nonatomic, assign) TFMPFillAudioBufferStruct fillStruct;
+
+-(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc;
 
 -(BOOL)play;
 

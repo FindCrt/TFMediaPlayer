@@ -9,6 +9,7 @@
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"
 #import "TFOPGLESDisplayView.h"
+#import "TFAudioUnitPlayer.h"
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
@@ -16,6 +17,7 @@
     BOOL _innerPlayWhenReady;
     
     TFOPGLESDisplayView *_displayView;
+    TFAudioUnitPlayer *_audioPlayer;
 }
 
 @end
@@ -29,7 +31,7 @@
         
         _playController = new tfmpcore::PlayController();
         
-        _playController->setDisplayMediaType(tfmpcore::TFMP_MEDIA_TYPE_VIDEO);
+        _playController->setDisplayMediaType(TFMP_MEDIA_TYPE_VIDEO);
         _playController->isAudioMajor = false;
         
         _playController->displayContext = (__bridge void *)self;
@@ -45,6 +47,13 @@
                 playController->play();
                 _state = TFMediaPlayerStatePlaying;
             }
+        };
+        
+        _playController->negotiateRealPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
+            
+            TFMPAudioStreamDescription result = [_audioPlayer resultAudioDescForSource:sourceDesc];
+            
+            return result;
         };
     }
     
@@ -127,5 +136,7 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
     
     return 0;
 }
+
+
 
 @end

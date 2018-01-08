@@ -30,7 +30,6 @@ void DisplayController::startDisplay(){
     shouldDisplay = true;
     
     pthread_create(&dispalyThread, nullptr, displayLoop, this);
-    
 }
 
 void DisplayController::stopDisplay(){
@@ -114,7 +113,6 @@ void *DisplayController::displayLoop(void *context){
     return 0;
 }
 
-<<<<<<< Updated upstream
 static int fillAudioBuffer(void *buffer, int size, void *context){
     
     return 0;
@@ -123,9 +121,3 @@ static int fillAudioBuffer(void *buffer, int size, void *context){
 TFMPFillAudioBufferStruct DisplayController::getFillAudioBufferStruct(){
     return {fillAudioBuffer, this};
 }
-=======
-int DisplayController::fillAudioBuffer(void *buffer, int64_t size, void *context){
-    
-    return 0;
-}
->>>>>>> Stashed changes

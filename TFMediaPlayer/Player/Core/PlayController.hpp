@@ -20,6 +20,7 @@ extern "C"{
 #include <pthread.h>
 #include <functional>
 #include "DisplayController.hpp"
+#include "TFMPAVFormat.h"
 
 namespace tfmpcore {
     
@@ -73,15 +74,13 @@ namespace tfmpcore {
         void setDisplayMediaType(TFMPMediaType displayMediaType);
         
         void *displayContext;
-        VideoFrameDisplayFunc displayVideoFrame;
-<<<<<<< Updated upstream
-        FillAudioBufferStruct getFillAudioBufferStruct();
-=======
->>>>>>> Stashed changes
+        TFMPVideoFrameDisplayFunc displayVideoFrame;
+
+        TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         
         DisplayController *getDisplayer();
         /** The source part inputs source audio stream desc, the platform-special part return a audio stream desc that will be fine for both parts. */
-        std::function<AudioStreamDescription(AudioStreamDescription)> negotiateRealPlayAudioDesc;
+        std::function<TFMPAudioStreamDescription(TFMPAudioStreamDescription)> negotiateRealPlayAudioDesc;
         FillAudioBufferFunc getFillAudioBufferFunc();
     };
 }

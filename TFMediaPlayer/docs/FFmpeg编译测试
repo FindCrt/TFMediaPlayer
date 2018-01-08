@@ -200,3 +200,35 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 
 *现在库为14M,主要还是codec比较大，但是现在也只有h264和aac两个解码器*
 
+模拟器架构的：
+
+./configure \
+--target-os=darwin \
+--arch=x86_64 \
+--cc="xcrun -sdk iphonesimulator clang" \
+--as="xcrun -sdk iphonesimulator clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-gpl \
+--enable-cross-compile \
+--disable-avdevice \
+--disable-avfilter \
+--disable-encoders \
+--disable-decoders \
+--enable-decoder=h264 \
+--enable-decoder=aac \
+--disable-muxers \
+--disable-demuxers \
+--enable-demuxer=h264 \
+--enable-demuxer=aac \
+--enable-demuxer=mov \
+--disable-parsers \
+--enable-parser=h264 \
+--enable-parser=aac \
+--disable-doc \
+--disable-swscale \
+--extra-cflags="-arch x86_64 -mios-simulator-version-min=8.0 -I/usr/local/include " \
+--extra-ldflags="-arch x86_64 -mios-simulator-version-min=8.0 -L/usr/local/lib" \
+--prefix="../compiled/simulator/"
+

@@ -122,17 +122,11 @@ void PlayController::setDisplayMediaType(TFMPMediaType displayMediaType){
     displayer->displayMediaType = displayMediaType;
 }
 
-<<<<<<< Updated upstream
-FillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
+TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
     return displayer->getFillAudioBufferStruct();
-=======
+}
 DisplayController *PlayController::getDisplayer(){
     return displayer;
-}
-
-FillAudioBufferFunc PlayController::getFillAudioBufferFunc(){
-    return displayer->fillAudioBuffer;
->>>>>>> Stashed changes
 }
 
 /***** private ******/
