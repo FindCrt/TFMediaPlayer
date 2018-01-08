@@ -13,7 +13,7 @@ extern "C"{
 
 using namespace tfmpcore;
 
-static unsigned int minExeTime = 10000; //microsecond
+static unsigned int minExeTime = 0.01; //microsecond
 
 void DisplayController::startDisplay(){
     
@@ -71,10 +71,13 @@ void *DisplayController::displayLoop(void *context){
             }
         }
         
-        int64_t remainTime = controller->syncClock->remainTime(videoFrame->pts, audioFrame->pts);
+        
+        double remainTime = controller->syncClock->remainTime(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
+        
+        printf("remainTime: %.6f\n",remainTime);
         
         if (remainTime > minExeTime) {
-            av_usleep((unsigned int)remainTime);
+            av_usleep(remainTime*1000000);
         }
         
         TFMPVideoFrameBuffer videoFrameBuf;
@@ -103,7 +106,7 @@ void *DisplayController::displayLoop(void *context){
         
         //TODO: audio
         
-        controller->syncClock->correctWithPresent(videoFrame->pts, audioFrame->pts);
+        controller->syncClock->correctWithPresent(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
         if(showVideo) av_frame_unref(videoFrame);
         if(showAudio) av_frame_unref(audioFrame);
     }
@@ -111,6 +114,7 @@ void *DisplayController::displayLoop(void *context){
     return 0;
 }
 
+<<<<<<< Updated upstream
 static int fillAudioBuffer(void *buffer, int size, void *context){
     
     return 0;
@@ -119,3 +123,9 @@ static int fillAudioBuffer(void *buffer, int size, void *context){
 TFMPFillAudioBufferStruct DisplayController::getFillAudioBufferStruct(){
     return {fillAudioBuffer, this};
 }
+=======
+int DisplayController::fillAudioBuffer(void *buffer, int64_t size, void *context){
+    
+    return 0;
+}
+>>>>>>> Stashed changes

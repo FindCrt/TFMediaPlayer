@@ -14,20 +14,27 @@ extern "C"{
 
 using namespace tfmpcore;
 
-int64_t SyncClock::remainTime(int64_t videoPts, int64_t audioPts){
+double SyncClock::remainTime(double videoPts, double audioPts){
     
-    int64_t currentTime = av_gettime_relative();
+    double currentTime = av_gettime_relative() / 1000000.0;
+    
+    if (ptsCorrection == 0) {
+        return 0.01;
+    }
     
     if (isAudioMajor) {
         
-        return videoPts + ptsCorrection - currentTime;
+        return audioPts + ptsCorrection - currentTime;
         
     }else{
-        return audioPts + ptsCorrection - currentTime;
+        
+        return videoPts - lastPts;
+        
+        //return videoPts + ptsCorrection - currentTime;
     }
 }
 
-int64_t SyncClock::nextMediaPts(int64_t videoPts, int64_t audioPts){
+double SyncClock::nextMediaPts(double videoPts, double audioPts){
     
     if (isAudioMajor) {
         return videoPts;
@@ -36,13 +43,18 @@ int64_t SyncClock::nextMediaPts(int64_t videoPts, int64_t audioPts){
     }
 }
 
-void SyncClock::correctWithPresent(int64_t videoPts, int64_t audioPts){
+void SyncClock::correctWithPresent(double videoPts, double audioPts){
     
-    uint64_t currentTime = av_gettime_relative();
+    double currentTime = av_gettime_relative() / 1000000.0;
     
     if (isAudioMajor) {
-        ptsCorrection = currentTime - videoPts;
+        lastPts = audioPts;
+        ptsCorrection = currentTime - audioPts;
     }else{
+        lastPts = videoPts;
         ptsCorrection = currentTime - videoPts;
     }
+    
+    
+    printf("ptsCorrection: %lld\n",ptsCorrection);
 }

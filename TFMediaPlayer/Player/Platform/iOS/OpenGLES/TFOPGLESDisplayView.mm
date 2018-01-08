@@ -78,7 +78,13 @@ void main()                                             \n\
 
 @implementation TFOPGLESDisplayView
 
-
+-(void)didMoveToSuperview{
+    //[super didMoveToSuperview];
+    
+    if (!self.context) {
+        [self setupOpenGLContext];
+    }
+}
 
 -(void)layoutSubviews{
     [super layoutSubviews];
@@ -174,9 +180,9 @@ void main()                                             \n\
         return;
     }
     
-    if (!self.context) {
-        [self setupOpenGLContext];
-    }
+//    if (!self.context) {
+//        [self setupOpenGLContext];
+//    }
     EAGLContext *preContex = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:self.context];
     

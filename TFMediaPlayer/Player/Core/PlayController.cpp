@@ -61,6 +61,9 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
     displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
     
+    displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
+    displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
+    
     displayer->syncClock = new SyncClock(isAudioMajor);
 
     prapareOK = true;
@@ -119,8 +122,17 @@ void PlayController::setDisplayMediaType(TFMPMediaType displayMediaType){
     displayer->displayMediaType = displayMediaType;
 }
 
+<<<<<<< Updated upstream
 FillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
     return displayer->getFillAudioBufferStruct();
+=======
+DisplayController *PlayController::getDisplayer(){
+    return displayer;
+}
+
+FillAudioBufferFunc PlayController::getFillAudioBufferFunc(){
+    return displayer->fillAudioBuffer;
+>>>>>>> Stashed changes
 }
 
 /***** private ******/

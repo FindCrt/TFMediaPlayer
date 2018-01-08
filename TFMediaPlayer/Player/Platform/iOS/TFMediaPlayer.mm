@@ -30,6 +30,7 @@
         _playController = new tfmpcore::PlayController();
         
         _playController->setDisplayMediaType(tfmpcore::TFMP_MEDIA_TYPE_VIDEO);
+        _playController->isAudioMajor = false;
         
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;

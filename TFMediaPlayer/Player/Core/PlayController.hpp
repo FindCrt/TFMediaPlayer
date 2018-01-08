@@ -23,6 +23,8 @@ extern "C"{
 
 namespace tfmpcore {
     
+    typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
+    
     class PlayController{
         
         std::string mediaPath;
@@ -72,8 +74,15 @@ namespace tfmpcore {
         
         void *displayContext;
         VideoFrameDisplayFunc displayVideoFrame;
+<<<<<<< Updated upstream
         FillAudioBufferStruct getFillAudioBufferStruct();
+=======
+>>>>>>> Stashed changes
         
+        DisplayController *getDisplayer();
+        /** The source part inputs source audio stream desc, the platform-special part return a audio stream desc that will be fine for both parts. */
+        std::function<AudioStreamDescription(AudioStreamDescription)> negotiateRealPlayAudioDesc;
+        FillAudioBufferFunc getFillAudioBufferFunc();
     };
 }
 

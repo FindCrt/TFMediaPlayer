@@ -10,11 +10,12 @@
 #define SyncClock_hpp
 
 #include <stdlib.h>
+#include <stdio.h>
 
 namespace tfmpcore {
     class SyncClock{
         //frame pts + correction = the real present time that come from av_gettime_relative.
-        int64_t ptsCorrection;
+        double ptsCorrection;
         
         bool isAudioMajor;
         
@@ -23,12 +24,12 @@ namespace tfmpcore {
         SyncClock(bool isAudioMajor = true):isAudioMajor(isAudioMajor){};
         
         
-        int64_t lastPts;
-        int64_t remainTime(int64_t videoPts, int64_t audioPts);
+        double lastPts;
+        double remainTime(double videoPts, double audioPts);
         
-        int64_t nextMediaPts(int64_t videoPts, int64_t audioPts);
+        double nextMediaPts(double videoPts, double audioPts);
         
-        void correctWithPresent(int64_t videoPts, int64_t audioPts);
+        void correctWithPresent(double videoPts, double audioPts);
     };
 }
 
