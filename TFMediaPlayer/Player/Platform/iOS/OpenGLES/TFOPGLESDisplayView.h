@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "TFGLView.h"
-#import "VideoFormat.h"
+#import "TFMPAVFormat.h"
 
 @interface TFOPGLESDisplayView : TFGLView
 

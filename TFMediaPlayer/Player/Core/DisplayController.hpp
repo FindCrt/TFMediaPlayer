@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <pthread.h>
-#include "VideoFormat.h"
+#include "TFMPAVFormat.hpp"
 #include "RecycleBuffer.hpp"
 #include "SyncClock.hpp"
 
@@ -20,16 +20,6 @@ extern "C"{
 }
 
 namespace tfmpcore {
-    
-    typedef enum{
-        TFMP_MEDIA_TYPE_VIDEO = 1 << 0,
-        TFMP_MEDIA_TYPE_AUDIO = 1 << 1,
-        TFMP_MEDIA_TYPE_SUBTITLE = 1 << 2,
-        TFMP_MEDIA_TYPE_ALL_AVIABLE = TFMP_MEDIA_TYPE_VIDEO | TFMP_MEDIA_TYPE_AUDIO | TFMP_MEDIA_TYPE_SUBTITLE,
-    }TFMPMediaType;
-    
-    typedef int (*VideoFrameDisplayFunc)(TFMPVideoFrameBuffer *, void *context);
-    typedef int (*AudioFrameDisplayFunc)(void *context);
     
     class DisplayController{
         
@@ -44,8 +34,8 @@ namespace tfmpcore {
         
         //the real display func different with different platform
         void *displayContext;
-        VideoFrameDisplayFunc displayVideoFrame;
-        AudioFrameDisplayFunc displayAudioFrame;
+        TFMPVideoFrameDisplayFunc displayVideoFrame;
+        TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         
         RecycleBuffer<AVFrame*> *shareVideoBuffer;
         RecycleBuffer<AVFrame*> *shareAudioBuffer;

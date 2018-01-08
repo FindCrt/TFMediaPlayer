@@ -57,12 +57,6 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         displayer->displayVideoFrame = displayVideoFrame;
     }
     
-    if ((displayMediaType & TFMP_MEDIA_TYPE_AUDIO) && audioDecoder != nullptr && displayAudioFrame == nullptr) {
-        return false;
-    }else{
-        displayer->displayAudioFrame = displayAudioFrame;
-    }
-    
     displayer->displayContext = displayContext;
     displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
     displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
@@ -123,6 +117,10 @@ void PlayController::stop(){
 void PlayController::setDisplayMediaType(TFMPMediaType displayMediaType){
     this->displayMediaType = displayMediaType;
     displayer->displayMediaType = displayMediaType;
+}
+
+FillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
+    return displayer->getFillAudioBufferStruct();
 }
 
 /***** private ******/

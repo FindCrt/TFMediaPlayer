@@ -72,7 +72,7 @@ namespace tfmpcore {
         
         void *displayContext;
         VideoFrameDisplayFunc displayVideoFrame;
-        AudioFrameDisplayFunc displayAudioFrame;
+        FillAudioBufferStruct getFillAudioBufferStruct();
         
     };
 }

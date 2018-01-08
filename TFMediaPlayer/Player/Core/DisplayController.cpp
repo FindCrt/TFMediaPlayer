@@ -110,3 +110,12 @@ void *DisplayController::displayLoop(void *context){
     
     return 0;
 }
+
+static int fillAudioBuffer(void *buffer, int size, void *context){
+    
+    return 0;
+}
+
+TFMPFillAudioBufferStruct DisplayController::getFillAudioBufferStruct(){
+    return {fillAudioBuffer, this};
+}
