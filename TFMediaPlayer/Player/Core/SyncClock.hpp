@@ -24,7 +24,7 @@ namespace tfmpcore {
         SyncClock(bool isAudioMajor = true):isAudioMajor(isAudioMajor){};
         
         
-        double lastPts;
+        double lastPts = 0;
         double remainTime(double videoPts, double audioPts);
         
         double nextMediaPts(double videoPts, double audioPts);

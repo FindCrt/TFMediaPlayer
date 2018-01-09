@@ -7,7 +7,7 @@
 //
 
 #include "PlayController.hpp"
-#include "DebugFuncs.h"
+#include "TFMPDebugFuncs.h"
 #include "ThreadConvience.h"
 
 using namespace tfmpcore;
@@ -31,10 +31,13 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
             videoDecoder = new Decoder(fmtCtx, i, type);
+            videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
+            audioStream = i;
         }else if (type == AVMEDIA_TYPE_SUBTITLE){
             subtitleDecoder = new Decoder(fmtCtx, i, type);
+            subTitleStream = i;
         }
     }
     
@@ -49,6 +52,10 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     if (subtitleDecoder && !subtitleDecoder->prepareDecode()) {
         return false;
     }
+    
+    //audio format
+    resolveAudioStreamFormat();
+    
     
     //check whether stream can display.
     if ((displayMediaType & TFMP_MEDIA_TYPE_VIDEO) && videoDecoder != nullptr && displayVideoFrame == nullptr) {
@@ -130,6 +137,39 @@ DisplayController *PlayController::getDisplayer(){
 }
 
 /***** private ******/
+
+void PlayController::resolveAudioStreamFormat(){
+    
+    auto codecpar = fmtCtx->streams[audioStream]->codecpar;
+    
+    TFMPAudioStreamDescription sourceDesc;
+    sourceDesc.sampleRate = codecpar->sample_rate;
+    
+    AVSampleFormat fmt = (AVSampleFormat)codecpar->format;
+    
+    bool isBigEndian = BIG_ENDIAN == BYTE_ORDER; //format's data is always in native-endian order.
+    
+    if (fmt == AV_SAMPLE_FMT_U8) {
+        setFormatFlagsForAudioDesc(&sourceDesc, true, false, isBigEndian);
+        sourceDesc.bitsPerChannel = 8;
+    }else if (fmt == AV_SAMPLE_FMT_S16){
+        setFormatFlagsForAudioDesc(&sourceDesc, true, true, isBigEndian);
+        sourceDesc.bitsPerChannel = 16;
+    }else if (fmt == AV_SAMPLE_FMT_S32){
+        setFormatFlagsForAudioDesc(&sourceDesc, true, true, isBigEndian);
+        sourceDesc.bitsPerChannel = 32;
+    }else if (fmt == AV_SAMPLE_FMT_FLT){
+        setFormatFlagsForAudioDesc(&sourceDesc, false, true, isBigEndian);
+        sourceDesc.bitsPerChannel = sizeof(float)*8;
+    }else if (fmt == AV_SAMPLE_FMT_DBL){
+        setFormatFlagsForAudioDesc(&sourceDesc, false, true, isBigEndian);
+        sourceDesc.bitsPerChannel = sizeof(double)*8;
+    }
+    
+    sourceDesc.channelPerFrame = codecpar->channels;
+    
+    realAudioDesc = negotiateRealPlayAudioDesc(sourceDesc);
+}
 
 void PlayController::startReadingFrames(){
     pthread_create(&readThread, nullptr, readFrame, this);

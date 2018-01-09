@@ -20,13 +20,19 @@ extern "C"{
 }
 
 namespace tfmpcore {
-
+    
     class DisplayController{
         
         pthread_t dispalyThread;
         static void *displayLoop(void *context);
         
         bool shouldDisplay;
+        
+        uint64_t remainingSize;
+        uint8_t *remainingAudioBuffer;
+        AVFrame *remainFrame;
+        
+        static int fillAudioBuffer(void *buffer, int size, void *context);
         
     public:
         

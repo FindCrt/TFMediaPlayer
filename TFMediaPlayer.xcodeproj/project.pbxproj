@@ -29,6 +29,7 @@
 		18415A321FF62110007095AC /* DisplayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A301FF62110007095AC /* DisplayController.cpp */; };
 		18415A351FF62648007095AC /* SyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A331FF62648007095AC /* SyncClock.cpp */; };
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
+		1843A1F2200463890053694A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
 		1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856F04C1FFB804D00B4F2A7 /* libx264.a */; };
@@ -43,24 +44,9 @@
 		18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */; };
 		18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */; };
 		892C12941FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 892C12931FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m */; };
-		892C13192003B63B0081CF79 /* libswscale.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C130B2003B63A0081CF79 /* libswscale.pc */; };
-		892C131A2003B63B0081CF79 /* libswresample.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C130C2003B63A0081CF79 /* libswresample.pc */; };
-		892C131B2003B63B0081CF79 /* libavdevice.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C130D2003B63A0081CF79 /* libavdevice.pc */; };
-		892C131C2003B63B0081CF79 /* libavcodec.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C130E2003B63A0081CF79 /* libavcodec.pc */; };
-		892C131D2003B63B0081CF79 /* libavformat.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C130F2003B63A0081CF79 /* libavformat.pc */; };
-		892C131E2003B63B0081CF79 /* libavutil.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C13102003B63A0081CF79 /* libavutil.pc */; };
-		892C131F2003B63B0081CF79 /* libavfilter.pc in Resources */ = {isa = PBXBuildFile; fileRef = 892C13112003B63A0081CF79 /* libavfilter.pc */; };
 		892C13202003B63B0081CF79 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13122003B63A0081CF79 /* libavutil.a */; };
 		892C13222003B63B0081CF79 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13142003B63A0081CF79 /* libavcodec.a */; };
 		892C13232003B63B0081CF79 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13152003B63A0081CF79 /* libavformat.a */; };
-		892C13252003B63B0081CF79 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
-		897ABF161FF7C4F800115779 /* libswscale.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF081FF7C4F700115779 /* libswscale.pc */; };
-		897ABF171FF7C4F800115779 /* libswresample.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF091FF7C4F700115779 /* libswresample.pc */; };
-		897ABF181FF7C4F800115779 /* libavdevice.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF0A1FF7C4F700115779 /* libavdevice.pc */; };
-		897ABF191FF7C4F800115779 /* libavcodec.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF0B1FF7C4F700115779 /* libavcodec.pc */; };
-		897ABF1A1FF7C4F800115779 /* libavformat.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF0C1FF7C4F700115779 /* libavformat.pc */; };
-		897ABF1B1FF7C4F800115779 /* libavutil.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF0D1FF7C4F700115779 /* libavutil.pc */; };
-		897ABF1C1FF7C4F800115779 /* libavfilter.pc in Resources */ = {isa = PBXBuildFile; fileRef = 897ABF0E1FF7C4F700115779 /* libavfilter.pc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,7 +96,7 @@
 		184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLocalMp4ViewController.h; sourceTree = "<group>"; };
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLocalMp4ViewController.m; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
-		184FF7531FF4A190007D5826 /* DebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DebugFuncs.h; sourceTree = "<group>"; };
+		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
 		1856F0491FFB804D00B4F2A7 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
 		1856F04A1FFB804D00B4F2A7 /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
 		1856F04C1FFB804D00B4F2A7 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
@@ -285,16 +271,16 @@
 				180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */,
 				180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */,
 				180FA4FD1FF4CB3300AFB5F9 /* AVFoundation.framework in Frameworks */,
-				892C13232003B63B0081CF79 /* libavformat.a in Frameworks */,
 				180FA4F81FF4CA3600AFB5F9 /* CoreMedia.framework in Frameworks */,
-				892C13202003B63B0081CF79 /* libavutil.a in Frameworks */,
 				180FA4F61FF4CA3000AFB5F9 /* VideoToolbox.framework in Frameworks */,
-				892C13252003B63B0081CF79 /* libswresample.a in Frameworks */,
-				892C13222003B63B0081CF79 /* libavcodec.a in Frameworks */,
 				180FA4F41FF4CA2400AFB5F9 /* OpenGLES.framework in Frameworks */,
 				180FA4F21FF4CA1E00AFB5F9 /* MobileCoreServices.framework in Frameworks */,
 				180FA4F01FF4CA1700AFB5F9 /* CoreAudio.framework in Frameworks */,
 				180FA4EE1FF4CA0D00AFB5F9 /* CoreVideo.framework in Frameworks */,
+				892C13232003B63B0081CF79 /* libavformat.a in Frameworks */,
+				892C13202003B63B0081CF79 /* libavutil.a in Frameworks */,
+				1843A1F2200463890053694A /* libswresample.a in Frameworks */,
+				892C13222003B63B0081CF79 /* libavcodec.a in Frameworks */,
 				180FA4FB1FF4CB2700AFB5F9 /* libiconv.tbd in Frameworks */,
 				180FA4EC1FF4CA0700AFB5F9 /* libbz2.tbd in Frameworks */,
 				1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */,
@@ -371,7 +357,7 @@
 		184FF7521FF4A15E007D5826 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				184FF7531FF4A190007D5826 /* DebugFuncs.h */,
+				184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */,
 				180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */,
 			);
 			path = Utilities;
@@ -823,24 +809,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
-				892C131A2003B63B0081CF79 /* libswresample.pc in Resources */,
-				897ABF1A1FF7C4F800115779 /* libavformat.pc in Resources */,
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
-				892C13192003B63B0081CF79 /* libswscale.pc in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
-				892C131C2003B63B0081CF79 /* libavcodec.pc in Resources */,
-				897ABF171FF7C4F800115779 /* libswresample.pc in Resources */,
-				892C131D2003B63B0081CF79 /* libavformat.pc in Resources */,
-				897ABF1C1FF7C4F800115779 /* libavfilter.pc in Resources */,
-				892C131E2003B63B0081CF79 /* libavutil.pc in Resources */,
-				892C131F2003B63B0081CF79 /* libavfilter.pc in Resources */,
-				897ABF161FF7C4F800115779 /* libswscale.pc in Resources */,
 				18415A2A1FF6130D007095AC /* frameDisplay.fs in Resources */,
-				897ABF191FF7C4F800115779 /* libavcodec.pc in Resources */,
 				184FF7511FF48BC0007D5826 /* game.mp4 in Resources */,
-				897ABF1B1FF7C4F800115779 /* libavutil.pc in Resources */,
-				892C131B2003B63B0081CF79 /* libavdevice.pc in Resources */,
-				897ABF181FF7C4F800115779 /* libavdevice.pc in Resources */,
 				18415A2B1FF6130D007095AC /* frameDisplay.vs in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

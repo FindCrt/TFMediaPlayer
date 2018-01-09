@@ -7,7 +7,7 @@
 //
 
 #include "Decoder.hpp"
-#include "DebugFuncs.h"
+#include "TFMPDebugFuncs.h"
 
 
 using namespace tfmpcore;
@@ -66,20 +66,35 @@ void *Decoder::decodeLoop(void *context){
         decoder->pktBuffer.blockGetOut(&pkt);
         int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
         if (retval != 0) {
-            printf("avcodec_send_packet error\n");
+            TFCheckRetval("avcodec send packet");
             continue;
         }
         
-        frame = av_frame_alloc();
-        retval = avcodec_receive_frame(decoder->codecCtx, frame);
-        
-        
-        if (retval != 0) {
-            printf("avcodec_receive_frame error\n");
-            continue;
+        if (decoder->type == AVMEDIA_TYPE_AUDIO) { //may many frames in one packet.
+            
+            while (retval == 0) {
+                frame = av_frame_alloc();
+                retval = avcodec_receive_frame(decoder->codecCtx, frame);
+                decoder->frameBuffer.blockInsert(frame);
+                printf("blockInsert 1\n");
+                
+                if (retval != 0 && retval != AVERROR_EOF) {
+                    TFCheckRetval("avcodec receive frame");
+                    continue;
+                }
+            }
+        }else{
+            
+            frame = av_frame_alloc();
+            retval = avcodec_receive_frame(decoder->codecCtx, frame);
+            decoder->frameBuffer.blockInsert(frame);
+            
+            if (retval != 0) {
+                TFCheckRetval("avcodec receive frame");
+                continue;
+            }
         }
         
-        decoder->frameBuffer.blockInsert(frame);
         av_packet_unref(&pkt);
     }
     

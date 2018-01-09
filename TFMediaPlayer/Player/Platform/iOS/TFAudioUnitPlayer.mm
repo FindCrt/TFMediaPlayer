@@ -9,12 +9,16 @@
 #import "TFAudioUnitPlayer.h"
 #import <AudioUnit/AudioUnit.h>
 #include <AVFoundation/AVFoundation.h>
-#import "DebugFuncs.h"
+#import "TFMPDebugFuncs.h"
 
 static UInt32 renderAudioElement = 0;//the id of element that render to system audio component.
 
 @interface TFAudioUnitPlayer (){
     AudioUnit audioUnit;
+    
+    TFMPAudioStreamDescription TFMPResultDesc;
+    
+    AudioStreamBasicDescription audioUnitResultDesc;
 }
 
 @end
@@ -27,6 +31,42 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
     }
     
     return self;
+}
+
+-(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
+    
+    //all return s16+44100,but don't change channel number.
+    TFMPResultDesc.sampleRate = 44100;
+    setFormatFlagsForAudioDesc(&TFMPResultDesc, true, true, isBigEndianForAudioDesc(&sourceDesc));
+    TFMPResultDesc.bitsPerChannel = 16;
+    TFMPResultDesc.channelPerFrame = sourceDesc.channelPerFrame;
+    
+    [self prepareAudioUnit];
+    
+    return TFMPResultDesc;
+}
+
+-(void)prepareAudioUnit{
+    
+    //gen Audio Unit audio description from TFMPResultDesc
+    
+    audioUnitResultDesc.mSampleRate = TFMPResultDesc.sampleRate;
+    audioUnitResultDesc.mFormatID = kAudioFormatLinearPCM;
+    
+    audioUnitResultDesc.mFormatFlags = 0; //reset.
+    if (isIntForAudioDesc(&TFMPResultDesc)) {
+        if (isSignedForAudioDesc(&TFMPResultDesc)) {
+            audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsSignedInteger;
+        }
+    }else{
+        audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsFloat;
+    }
+    if (isBigEndianForAudioDesc(&TFMPResultDesc)) {
+        audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsBigEndian;
+    }
+    
+    //setup audio unit
+    [self setupAudioUnitRenderWithAudioDesc:audioUnitResultDesc];
 }
 
 -(BOOL)play{
@@ -50,9 +90,12 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
     AudioOutputUnitStop(audioUnit);
     
     //release resources
+    AudioComponentInstanceDispose(audioUnit);
 }
 
 -(void)setupAudioUnitRenderWithAudioDesc:(AudioStreamBasicDescription)audioDesc{
+    
+    AudioComponentInstanceDispose(audioUnit); //dispose previous audioUnit
     
     //componentDesc是筛选条件 component是组件的抽象，对应class的角色，componentInstance是具体的组件实体，对应object角色。
     AudioComponentDescription componentDesc;
@@ -85,24 +128,6 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
     status = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Group, renderAudioElement, &callbackSt, sizeof(callbackSt));
     
     TFCheckStatusUnReturn(status, @"set render callback");
-    
-    NSError *error = nil;
-    [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
-    if (error) {
-        NSLog(@"audio session set category: %@",error);
-        return;
-    }
-    [[AVAudioSession sharedInstance] setActive:YES error:&error];
-    if (error) {
-        NSLog(@"active audio session: %@",error);
-        return;
-    }
-    
-    status = AudioOutputUnitStart(audioUnit);
-    
-    if (status != 0) {
-        [self stop];
-    }
 }
 
 
@@ -117,7 +142,7 @@ OSStatus playAudioBufferCallback(	void *							inRefCon,
     
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     
-    UInt32 framesPerPacket = inNumberFrames;
+//    UInt32 framesPerPacket = inNumberFrames;
     
 //    int size = 0;
     

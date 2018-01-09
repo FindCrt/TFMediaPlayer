@@ -46,13 +46,16 @@ void *DisplayController::displayLoop(void *context){
     
     while (controller->shouldDisplay) {
         
-        //just check, don't use.
+        printf("got display frame1\n");
+        
         if (showVideo) {
             controller->shareVideoBuffer->blockGetOut(&videoFrame);
         }
         if (showAudio) {
             controller->shareAudioBuffer->blockGetOut(&audioFrame);
         }
+        
+        printf("got display frame2\n");
         
         int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame->pts, audioFrame->pts);
         
@@ -77,6 +80,8 @@ void *DisplayController::displayLoop(void *context){
         
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
+        }else if (remainTime < 0){
+            continue;
         }
         
         TFMPVideoFrameBuffer videoFrameBuf;
@@ -113,7 +118,54 @@ void *DisplayController::displayLoop(void *context){
     return 0;
 }
 
-static int fillAudioBuffer(void *buffer, int size, void *context){
+int DisplayController::fillAudioBuffer(void *buffer, int size, void *context){
+    printf("fillAudioBuffer\n");
+    DisplayController *displayer = (DisplayController *)context;
+    
+    if (displayer->remainingSize >= size) {
+        //TODO: do more thing for planar audio.
+        memcpy(buffer, displayer->remainingAudioBuffer, size);
+        
+        displayer->remainingSize -= size;
+        displayer->remainingAudioBuffer += size;
+        
+    }else{
+        
+        int needReadSize = size;
+        if (displayer->remainingSize > 0) {
+            
+            needReadSize -= displayer->remainingSize;
+            memcpy(buffer, displayer->remainingAudioBuffer, displayer->remainingSize);
+            
+            displayer->remainingAudioBuffer = nullptr;
+            displayer->remainingSize = 0;
+            
+            av_frame_unref(displayer->remainFrame); // release this frame
+        }
+        
+        AVFrame *frame = av_frame_alloc();
+        while (needReadSize > 0) {
+            
+            displayer->shareVideoBuffer->blockGetOut(&frame);
+            
+            if (needReadSize >= frame->linesize[0]) {
+                
+                memcpy(buffer, frame->extended_data[0], frame->linesize[0]);
+                needReadSize -= frame->linesize[0];
+                
+            }else{
+                
+                //there is a little buffer left.
+//                displayer->remainFrame = frame;
+                displayer->remainFrame = av_frame_clone(frame); //retain this frame
+                displayer->remainingSize = frame->linesize[0] - needReadSize;
+                displayer->remainingAudioBuffer = frame->extended_data[0] + needReadSize;
+                
+                memcpy(buffer, frame->extended_data[0], needReadSize);
+                needReadSize = 0;
+            }
+        }
+    }
     
     return 0;
 }

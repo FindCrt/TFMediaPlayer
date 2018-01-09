@@ -1,17 +1,19 @@
 //
-//  DebugFuncs.h
+//  TFMPDebugFuncs.h
 //  TFMediaPlayer
 //
 //  Created by shiwei on 17/12/28.
 //  Copyright © 2017年 shiwei. All rights reserved.
 //
 
-#ifndef DebugFuncs_h
-#define DebugFuncs_h
+#ifndef TFMPDebugFuncs_h
+#define TFMPDebugFuncs_h
 
 /** log */
 
-#if DEBUG
+#define TFMPLOG 1
+
+#if DEBUG & TFMPLOG
 #define TFMPDLog(format,...) NSLog(format, ##__VA_ARGS__)
 #else
 #define TFMPDLog(format,...)
@@ -19,18 +21,20 @@
 
 /** function status check */
 
+#if DEBUG & TFMPLOG
+
 #define TFCheckRetval(statement)\
 if (retval < 0) {\
 char errStr[64];\
 av_strerror(retval, errStr, 64);\
-printf("%s error(%d)\n",statement,retval);\
+printf("%s error(%s)\n",statement,errStr);\
 }\
 
 #define TFCheckRetvalAndReturn(statement)\
 if (retval < 0) {\
 char errStr[64];\
 av_strerror(retval, errStr, 64);\
-printf("%s error(%d)\n",statement,retval);\
+printf("%s error(%s)\n",statement,errStr);\
 return;\
 }\
 
@@ -41,6 +45,9 @@ av_strerror(retval, errStr, 64);\
 printf("%s error(%s)\n",statement,errStr);\
 goto fail;\
 }\
+
+
+
 
 #define TFCheckStatus(status, log)    if(status != 0) {\
 int bigEndian = CFSwapInt32HostToBig(status);\
@@ -70,5 +77,6 @@ NSLog(@"%@ error: %s",log,statusTex); goto fail;\
 NSLog(@"%@ error:\n{%@}",log,error); return;\
 }
 
+#endif
 
-#endif /* DebugFuncs_h */
+#endif /* TFMPDebugFuncs_h */

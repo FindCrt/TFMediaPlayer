@@ -45,11 +45,14 @@ namespace tfmpcore {
         
         bool prapareOK;
         
+        //read frames
         void startReadingFrames();
-        
         pthread_t readThread;
-        
         static void * readFrame(void *context);
+        
+        //real audio format
+        void resolveAudioStreamFormat();
+        TFMPAudioStreamDescription realAudioDesc;
         
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         

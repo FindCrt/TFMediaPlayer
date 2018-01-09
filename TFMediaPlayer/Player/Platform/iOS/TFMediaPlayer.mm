@@ -10,6 +10,8 @@
 #import "PlayController.hpp"
 #import "TFOPGLESDisplayView.h"
 #import "TFAudioUnitPlayer.h"
+#import <AVFoundation/AVFoundation.h>
+#import "TFMPDebugFuncs.h"
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
@@ -31,7 +33,7 @@
         
         _playController = new tfmpcore::PlayController();
         
-        _playController->setDisplayMediaType(TFMP_MEDIA_TYPE_VIDEO);
+        _playController->setDisplayMediaType((TFMPMediaType)(TFMP_MEDIA_TYPE_VIDEO | TFMP_MEDIA_TYPE_AUDIO));
         _playController->isAudioMajor = false;
         
         _playController->displayContext = (__bridge void *)self;
@@ -89,6 +91,11 @@
 }
 
 -(void)play{
+    
+    if (![self configureAVSession]) {
+        return;
+    }
+    
     if (_state == TFMediaPlayerStateNone) {
         
         _innerPlayWhenReady = YES;
@@ -98,6 +105,7 @@
         _innerPlayWhenReady = YES;
     }else if (_state == TFMediaPlayerStateReady || _state == TFMediaPlayerStatePause){
         _playController->play();
+        [_audioPlayer play];
     }
 }
 
@@ -125,6 +133,25 @@
         default:
             break;
     }
+}
+
+-(BOOL)configureAVSession{
+    
+    NSError *error = nil;
+    
+    [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayback error:&error];
+    if (error) {
+        TFMPDLog(@"audio session set category error: %@",error);
+        return NO;
+    }
+    
+    [[AVAudioSession sharedInstance] setActive:YES error:&error];
+    if (error) {
+        TFMPDLog(@"active audio session error: %@",error);
+        return NO;
+    }
+    
+    return YES;
 }
 
 #pragma mark - platform special
