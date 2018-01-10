@@ -50,12 +50,12 @@ void *DisplayController::displayLoop(void *context){
         
         if (showVideo) {
             controller->shareVideoBuffer->blockGetOut(&videoFrame);
+            printf("got video frame\n");
         }
         if (showAudio) {
             controller->shareAudioBuffer->blockGetOut(&audioFrame);
+            printf("got audio frame\n");
         }
-        
-        printf("got display frame2\n");
         
         int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame->pts, audioFrame->pts);
         

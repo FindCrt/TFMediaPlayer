@@ -103,6 +103,8 @@ namespace tfmpcore {
             backNode = frontNode->pre;
         }
         
+        char identifier[16];
+        
         bool isFull(){
             return usedSize == limitSize;
         };
@@ -144,9 +146,11 @@ namespace tfmpcore {
         void blockInsert(T val){
             
             if (usedSize >= limitSize) {
+                printf(">>>>lock full %s\n",identifier);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
+                printf("<<<<unlock full %s\n",identifier);
             }
             
             insert(val);
@@ -154,11 +158,16 @@ namespace tfmpcore {
         }
         
         void blockGetOut(T *valP){
-            
+
             if (usedSize == 0) {
+                
+                printf(">>>>lock empty %s\n",identifier);
+                
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
+                
+                printf("<<<<unlock empty %s\n",identifier);
             }
             
             getOut(valP);

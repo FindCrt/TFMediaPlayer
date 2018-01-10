@@ -185,6 +185,7 @@ void * PlayController::readFrame(void *context){
         
         if (packet->stream_index == controller->videoStrem) {
             
+            printf("video packet in");
             controller->videoDecoder->decodePacket(packet);
             
         }else if (packet->stream_index == controller->audioStream){

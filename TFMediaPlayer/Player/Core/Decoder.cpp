@@ -33,6 +33,19 @@ bool Decoder::prepareDecode(){
         return false;
     }
     
+#if DEBUG
+    if (type == AVMEDIA_TYPE_AUDIO) {
+        strcpy(frameBuffer.identifier, "audio_frame");
+        strcpy(pktBuffer.identifier, "audio_packet");
+    }else if (type == AVMEDIA_TYPE_VIDEO){
+        strcpy(frameBuffer.identifier, "video_frame");
+        strcpy(pktBuffer.identifier, "video_packet");
+    }else{
+        strcpy(frameBuffer.identifier, "subtitle_frame");
+        strcpy(pktBuffer.identifier, "subtitle_packet");
+    }
+#endif
+    
     shouldDecode = true;
     
     return true;
