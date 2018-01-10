@@ -48,9 +48,12 @@ typedef int (*TFMPVideoFrameDisplayFunc)(TFMPVideoFrameBuffer *, void *context);
 
 typedef struct{
     double sampleRate;
-    char formatFlags;  //bit 1 for is int, bit 2 for is signed, bit 3 for is bigEndian.
+    uint8_t formatFlags;  //bit 1 for is int, bit 2 for is signed, bit 3 for is bigEndian.
     int bitsPerChannel;
-    int channelPerFrame;
+    int channelsPerFrame;
+    
+    uint64_t ffmpeg_channel_layout;
+    
 }TFMPAudioStreamDescription;
 
 inline void setFormatFlagsForAudioDesc(TFMPAudioStreamDescription *audioDesc, bool isInt, bool isSigned, bool isBigEndian){
@@ -59,16 +62,16 @@ inline void setFormatFlagsForAudioDesc(TFMPAudioStreamDescription *audioDesc, bo
     if (isBigEndian)    audioDesc->formatFlags |= 1 << 2;
 }
 
-inline bool isIntForAudioDesc(TFMPAudioStreamDescription *audioDesc){
-    return (audioDesc->formatFlags & 1);
+inline bool isIntForAudioDesc(uint8_t formatFlags){
+    return (formatFlags & 1);
 }
 
-inline bool isSignedForAudioDesc(TFMPAudioStreamDescription *audioDesc){
-    return (audioDesc->formatFlags & (1<<1));
+inline bool isSignedForAudioDesc(uint8_t formatFlags){
+    return (formatFlags & (1<<1));
 }
 
-inline bool isBigEndianForAudioDesc(TFMPAudioStreamDescription *audioDesc){
-    return (audioDesc->formatFlags & (1<<2));
+inline bool isBigEndianForAudioDesc(uint8_t formatFlags){
+    return (formatFlags & (1<<2));
 }
 
 

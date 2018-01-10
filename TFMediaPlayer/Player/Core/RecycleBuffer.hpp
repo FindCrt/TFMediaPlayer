@@ -124,6 +124,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
+            printf("%s: %ld\n",identifier,usedSize);
             
             return true;
         }
@@ -139,6 +140,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
+            printf("%s: %ld\n",identifier,usedSize);
             
             return true;
         }

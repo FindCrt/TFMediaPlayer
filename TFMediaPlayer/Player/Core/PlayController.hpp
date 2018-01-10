@@ -52,7 +52,6 @@ namespace tfmpcore {
         
         //real audio format
         void resolveAudioStreamFormat();
-        TFMPAudioStreamDescription realAudioDesc;
         
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
@@ -83,7 +82,7 @@ namespace tfmpcore {
         
         DisplayController *getDisplayer();
         /** The source part inputs source audio stream desc, the platform-special part return a audio stream desc that will be fine for both parts. */
-        std::function<TFMPAudioStreamDescription(TFMPAudioStreamDescription)> negotiateRealPlayAudioDesc;
+        std::function<TFMPAudioStreamDescription(TFMPAudioStreamDescription)> negotiateAdoptedPlayAudioDesc;
         FillAudioBufferFunc getFillAudioBufferFunc();
     };
 }

@@ -100,6 +100,7 @@
 		1856F0491FFB804D00B4F2A7 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
 		1856F04A1FFB804D00B4F2A7 /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
 		1856F04C1FFB804D00B4F2A7 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		185708392006342D008FB4CF /* TFMPUtilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPUtilities.h; sourceTree = "<group>"; };
 		185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -359,6 +360,7 @@
 			children = (
 				184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */,
 				180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */,
+				185708392006342D008FB4CF /* TFMPUtilities.h */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";

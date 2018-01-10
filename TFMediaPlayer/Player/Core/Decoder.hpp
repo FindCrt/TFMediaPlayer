@@ -13,12 +13,15 @@
 extern "C"{
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libswresample/swresample.h>
 }
 
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
+#include "TFMPAVFormat.h"
 
 namespace tfmpcore {
+    
     class Decoder{
         
         AVFormatContext *fmtCtx;
@@ -35,6 +38,14 @@ namespace tfmpcore {
         
         bool shouldDecode;
         
+        //resample
+        TFMPAudioStreamDescription adoptedAudioDesc;
+        SwrContext *swrCtx;
+        void initResampleContext(AVFrame *sourceFrame);
+        bool reampleAudioFrame(AVFrame *inFrame, AVFrame *outFrame);
+        
+        TFMPAudioStreamDescription *lastSourceAudioDesc;
+        
     public:
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
@@ -43,7 +54,9 @@ namespace tfmpcore {
             return &frameBuffer;
         };
         
-        
+        void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc){
+            this->adoptedAudioDesc = adoptedAudioDesc;
+        }
         
         bool prepareDecode();
         

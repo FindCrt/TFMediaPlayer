@@ -8,9 +8,15 @@
 
 #include "Decoder.hpp"
 #include "TFMPDebugFuncs.h"
-
+#include "TFMPUtilities.h"
 
 using namespace tfmpcore;
+
+static int SWR_CH_MAX = 2;
+
+inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc);
+inline bool isNeedChangeSwrContext(AVFrame *sourceFrame, TFMPAudioStreamDescription *lastDesc);
+static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples);
 
 bool Decoder::prepareDecode(){
     AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
@@ -88,8 +94,24 @@ void *Decoder::decodeLoop(void *context){
             while (retval == 0) {
                 frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
+                
+                if (isNeedResample(frame, &(decoder->adoptedAudioDesc))) {
+                    
+                    //source audio desc may change.
+                    if (isNeedResample(frame, (decoder->lastSourceAudioDesc))) {
+                        decoder->initResampleContext(frame);
+                    }
+                    
+                    AVFrame *resampledFrame = av_frame_alloc();
+                    if (!decoder->reampleAudioFrame(frame, resampledFrame)) {
+                        continue;
+                    }
+                    
+                    frame = resampledFrame;
+                }
+                
                 decoder->frameBuffer.blockInsert(frame);
-                printf("blockInsert 1\n");
+                
                 
                 if (retval != 0 && retval != AVERROR_EOF) {
                     TFCheckRetval("avcodec receive frame");
@@ -113,3 +135,77 @@ void *Decoder::decodeLoop(void *context){
     
     return 0;
 }
+
+#pragma mark - resample audio
+
+/** If source audio desc is different from adopted audio desc, we need to resample source audio */
+inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc){
+    if (destDesc->sampleRate != sourceFrame->sample_rate) return true;
+    if (destDesc->channelsPerFrame != sourceFrame->channels) return true;
+    
+    if (formatFlagsFromFFmpegAudioFormat((AVSampleFormat)sourceFrame->format) != destDesc->formatFlags) {
+        return true;
+    }
+    if (bitPerChannelFromFFmpegAudioFormat((AVSampleFormat)sourceFrame->format) != destDesc->bitsPerChannel){
+        return true;
+    }
+    
+    return false;
+}
+
+void Decoder::initResampleContext(AVFrame *sourceFrame){
+    swrCtx = swr_alloc();
+    
+    AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    
+    swrCtx = swr_alloc_set_opts(swrCtx,
+                                adoptedAudioDesc.ffmpeg_channel_layout,
+                                destFmt,
+                                adoptedAudioDesc.sampleRate,
+                                sourceFrame->channel_layout,
+                                (AVSampleFormat)sourceFrame->format,
+                                sourceFrame->sample_rate,
+                                0, NULL);
+    swr_init(swrCtx);
+}
+
+bool Decoder::reampleAudioFrame(AVFrame *inFrame, AVFrame *outFrame){
+    
+    outFrame->nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+    
+    AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    int retval = av_samples_alloc(outFrame->extended_data,
+                               &outFrame->linesize[0],
+                               adoptedAudioDesc.channelsPerFrame,
+                               outFrame->nb_samples,
+                               destFmt, 0);
+    
+    if (retval < 0) {
+        printf("av_samples_alloc error\n");
+        return false;
+    }
+    
+//    uint8_t* m_ain[SWR_CH_MAX];
+//    setup_array(m_ain, inFrame, (AVSampleFormat)inFrame->format, inFrame->nb_samples);
+    
+    swr_convert(swrCtx, outFrame->extended_data, outFrame->nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
+    return true;
+}
+
+//static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples)
+//{
+//    if (av_sample_fmt_is_planar((AVSampleFormat)format))
+//    {
+//        int i;int plane_size = av_get_bytes_per_sample((AVSampleFormat)(format & 0xFF)) * samples;format &= 0xFF;
+//        
+//        for (i = 0; i < in_frame->channels; i++)
+//        {
+//            out[i] = in_frame->data[i];
+//        }
+//    }
+//    else
+//    {
+//        out[0] = in_frame->data[0];
+//    }
+//}
+

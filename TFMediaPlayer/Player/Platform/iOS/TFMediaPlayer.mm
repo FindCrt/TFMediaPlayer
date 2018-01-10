@@ -46,12 +46,15 @@
             }
             
             if (_innerPlayWhenReady || _autoPlayWhenReady) {
-                playController->play();
-                _state = TFMediaPlayerStatePlaying;
+                [self play];
             }
         };
         
-        _playController->negotiateRealPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
+        
+        _audioPlayer = [[TFAudioUnitPlayer alloc] init];
+        _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
+        
+        _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
             
             TFMPAudioStreamDescription result = [_audioPlayer resultAudioDescForSource:sourceDesc];
             
@@ -80,8 +83,11 @@
 -(void)preparePlay{
     
     if (_mediaURL == nil) {
+        _state = TFMediaPlayerStateNone;
         return;
     }
+    
+    _state = TFMediaPlayerStateConnecting;
     
     //local file or bundle file need a file reader which is different on different platform.
     bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -93,6 +99,7 @@
 -(void)play{
     
     if (![self configureAVSession]) {
+        _state = TFMediaPlayerStateNone;
         return;
     }
     
@@ -104,8 +111,11 @@
     }else if (_state == TFMediaPlayerStateConnecting) {
         _innerPlayWhenReady = YES;
     }else if (_state == TFMediaPlayerStateReady || _state == TFMediaPlayerStatePause){
+        
         _playController->play();
         [_audioPlayer play];
+        
+        _state = TFMediaPlayerStatePlaying;
     }
 }
 

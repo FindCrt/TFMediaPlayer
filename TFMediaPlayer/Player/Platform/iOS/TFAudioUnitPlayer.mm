@@ -16,7 +16,7 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 @interface TFAudioUnitPlayer (){
     AudioUnit audioUnit;
     
-    TFMPAudioStreamDescription TFMPResultDesc;
+    TFMPAudioStreamDescription tfmpResultDesc;
     
     AudioStreamBasicDescription audioUnitResultDesc;
 }
@@ -36,34 +36,42 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100,but don't change channel number.
-    TFMPResultDesc.sampleRate = 44100;
-    setFormatFlagsForAudioDesc(&TFMPResultDesc, true, true, isBigEndianForAudioDesc(&sourceDesc));
-    TFMPResultDesc.bitsPerChannel = 16;
-    TFMPResultDesc.channelPerFrame = sourceDesc.channelPerFrame;
+    tfmpResultDesc.sampleRate = 44100;
+    setFormatFlagsForAudioDesc(&tfmpResultDesc, true, true, isBigEndianForAudioDesc(sourceDesc.formatFlags));
+    tfmpResultDesc.bitsPerChannel = 16;
+    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+    
+    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
     
     [self prepareAudioUnit];
     
-    return TFMPResultDesc;
+    return tfmpResultDesc;
 }
 
 -(void)prepareAudioUnit{
     
-    //gen Audio Unit audio description from TFMPResultDesc
+    //gen Audio Unit audio description from tfmpResultDesc
     
-    audioUnitResultDesc.mSampleRate = TFMPResultDesc.sampleRate;
+    audioUnitResultDesc.mSampleRate = tfmpResultDesc.sampleRate;
     audioUnitResultDesc.mFormatID = kAudioFormatLinearPCM;
     
     audioUnitResultDesc.mFormatFlags = 0; //reset.
-    if (isIntForAudioDesc(&TFMPResultDesc)) {
-        if (isSignedForAudioDesc(&TFMPResultDesc)) {
-            audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsSignedInteger;
+    if (isIntForAudioDesc(tfmpResultDesc.formatFlags)) {
+        if (isSignedForAudioDesc(tfmpResultDesc.formatFlags)) {
+            audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
         }
     }else{
-        audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsFloat;
+        audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsFloat;
     }
-    if (isBigEndianForAudioDesc(&TFMPResultDesc)) {
-        audioUnitResultDesc.mFormatFlags &= kAudioFormatFlagIsBigEndian;
+    if (isBigEndianForAudioDesc(tfmpResultDesc.formatFlags)) {
+        audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
     }
+    
+    audioUnitResultDesc.mBitsPerChannel = tfmpResultDesc.bitsPerChannel;
+    audioUnitResultDesc.mChannelsPerFrame = tfmpResultDesc.channelsPerFrame;
+    audioUnitResultDesc.mBytesPerFrame = audioUnitResultDesc.mBitsPerChannel * audioUnitResultDesc.mChannelsPerFrame / 8;
+    audioUnitResultDesc.mBytesPerPacket = audioUnitResultDesc.mBytesPerFrame;
+    audioUnitResultDesc.mFramesPerPacket = 1;
     
     //setup audio unit
     [self setupAudioUnitRenderWithAudioDesc:audioUnitResultDesc];

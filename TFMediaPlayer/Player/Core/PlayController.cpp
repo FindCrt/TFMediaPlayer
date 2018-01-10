@@ -166,9 +166,12 @@ void PlayController::resolveAudioStreamFormat(){
         sourceDesc.bitsPerChannel = sizeof(double)*8;
     }
     
-    sourceDesc.channelPerFrame = codecpar->channels;
+    sourceDesc.channelsPerFrame = codecpar->channels;
+    sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
+    sourceDesc.ffmpeg_format = codecpar->format;
     
-    realAudioDesc = negotiateRealPlayAudioDesc(sourceDesc);
+    //resample source audio to real-play audio format.
+    audioDecoder->setAdoptedAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
 }
 
 void PlayController::startReadingFrames(){
