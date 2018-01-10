@@ -9,7 +9,7 @@
 #ifndef DisplayController_hpp
 #define DisplayController_hpp
 
-#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include "TFMPAVFormat.h"
 #include "RecycleBuffer.hpp"

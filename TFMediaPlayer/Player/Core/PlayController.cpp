@@ -168,7 +168,6 @@ void PlayController::resolveAudioStreamFormat(){
     
     sourceDesc.channelsPerFrame = codecpar->channels;
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
-    sourceDesc.ffmpeg_format = codecpar->format;
     
     //resample source audio to real-play audio format.
     audioDecoder->setAdoptedAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));

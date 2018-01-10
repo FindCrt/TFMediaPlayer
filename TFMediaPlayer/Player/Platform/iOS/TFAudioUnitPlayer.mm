@@ -150,11 +150,6 @@ OSStatus playAudioBufferCallback(	void *							inRefCon,
     
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     
-//    UInt32 framesPerPacket = inNumberFrames;
-    
-//    int size = 0;
-    
-    //TODO: 转换成中间格式的大小。
     int retval = player->_fillStruct.fillFunc(ioData->mBuffers[0].mData, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
     
     return retval;

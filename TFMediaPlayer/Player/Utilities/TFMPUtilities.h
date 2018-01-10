@@ -18,7 +18,7 @@ extern "C"{
 inline uint8_t formatFlagsFromFFmpegAudioFormat(AVSampleFormat audioFormat){
     
     bool isBigEndian = BIG_ENDIAN == BYTE_ORDER; //format's data is always in native-endian order.
-    bool isInt = false, isSigned = false;
+    bool isInt = false, isSigned = false, isPlanar = false;
     
     if (audioFormat == AV_SAMPLE_FMT_U8) {
         isInt = true;
@@ -38,6 +38,8 @@ inline uint8_t formatFlagsFromFFmpegAudioFormat(AVSampleFormat audioFormat){
     }else if (audioFormat == AV_SAMPLE_FMT_DBL){
         isInt = false;
         isSigned = true;
+    }else{
+        
     }
     
     uint8_t formatFlags = 0;
@@ -45,6 +47,7 @@ inline uint8_t formatFlagsFromFFmpegAudioFormat(AVSampleFormat audioFormat){
     if (isInt)          formatFlags |= 1;
     if (isSigned)       formatFlags |= 1 << 1;
     if (isBigEndian)    formatFlags |= 1 << 2;
+    if
     
     return formatFlags;
 }
@@ -62,7 +65,7 @@ inline int bitPerChannelFromFFmpegAudioFormat(AVSampleFormat audioFormat){
         return sizeof(float)*8;
     }else if (audioFormat == AV_SAMPLE_FMT_DBL){
         return sizeof(double)*8;
-    }
+    }else
     return 0;
 }
 

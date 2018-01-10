@@ -40,11 +40,11 @@ namespace tfmpcore {
         
         //resample
         TFMPAudioStreamDescription adoptedAudioDesc;
-        SwrContext *swrCtx;
+        SwrContext *swrCtx = nullptr;
         void initResampleContext(AVFrame *sourceFrame);
         bool reampleAudioFrame(AVFrame *inFrame, AVFrame *outFrame);
         
-        TFMPAudioStreamDescription *lastSourceAudioDesc;
+        TFMPAudioStreamDescription *lastSourceAudioDesc = nullptr;
         
     public:
         AVMediaType type;

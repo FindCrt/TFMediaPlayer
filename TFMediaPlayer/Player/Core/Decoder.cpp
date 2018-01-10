@@ -16,7 +16,7 @@ static int SWR_CH_MAX = 2;
 
 inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc);
 inline bool isNeedChangeSwrContext(AVFrame *sourceFrame, TFMPAudioStreamDescription *lastDesc);
-static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples);
+//static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples);
 
 bool Decoder::prepareDecode(){
     AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
@@ -140,6 +140,9 @@ void *Decoder::decodeLoop(void *context){
 
 /** If source audio desc is different from adopted audio desc, we need to resample source audio */
 inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc){
+    
+    if (destDesc == nullptr) return true;
+    
     if (destDesc->sampleRate != sourceFrame->sample_rate) return true;
     if (destDesc->channelsPerFrame != sourceFrame->channels) return true;
     
@@ -157,23 +160,40 @@ void Decoder::initResampleContext(AVFrame *sourceFrame){
     swrCtx = swr_alloc();
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    AVSampleFormat sourceFmt = (AVSampleFormat)sourceFrame->format;
     
     swrCtx = swr_alloc_set_opts(swrCtx,
                                 adoptedAudioDesc.ffmpeg_channel_layout,
                                 destFmt,
                                 adoptedAudioDesc.sampleRate,
                                 sourceFrame->channel_layout,
-                                (AVSampleFormat)sourceFrame->format,
+                                sourceFmt,
                                 sourceFrame->sample_rate,
                                 0, NULL);
-    swr_init(swrCtx);
+    int retval = swr_init(swrCtx);
+    
+    
+    if (lastSourceAudioDesc != nullptr) free(lastSourceAudioDesc);
+    
+    lastSourceAudioDesc = new TFMPAudioStreamDescription();
+    lastSourceAudioDesc->sampleRate = sourceFrame->sample_rate;
+    lastSourceAudioDesc->formatFlags = formatFlagsFromFFmpegAudioFormat(sourceFmt);
+    lastSourceAudioDesc->bitsPerChannel = bitPerChannelFromFFmpegAudioFormat(sourceFmt);
+    lastSourceAudioDesc->ffmpeg_channel_layout = sourceFrame->channel_layout;
+    lastSourceAudioDesc->channelsPerFrame = sourceFrame->channels;
 }
 
 bool Decoder::reampleAudioFrame(AVFrame *inFrame, AVFrame *outFrame){
     
+    if (swrCtx == nullptr) {
+        return false;
+    }
+    
     outFrame->nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    
+    printf("outCount: %d, sourceCount: %d",outFrame->nb_samples, inFrame->nb_samples);
     int retval = av_samples_alloc(outFrame->extended_data,
                                &outFrame->linesize[0],
                                adoptedAudioDesc.channelsPerFrame,
