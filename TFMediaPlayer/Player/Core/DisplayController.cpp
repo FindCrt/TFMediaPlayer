@@ -118,53 +118,61 @@ void *DisplayController::displayLoop(void *context){
     return 0;
 }
 
-int DisplayController::fillAudioBuffer(void *buffer, int size, void *context){
-    printf("fillAudioBuffer\n");
+int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
+    
     DisplayController *displayer = (DisplayController *)context;
     
-    if (displayer->remainingSize >= size) {
-        //TODO: do more thing for planar audio.
-        memcpy(buffer, displayer->remainingAudioBuffer, size);
+    for (int i = 0; i<lineCount; i++) {
         
-        displayer->remainingSize -= size;
-        displayer->remainingAudioBuffer += size;
+        uint8_t *buffer = buffersList[i];
         
-    }else{
-        
-        int needReadSize = size;
-        if (displayer->remainingSize > 0) {
+        if (displayer->remainingSize[i] >= oneLineSize) {
+            //TODO: do more thing for planar audio.
+            memcpy(buffer, displayer->remainingAudioBuffer[i], oneLineSize);
             
-            needReadSize -= displayer->remainingSize;
-            memcpy(buffer, displayer->remainingAudioBuffer, displayer->remainingSize);
+            displayer->remainingSize[i] -= oneLineSize;
+            displayer->remainingAudioBuffer[i] += oneLineSize;
             
-            displayer->remainingAudioBuffer = nullptr;
-            displayer->remainingSize = 0;
+        }else{
             
-            av_frame_unref(displayer->remainFrame); // release this frame
-        }
-        
-        AVFrame *frame = av_frame_alloc();
-        while (needReadSize > 0) {
-            
-            displayer->shareAudioBuffer->blockGetOut(&frame);
-            
-            if (needReadSize >= frame->linesize[0]) {
+            int needReadSize = oneLineSize;
+            if (displayer->remainingSize[i] > 0) {
                 
-                memcpy(buffer, frame->extended_data[0], frame->linesize[0]);
-                needReadSize -= frame->linesize[0];
+                needReadSize -= displayer->remainingSize[i];
+                memcpy(buffer, displayer->remainingAudioBuffer[i], displayer->remainingSize[i]);
                 
-            }else{
+                displayer->remainingAudioBuffer[i] = nullptr;
+                displayer->remainingSize[i] = 0;
                 
-                //there is a little buffer left.
-//                displayer->remainFrame = frame;
-                displayer->remainFrame = av_frame_clone(frame); //retain this frame
-                displayer->remainingSize = frame->linesize[0] - needReadSize;
-                displayer->remainingAudioBuffer = frame->extended_data[0] + needReadSize;
+                //TODO: Maybe the frames of different line is different.We need to reatin/release different frames.
+                av_frame_unref(displayer->remainFrame); // release this frame
+            }
+            
+            AVFrame *frame = av_frame_alloc();
+            int frameLineSize = 0; //Each channel plane size is same for audio.
+            while (needReadSize > 0) {
                 
-                memcpy(buffer, frame->extended_data[0], needReadSize);
-                needReadSize = 0;
+                displayer->shareAudioBuffer->blockGetOut(&frame);
+                frameLineSize = frame->linesize[0];
+                
+                if (needReadSize >= frameLineSize) {
+                    
+                    memcpy(buffer, frame->extended_data[i], frameLineSize);
+                    needReadSize -= frameLineSize;
+                    
+                }else{
+                    
+                    //there is a little buffer left.
+                    displayer->remainFrame = av_frame_clone(frame); //retain this frame
+                    displayer->remainingSize[i] = frameLineSize - needReadSize;
+                    displayer->remainingAudioBuffer[i] = frame->extended_data[i] + needReadSize;
+                    
+                    memcpy(buffer, frame->extended_data[i], needReadSize);
+                    needReadSize = 0;
+                }
             }
         }
+
     }
     
     return 0;

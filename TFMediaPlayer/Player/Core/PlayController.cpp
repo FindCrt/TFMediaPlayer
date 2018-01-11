@@ -9,6 +9,7 @@
 #include "PlayController.hpp"
 #include "TFMPDebugFuncs.h"
 #include "ThreadConvience.h"
+#include "TFMPUtilities.h"
 
 using namespace tfmpcore;
 
@@ -147,24 +148,8 @@ void PlayController::resolveAudioStreamFormat(){
     
     AVSampleFormat fmt = (AVSampleFormat)codecpar->format;
     
-    bool isBigEndian = BIG_ENDIAN == BYTE_ORDER; //format's data is always in native-endian order.
-    
-    if (fmt == AV_SAMPLE_FMT_U8) {
-        setFormatFlagsForAudioDesc(&sourceDesc, true, false, isBigEndian);
-        sourceDesc.bitsPerChannel = 8;
-    }else if (fmt == AV_SAMPLE_FMT_S16){
-        setFormatFlagsForAudioDesc(&sourceDesc, true, true, isBigEndian);
-        sourceDesc.bitsPerChannel = 16;
-    }else if (fmt == AV_SAMPLE_FMT_S32){
-        setFormatFlagsForAudioDesc(&sourceDesc, true, true, isBigEndian);
-        sourceDesc.bitsPerChannel = 32;
-    }else if (fmt == AV_SAMPLE_FMT_FLT){
-        setFormatFlagsForAudioDesc(&sourceDesc, false, true, isBigEndian);
-        sourceDesc.bitsPerChannel = sizeof(float)*8;
-    }else if (fmt == AV_SAMPLE_FMT_DBL){
-        setFormatFlagsForAudioDesc(&sourceDesc, false, true, isBigEndian);
-        sourceDesc.bitsPerChannel = sizeof(double)*8;
-    }
+    sourceDesc.formatFlags = formatFlagsFromFFmpegAudioFormat(fmt);
+    sourceDesc.bitsPerChannel = bitPerChannelFromFFmpegAudioFormat(fmt);
     
     sourceDesc.channelsPerFrame = codecpar->channels;
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;

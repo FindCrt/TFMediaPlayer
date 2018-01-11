@@ -95,6 +95,16 @@ void *Decoder::decodeLoop(void *context){
                 frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 
+                if (retval != 0 && retval != AVERROR_EOF) {
+                    TFCheckRetval("avcodec receive frame");
+                    continue;
+                }
+                
+                for (int i = 0; i<8; i++) {
+                    printf("lineSize(%d):%d ",i,frame->linesize[i]);
+                }
+                printf("\n>>>>>>>>\n");
+                
                 if (isNeedResample(frame, &(decoder->adoptedAudioDesc))) {
                     
                     //source audio desc may change.
@@ -111,12 +121,7 @@ void *Decoder::decodeLoop(void *context){
                 }
                 
                 decoder->frameBuffer.blockInsert(frame);
-                
-                
-                if (retval != 0 && retval != AVERROR_EOF) {
-                    TFCheckRetval("avcodec receive frame");
-                    continue;
-                }
+
             }
         }else{
             
@@ -140,6 +145,14 @@ void *Decoder::decodeLoop(void *context){
 
 /** If source audio desc is different from adopted audio desc, we need to resample source audio */
 inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc){
+    
+    //bad frame data
+    if (sourceFrame->sample_rate <= 0 ||
+        sourceFrame->channel_layout <= 0 ||
+        sourceFrame->extended_data == nullptr) {
+        printf("bad frame data ^^^^^\n");
+        return false;
+    }
     
     if (destDesc == nullptr) return true;
     
@@ -172,6 +185,7 @@ void Decoder::initResampleContext(AVFrame *sourceFrame){
                                 0, NULL);
     int retval = swr_init(swrCtx);
     
+    TFCheckRetval("swr init");
     
     if (lastSourceAudioDesc != nullptr) free(lastSourceAudioDesc);
     

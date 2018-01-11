@@ -19,6 +19,8 @@ extern "C"{
 #include <libavformat/avformat.h>
 }
 
+#define TFMP_MAX_AUDIO_CHANNEL 8
+
 namespace tfmpcore {
     
     class DisplayController{
@@ -28,11 +30,12 @@ namespace tfmpcore {
         
         bool shouldDisplay;
         
-        uint64_t remainingSize;
-        uint8_t *remainingAudioBuffer;
+        
+        uint64_t remainingSize[TFMP_MAX_AUDIO_CHANNEL];
+        uint8_t *remainingAudioBuffer[TFMP_MAX_AUDIO_CHANNEL];
         AVFrame *remainFrame;
         
-        static int fillAudioBuffer(void *buffer, int size, void *context);
+        static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
         
     public:
         

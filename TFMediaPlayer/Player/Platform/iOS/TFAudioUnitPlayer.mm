@@ -36,12 +36,19 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100,but don't change channel number.
-    tfmpResultDesc.sampleRate = 44100;
-    setFormatFlagsForAudioDesc(&tfmpResultDesc, true, true, isBigEndianForAudioDesc(sourceDesc.formatFlags));
-    tfmpResultDesc.bitsPerChannel = 16;
-    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+//    tfmpResultDesc.sampleRate = 44100;
+//    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
+//                            true,
+//                            true,
+//                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
+//                            isPlanarForFormatFlags(sourceDesc.formatFlags));
+//    
+//    tfmpResultDesc.bitsPerChannel = 16;
+//    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+//    
+//    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
     
-    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    tfmpResultDesc = sourceDesc;
     
     [self prepareAudioUnit];
     
@@ -52,26 +59,12 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
     
     //gen Audio Unit audio description from tfmpResultDesc
     
-    audioUnitResultDesc.mSampleRate = tfmpResultDesc.sampleRate;
-    audioUnitResultDesc.mFormatID = kAudioFormatLinearPCM;
-    
     audioUnitResultDesc.mFormatFlags = 0; //reset.
-    if (isIntForAudioDesc(tfmpResultDesc.formatFlags)) {
-        if (isSignedForAudioDesc(tfmpResultDesc.formatFlags)) {
-            audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
-        }
-    }else{
-        audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsFloat;
-    }
-    if (isBigEndianForAudioDesc(tfmpResultDesc.formatFlags)) {
-        audioUnitResultDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
-    }
+    bool isInt = isIntForFormatFlags(tfmpResultDesc.formatFlags);
+    bool isPlanar = isPlanarForFormatFlags(tfmpResultDesc.formatFlags);
+    bool isBigEndian = isBigEndianForFormatFlags(tfmpResultDesc.formatFlags);
     
-    audioUnitResultDesc.mBitsPerChannel = tfmpResultDesc.bitsPerChannel;
-    audioUnitResultDesc.mChannelsPerFrame = tfmpResultDesc.channelsPerFrame;
-    audioUnitResultDesc.mBytesPerFrame = audioUnitResultDesc.mBitsPerChannel * audioUnitResultDesc.mChannelsPerFrame / 8;
-    audioUnitResultDesc.mBytesPerPacket = audioUnitResultDesc.mBytesPerFrame;
-    audioUnitResultDesc.mFramesPerPacket = 1;
+    FillOutASBDForLPCM(audioUnitResultDesc, tfmpResultDesc.sampleRate, tfmpResultDesc.channelsPerFrame, tfmpResultDesc.bitsPerChannel, tfmpResultDesc.bitsPerChannel, !isInt, isBigEndian, isPlanar);
     
     //setup audio unit
     [self setupAudioUnitRenderWithAudioDesc:audioUnitResultDesc];
@@ -141,7 +134,7 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 
 #pragma mark - callback
 
-OSStatus playAudioBufferCallback(	void *							inRefCon,
+OSStatus playAudioBufferCallback(void *							inRefCon,
                                  AudioUnitRenderActionFlags *	ioActionFlags,
                                  const AudioTimeStamp *			inTimeStamp,
                                  UInt32							inBusNumber,
@@ -150,7 +143,15 @@ OSStatus playAudioBufferCallback(	void *							inRefCon,
     
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     
-    int retval = player->_fillStruct.fillFunc(ioData->mBuffers[0].mData, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
+    int count = ioData->mNumberBuffers;
+    uint8_t *buffers[count];
+    for (int i = 0; i<count; i++) {
+        buffers[i] = (uint8_t *)(ioData->mBuffers[i].mData);
+    }
+    
+    int retval = player->_fillStruct.fillFunc(buffers, count, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
+    
+//    TFMPPrintBuffer(buffers[0], 100, 100);
     
     return retval;
 }
