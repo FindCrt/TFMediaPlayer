@@ -149,37 +149,46 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             }
             
             AVFrame *frame = av_frame_alloc();
-            int frameLineSize = 0; //Each channel plane size is same for audio.
+//            int frameLineSize = 0; //Each channel plane size is same for audio.
             
-            uint8_t *dataBuffer[8];
-            int linesize[8];
+            uint8_t **dataBuffer = nullptr;
+            int linesize, outSamples;
             
             while (needReadSize > 0) {
                 
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
-                if (displayer->audioResampler->isNeedResample(frame)) {
-                    displayer->audioResampler->reampleAudioFrame(frame, dataBuffer, linesize);
+                if (frame->extended_data == nullptr) {
+                    continue;
                 }
                 
-                frameLineSize = frame->linesize[0];
+                if (displayer->audioResampler->isNeedResample(frame)) {
+                    dataBuffer = displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize);
+                }else{
+                    dataBuffer = frame->extended_data;
+                    linesize = frame->linesize[0];
+                }
                 
-                printf("one sample size: %d | %d, %d\n",frameLineSize/frame->nb_samples,frameLineSize, frame->nb_samples);
+                if (dataBuffer == nullptr) {
+                    continue;
+                }
                 
-                if (needReadSize >= frameLineSize) {
+//                frameLineSize = frame->linesize[0];
+                
+//                printf("one sample size: %d | %d, %d\n",frameLineSize/frame->nb_samples,frameLineSize, frame->nb_samples);
+                
+                if (needReadSize >= linesize) {
                     
-                    memcpy(buffer, frame->data[i], frameLineSize);
-                    needReadSize -= frameLineSize;
+                    memcpy(buffer, dataBuffer[i], linesize);
+                    needReadSize -= linesize;
                     
                 }else{
                     
                     //there is a little buffer left.
-                    displayer->remainFrame = av_frame_alloc(); //retain this frame
-                    av_frame_ref(displayer->remainFrame, frame);
-                    displayer->remainingSize[i] = frameLineSize - needReadSize;
-                    displayer->remainingAudioBuffer[i] = frame->data[i] + needReadSize;
+                    displayer->remainingSize[i] = linesize - needReadSize;
+                    displayer->remainingAudioBuffer[i] = dataBuffer[i] + needReadSize;
                     
-                    memcpy(buffer, frame->data[i], needReadSize);
+                    memcpy(buffer, dataBuffer, needReadSize);
                     needReadSize = 0;
                 }
             }

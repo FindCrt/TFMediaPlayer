@@ -33,7 +33,7 @@ namespace tfmpcore {
             this->adoptedAudioDesc = adoptedAudioDesc;
         }
         
-        inline bool isNeedResample(AVFrame *sourceFrame);
+        bool isNeedResample(AVFrame *sourceFrame);
         
         uint8_t **reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize);
     };

@@ -99,6 +99,10 @@ void *Decoder::decodeLoop(void *context){
                     TFCheckRetval("avcodec receive frame");
                     continue;
                 }
+                if (frame->extended_data == nullptr) {
+                    printf("audio frame data is null\n");
+                    continue;
+                }
                 
 //                if (isNeedResample(frame, &(decoder->adoptedAudioDesc))) {
 //                    

@@ -196,7 +196,7 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 --disable-swscale \
 --extra-cflags="-arch arm64 -mios-version-min=8.0 -I/Users/apple/AVLibraries/thin-x264/arm64/include -I/usr/local/include " \
 --extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
---prefix="/Users/apple/AVLibraries/compiled/ffmpeg"
+--prefix="../compiled/arm64"
 
 *现在库为14M,主要还是codec比较大，但是现在也只有h264和aac两个解码器*
 

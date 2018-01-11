@@ -38,7 +38,8 @@ inline bool _isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *de
     
     return false;
 }
-inline bool AudioResampler::isNeedResample(AVFrame *sourceFrame){
+
+bool AudioResampler::isNeedResample(AVFrame *sourceFrame){
     return _isNeedResample(sourceFrame,&adoptedAudioDesc);
 }
 
@@ -80,13 +81,13 @@ uint8_t **AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, i
         return nullptr;
     }
     
-    *outSamples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+    int nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     
-    printf("outCount: %d, sourceCount: %d",nb_samples, inFrame->nb_samples);
+    printf("outCount: %d, sourceCount: %d",*outSamples, inFrame->nb_samples);
     
-    uint8_t **outBuffer = nullptr;
+    uint8_t **outBuffer = (uint8_t**)malloc(sizeof(uint8_t*));
     int retval = av_samples_alloc(outBuffer,
                                   linesize,
                                   adoptedAudioDesc.channelsPerFrame,
@@ -102,6 +103,8 @@ uint8_t **AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, i
     //    setup_array(m_ain, inFrame, (AVSampleFormat)inFrame->format, inFrame->nb_samples);
     
     swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
+    
+    *outSamples = nb_samples;
     return outBuffer;
 }
 

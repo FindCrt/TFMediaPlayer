@@ -8,6 +8,7 @@
 
 #import "TFLocalMp4ViewController.h"
 #import "TFMediaPlayer.h"
+#import <AVFoundation/AVFoundation.h>
 
 @interface TFLocalMp4ViewController (){
     TFMediaPlayer *_player;
@@ -48,7 +49,27 @@
     
     _player.mediaURL = videoURL;
     
+    [self configureAVSession];
     [_player play];
+}
+
+-(BOOL)configureAVSession{
+    
+    NSError *error = nil;
+    
+    [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayback error:&error];
+    if (error) {
+//        TFMPDLog(@"audio session set category error: %@",error);
+        return NO;
+    }
+    
+    [[AVAudioSession sharedInstance] setActive:YES error:&error];
+    if (error) {
+//        TFMPDLog(@"active audio session error: %@",error);
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

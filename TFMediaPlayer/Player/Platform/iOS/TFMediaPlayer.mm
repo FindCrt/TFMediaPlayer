@@ -10,8 +10,9 @@
 #import "PlayController.hpp"
 #import "TFOPGLESDisplayView.h"
 #import "TFAudioUnitPlayer.h"
-#import <AVFoundation/AVFoundation.h>
 #import "TFMPDebugFuncs.h"
+
+//#import <AVFoundation/AVFoundation.h>
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
@@ -147,19 +148,19 @@
 
 -(BOOL)configureAVSession{
     
-    NSError *error = nil;
-    
-    [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayback error:&error];
-    if (error) {
-        TFMPDLog(@"audio session set category error: %@",error);
-        return NO;
-    }
-    
-    [[AVAudioSession sharedInstance] setActive:YES error:&error];
-    if (error) {
-        TFMPDLog(@"active audio session error: %@",error);
-        return NO;
-    }
+//    NSError *error = nil;
+//
+//    [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayback error:&error];
+//    if (error) {
+//        TFMPDLog(@"audio session set category error: %@",error);
+//        return NO;
+//    }
+//
+//    [[AVAudioSession sharedInstance] setActive:YES error:&error];
+//    if (error) {
+//        TFMPDLog(@"active audio session error: %@",error);
+//        return NO;
+//    }
     
     return YES;
 }
