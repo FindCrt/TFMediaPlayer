@@ -39,7 +39,13 @@
 }
 
 -(void)startPlay{
+    
     NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"test1" withExtension:@"mp4"];
+    
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"王崴 - 大城小爱" withExtension:@"mp3"];
+    
     _player.mediaURL = videoURL;
     
     [_player play];

@@ -145,29 +145,41 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->remainingSize[i] = 0;
                 
                 //TODO: Maybe the frames of different line is different.We need to reatin/release different frames.
-                av_frame_unref(displayer->remainFrame); // release this frame
+//                av_frame_free(&displayer->remainFrame); // release this frame
             }
             
             AVFrame *frame = av_frame_alloc();
             int frameLineSize = 0; //Each channel plane size is same for audio.
+            
+            uint8_t *dataBuffer[8];
+            int linesize[8];
+            
             while (needReadSize > 0) {
                 
                 displayer->shareAudioBuffer->blockGetOut(&frame);
+                
+                if (displayer->audioResampler->isNeedResample(frame)) {
+                    displayer->audioResampler->reampleAudioFrame(frame, dataBuffer, linesize);
+                }
+                
                 frameLineSize = frame->linesize[0];
+                
+                printf("one sample size: %d | %d, %d\n",frameLineSize/frame->nb_samples,frameLineSize, frame->nb_samples);
                 
                 if (needReadSize >= frameLineSize) {
                     
-                    memcpy(buffer, frame->extended_data[i], frameLineSize);
+                    memcpy(buffer, frame->data[i], frameLineSize);
                     needReadSize -= frameLineSize;
                     
                 }else{
                     
                     //there is a little buffer left.
-                    displayer->remainFrame = av_frame_clone(frame); //retain this frame
+                    displayer->remainFrame = av_frame_alloc(); //retain this frame
+                    av_frame_ref(displayer->remainFrame, frame);
                     displayer->remainingSize[i] = frameLineSize - needReadSize;
-                    displayer->remainingAudioBuffer[i] = frame->extended_data[i] + needReadSize;
+                    displayer->remainingAudioBuffer[i] = frame->data[i] + needReadSize;
                     
-                    memcpy(buffer, frame->extended_data[i], needReadSize);
+                    memcpy(buffer, frame->data[i], needReadSize);
                     needReadSize = 0;
                 }
             }

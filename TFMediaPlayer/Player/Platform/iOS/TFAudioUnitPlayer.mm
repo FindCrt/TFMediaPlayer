@@ -35,20 +35,20 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
-    //all return s16+44100,but don't change channel number.
-//    tfmpResultDesc.sampleRate = 44100;
-//    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
-//                            true,
-//                            true,
-//                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
-//                            isPlanarForFormatFlags(sourceDesc.formatFlags));
-//    
-//    tfmpResultDesc.bitsPerChannel = 16;
-//    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
-//    
-//    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    //all return s16+44100(no planar),but don't change channel number.
+    tfmpResultDesc.sampleRate = 44100;
+    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
+                            true,
+                            true,
+                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
+                            false);
     
-    tfmpResultDesc = sourceDesc;
+    tfmpResultDesc.bitsPerChannel = 16;
+    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+    
+    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    
+//    tfmpResultDesc = sourceDesc;
     
     [self prepareAudioUnit];
     
@@ -151,7 +151,7 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
     
     int retval = player->_fillStruct.fillFunc(buffers, count, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
     
-//    TFMPPrintBuffer(buffers[0], 100, 100);
+//    TFMPPrintBuffer(buffers[0], 0, 1024);
     
     return retval;
 }

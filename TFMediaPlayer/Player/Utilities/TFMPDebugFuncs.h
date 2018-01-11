@@ -81,7 +81,7 @@ NSLog(@"%@ error:\n{%@}",log,error); return;\
 
 #define TFMPPrintBuffer(buffer, start, length)\
 int *checkP = (int*)buffer;\
-for(int i = 0; i<length;i++){\
+for(int i = 0; i<length/4;i++){\
     printf("%x |",*checkP);\
     checkP++;\
 }\

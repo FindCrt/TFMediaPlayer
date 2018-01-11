@@ -13,6 +13,9 @@
  * 构建audioUnit的音频格式，使用系统提供的`FillOutASBDForLPCM`更方便
  * 音频的解码是一个packet对应多个frame.
  * 音频的linesize只要第一个有效，因为每个linesize强制一样。
+ * FFmpeg的linesize单位是byte.
+ * 奇怪的是`AV_SAMPLE_FMT_FLTP`格式，linesize为8192,nb_samples为1024，算起来bitPerSample为8.
+ * `av_frame_clone`返回为null
 
 4. 音视频同步
  * 使用remainTime，如果计算失误，会导致sleep非常长时间。

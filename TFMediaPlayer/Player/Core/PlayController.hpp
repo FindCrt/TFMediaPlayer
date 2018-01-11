@@ -21,6 +21,7 @@ extern "C"{
 #include <functional>
 #include "DisplayController.hpp"
 #include "TFMPAVFormat.h"
+#include "AudioResampler.hpp"
 
 namespace tfmpcore {
     
@@ -42,6 +43,8 @@ namespace tfmpcore {
         Decoder *subtitleDecoder;
         
         DisplayController *displayer = new DisplayController();
+        
+        AudioResampler *audioResampler = new AudioResampler();
         
         bool prapareOK;
         

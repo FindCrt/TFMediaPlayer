@@ -14,6 +14,7 @@
 #include "TFMPAVFormat.h"
 #include "RecycleBuffer.hpp"
 #include "SyncClock.hpp"
+#include "AudioResampler.hpp"
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -33,9 +34,11 @@ namespace tfmpcore {
         
         uint64_t remainingSize[TFMP_MAX_AUDIO_CHANNEL];
         uint8_t *remainingAudioBuffer[TFMP_MAX_AUDIO_CHANNEL];
-        AVFrame *remainFrame;
+//        AVFrame *remainFrame;
         
         static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
+        
+        AudioResampler *audioResampler = nullptr;
         
     public:
         
@@ -46,6 +49,10 @@ namespace tfmpcore {
         
         TFMPVideoFrameDisplayFunc displayVideoFrame;
         TFMPFillAudioBufferStruct getFillAudioBufferStruct();
+        
+        void setAudioResampler(AudioResampler *audioResampler){
+            this->audioResampler = audioResampler;
+        }
         
         RecycleBuffer<AVFrame*> *shareVideoBuffer;
         RecycleBuffer<AVFrame*> *shareAudioBuffer;
