@@ -165,6 +165,10 @@
     return YES;
 }
 
+-(void)setShareAudioStruct:(TFMPShareAudioBufferStruct)shareAudioStruct{
+    [_audioPlayer setShareAudioStruct:shareAudioStruct];
+}
+
 #pragma mark - platform special
 
 int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){

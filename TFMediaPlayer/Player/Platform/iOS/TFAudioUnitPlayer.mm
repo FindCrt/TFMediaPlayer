@@ -36,19 +36,19 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100(no planar),but don't change channel number.
-    tfmpResultDesc.sampleRate = 44100;
-    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
-                            true,
-                            true,
-                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
-                            false);
+//    tfmpResultDesc.sampleRate = 44100;
+//    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
+//                            true,
+//                            true,
+//                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
+//                            false);
+//    
+//    tfmpResultDesc.bitsPerChannel = 16;
+//    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+//    
+//    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
     
-    tfmpResultDesc.bitsPerChannel = 16;
-    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
-    
-    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
-    
-//    tfmpResultDesc = sourceDesc;
+    tfmpResultDesc = sourceDesc;
     
     [self prepareAudioUnit];
     
@@ -92,11 +92,13 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
     
     //release resources
     AudioComponentInstanceDispose(audioUnit);
+    audioUnit = nil;
 }
 
 -(void)setupAudioUnitRenderWithAudioDesc:(AudioStreamBasicDescription)audioDesc{
     
     AudioComponentInstanceDispose(audioUnit); //dispose previous audioUnit
+    audioUnit = nil;
     
     //componentDesc是筛选条件 component是组件的抽象，对应class的角色，componentInstance是具体的组件实体，对应object角色。
     AudioComponentDescription componentDesc;
@@ -144,7 +146,7 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     
     int count = ioData->mNumberBuffers;
-    uint8_t *buffers[count];
+    uint8_t **buffers = (uint8_t**)malloc(count*sizeof(uint8_t*));
     for (int i = 0; i<count; i++) {
         buffers[i] = (uint8_t *)(ioData->mBuffers[i].mData);
     }
@@ -152,6 +154,10 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
     int retval = player->_fillStruct.fillFunc(buffers, count, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
     
 //    TFMPPrintBuffer(buffers[0], 0, 1024);
+    if (player->_shareAudioStruct.shareAudioFunc) {
+        int size = (int)ioData->mBuffers[0].mDataByteSize;
+        player->_shareAudioStruct.shareAudioFunc(buffers, size, player->_shareAudioStruct.context);
+    }
     
     return retval;
 }

@@ -16,14 +16,6 @@ using namespace tfmpcore;
 /** If source audio desc is different from adopted audio desc, we need to resample source audio */
 inline bool _isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc){
     
-    //bad frame data
-    if (sourceFrame->sample_rate <= 0 ||
-        sourceFrame->channel_layout <= 0 ||
-        sourceFrame->extended_data == nullptr) {
-        printf("bad frame data ^^^^^\n");
-        return false;
-    }
-    
     if (destDesc == nullptr) return true;
     
     if (destDesc->sampleRate != sourceFrame->sample_rate) return true;

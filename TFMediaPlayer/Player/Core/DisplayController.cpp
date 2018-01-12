@@ -153,6 +153,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             AVFrame *frame = av_frame_alloc();
 //            int frameLineSize = 0; //Each channel plane size is same for audio.
             
+            bool resample = false;
             uint8_t **dataBuffer = nullptr;
             int linesize, outSamples;
             
@@ -160,12 +161,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
-                if (frame->extended_data == nullptr) {
-                    continue;
-                }
+//                if (frame->extended_data == nullptr) {
+//                    continue;
+//                }
                 
                 if (displayer->audioResampler->isNeedResample(frame)) {
                     dataBuffer = displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize);
+                    resample = true;
                 }else{
                     dataBuffer = frame->extended_data;
                     linesize = frame->linesize[0];
@@ -193,7 +195,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     displayer->remainingSize[i] = linesize - needReadSize;
                     
                     //TODO: reuse malloced bytes.
-                    free(displayer->remainingAudioBuffer[i]);
+//                    free(displayer->remainingAudioBuffer[i]);
                     displayer->remainingAudioBuffer[i] = (uint8_t*)malloc(displayer->remainingSize[i]);
                     memcpy(displayer->remainingAudioBuffer[i], dataBuffer[i] + needReadSize, displayer->remainingSize[i]);
                     
@@ -201,7 +203,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     needReadSize = 0;
                     
                     av_frame_free(&frame);
-                    free(dataBuffer);
+                    if (resample) free(dataBuffer);
                 }
             }
         }

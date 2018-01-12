@@ -11,6 +11,12 @@
 #import <Foundation/Foundation.h>
 #import "TFMPAVFormat.h"
 
+typedef void(*TFMPShareAudioBufferFunc) (uint8_t **buffer, int size, void *context);
+typedef struct{
+    TFMPShareAudioBufferFunc shareAudioFunc;
+    void *context;
+} TFMPShareAudioBufferStruct;
+
 @interface TFAudioUnitPlayer : NSObject
 
 @property (nonatomic, assign) TFMPFillAudioBufferStruct fillStruct;
@@ -22,5 +28,7 @@
 -(void)pause;
 
 -(void)stop;
+
+@property (nonatomic, assign) TFMPShareAudioBufferStruct shareAudioStruct;
 
 @end

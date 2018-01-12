@@ -68,7 +68,8 @@ void Decoder::stopDecode(){
 void Decoder::decodePacket(AVPacket *packet){
     
     AVPacket *refPacket = av_packet_alloc();
-    av_packet_ref(refPacket, packet);
+    int retval = av_packet_ref(refPacket, packet);
+    TFCheckRetval("av_packet_ref")
     
     pktBuffer.blockInsert(*refPacket);
 }
@@ -96,6 +97,10 @@ void *Decoder::decodeLoop(void *context){
                 frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 
+                if (retval == AVERROR(EAGAIN)) {
+                    break;
+                }
+                
                 if (retval != 0 && retval != AVERROR_EOF) {
                     TFCheckRetval("avcodec receive frame");
                     continue;
@@ -121,12 +126,6 @@ void *Decoder::decodeLoop(void *context){
 //                }else{
 //                    decoder->frameBuffer.blockInsert(frame);
 //                }
-                if (frame->sample_rate <= 0 ||
-                    frame->channel_layout <= 0 ||
-                    frame->extended_data == nullptr) {
-                    printf("bad frame data1 <<<<<\n");
-                    continue;
-                }
                 
                 decoder->frameBuffer.blockInsert(frame);
             }

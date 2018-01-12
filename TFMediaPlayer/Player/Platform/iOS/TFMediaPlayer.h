@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TFAudioUnitPlayer.h"
 
 typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
     TFMediaPlayerStateNone,
@@ -28,6 +29,7 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 -(void)pause;
 -(void)stop;
 
+@property (nonatomic, assign) TFMPShareAudioBufferStruct shareAudioStruct;
 
 @property (nonatomic, assign) TFMediaPlayerState state;
 

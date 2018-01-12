@@ -28,9 +28,8 @@ static CGFloat pointSpace = 2;
     
     double _sampleValueMax;
     
-    int _averageRange;
     int _averageCount;
-    int _average;
+    int64_t _average;
 }
 
 @property (nonatomic, assign) CGFloat moveSpeed;
@@ -44,8 +43,7 @@ static CGFloat pointSpace = 2;
 -(instancetype)initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
         
-        _moveSpeed = 128;
-        _averageRange = 10;
+        _moveSpeed = 1000;
         _showedViews = [[NSMutableArray alloc] init];
         _unuseViews = [[NSMutableSet alloc] init];
         
@@ -79,37 +77,54 @@ static CGFloat pointSpace = 2;
     int sampleCount = size / _bytesPerSample;
     
     int frequency = _sampleRate / (_moveSpeed/pointSpace); //n个样本显示一个
-    int
+    
     
     //暂时按s16来读取
     SInt16 *s16Buffer = buffer;
     
-    if (_lastSampleCount+sampleCount > frequency) {
+//    if (_lastSampleCount+sampleCount > frequency) {
+//
+//        SInt16 rawValue = *(s16Buffer+frequency-_lastSampleCount);
+//        float floatValue = rawValue / _sampleValueMax;
+//        printf("%d -- %.8f\n",rawValue,floatValue);
+//        [self showNextData:floatValue];
+//
+//        int unreadSamples = sampleCount - (frequency-_lastSampleCount);
+//        while (unreadSamples > frequency) {
+//            s16Buffer += frequency;
+//            float floatValue = *s16Buffer / _sampleValueMax;
+//
+//            //                [_savedDatas addObject:@(floatValue)];
+//            [self showNextData:floatValue];
+//
+//            unreadSamples -= frequency;
+//        }
+//
+//        _lastSampleCount = unreadSamples;
+//
+//    }else{
+//        _lastSampleCount += sampleCount;
+//    }
+    
+    for (int i = 0; i<sampleCount; i++) {
+        SInt16 rawValue = *s16Buffer;
         
-        SInt16 rawValue = *(s16Buffer+frequency-_lastSampleCount);
-        float floatValue = rawValue / _sampleValueMax;
-        printf("%d -- %.8f\n",rawValue,floatValue);
-        [self showNextData:floatValue];
+        _average += rawValue;
+        _averageCount++;
         
-        int unreadSamples = sampleCount - (frequency-_lastSampleCount);
-        while (unreadSamples > frequency) {
-            s16Buffer += frequency;
-            float floatValue = *s16Buffer / _sampleValueMax;
-            
-            //                [_savedDatas addObject:@(floatValue)];
-            [self showNextData:floatValue];
-            
-            unreadSamples -= frequency;
+        if (_averageCount == frequency) {
+            [self showNextData:_average/(double)frequency/_sampleValueMax];
+            _average = 0;
+            _averageCount = 0;
         }
         
-        _lastSampleCount = unreadSamples;
-        
-    }else{
-        _lastSampleCount += sampleCount;
+        s16Buffer++;
     }
 }
 
 -(void)showNextData:(float)value{
+    value *= 5;
+    printf("<< %.6f\n",value);
     
     TFAudioPowerGraphContentView *cell = nil;
     if (NSLocationInRange(_curIndex, _showingRange)) {
@@ -141,14 +156,14 @@ static CGFloat pointSpace = 2;
 }
 
 -(void)start{
-    _timer = [NSTimer timerWithTimeInterval:_refreshDuration target:self selector:@selector(scrollGraph) userInfo:nil repeats:YES];
-    
-    [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
+//    _timer = [NSTimer timerWithTimeInterval:_refreshDuration target:self selector:@selector(scrollGraph) userInfo:nil repeats:YES];
+//
+//    [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
 }
 
 -(void)stop{
-    [_timer invalidate];
-    _timer = nil;
+//    [_timer invalidate];
+//    _timer = nil;
 }
 
 -(void)scrollGraph{
@@ -164,14 +179,14 @@ static CGFloat pointSpace = 2;
     
     NSInteger showFirstIndex = _showingRange.location+dropCount;
     
-    for (NSInteger i = 0; i<dropCount; i++) {
-        
-        TFAudioPowerGraphContentView *cell = _showedViews[i];
-        
-        [cell removeFromSuperview];
-        
-        [_unuseViews addObject:cell];
-    }
+//    for (NSInteger i = 0; i<dropCount; i++) {
+//
+//        TFAudioPowerGraphContentView *cell = _showedViews[i];
+//
+//        [cell removeFromSuperview];
+//
+//        [_unuseViews addObject:cell];
+//    }
     
     [_showedViews removeObjectsInRange:NSMakeRange(0, dropCount)];
     
