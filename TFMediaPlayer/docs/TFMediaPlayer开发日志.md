@@ -15,7 +15,8 @@
  * 音频的linesize只要第一个有效，因为每个linesize强制一样。
  * FFmpeg的linesize单位是byte.
  * 奇怪的是`AV_SAMPLE_FMT_FLTP`格式，linesize为8192,nb_samples为1024，算起来bitPerSample为8.
- * `av_frame_clone`返回为null
+ * `av_frame_clone`返回为null，如果src不是ref的话。
+ 
 
 4. 音视频同步
  * 使用remainTime，如果计算失误，会导致sleep非常长时间。
@@ -26,4 +27,7 @@
  * 核心问题是音频packet和视频packet的数量对比，还有frame。他们可能不是1：1的。
 
 6. 音频的重采样
- * 
+
+ 
+7. 哒哒声的问题：
+  >今天刚好碰到同样的问题，google, baidu均无解，无奈自己研究，是因为语音数据里包含了RTP包头的原因，自己写了个转换工具，把12Bytes的RTP包头去掉，哒哒声就没了

@@ -22,6 +22,8 @@
 		180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5021FF4D16800AFB5F9 /* Decoder.cpp */; };
 		1834340E200851E300ED9B05 /* TFAudioFileReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 1834340D200851E300ED9B05 /* TFAudioFileReader.m */; };
 		183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */ = {isa = PBXBuildFile; fileRef = 183434112008535500ED9B05 /* TFAudioBufferData.c */; };
+		18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18343415200862F400ED9B05 /* TFAudioPowerGraphView.m */; };
+		183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 183434172008AB3B00ED9B05 /* LuckyDay.mp3 */; };
 		18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A1A1FF5D5F6007095AC /* UnitTest.mm */; };
 		18415A2A1FF6130D007095AC /* frameDisplay.fs in Resources */ = {isa = PBXBuildFile; fileRef = 18415A221FF6130D007095AC /* frameDisplay.fs */; };
 		18415A2B1FF6130D007095AC /* frameDisplay.vs in Resources */ = {isa = PBXBuildFile; fileRef = 18415A231FF6130D007095AC /* frameDisplay.vs */; };
@@ -84,6 +86,9 @@
 		1834340D200851E300ED9B05 /* TFAudioFileReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFAudioFileReader.m; sourceTree = "<group>"; };
 		183434102008535500ED9B05 /* TFAudioBufferData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioBufferData.h; sourceTree = "<group>"; };
 		183434112008535500ED9B05 /* TFAudioBufferData.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TFAudioBufferData.c; sourceTree = "<group>"; };
+		18343414200862F400ED9B05 /* TFAudioPowerGraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioPowerGraphView.h; sourceTree = "<group>"; };
+		18343415200862F400ED9B05 /* TFAudioPowerGraphView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFAudioPowerGraphView.m; sourceTree = "<group>"; };
+		183434172008AB3B00ED9B05 /* LuckyDay.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = LuckyDay.mp3; sourceTree = "<group>"; };
 		18415A191FF5D5F6007095AC /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTest.h; sourceTree = "<group>"; };
 		18415A1A1FF5D5F6007095AC /* UnitTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UnitTest.mm; sourceTree = "<group>"; };
 		18415A221FF6130D007095AC /* frameDisplay.fs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = frameDisplay.fs; sourceTree = "<group>"; };
@@ -333,6 +338,15 @@
 			name = AudioUnit;
 			sourceTree = "<group>";
 		};
+		18343413200862C600ED9B05 /* testTools */ = {
+			isa = PBXGroup;
+			children = (
+				18343414200862F400ED9B05 /* TFAudioPowerGraphView.h */,
+				18343415200862F400ED9B05 /* TFAudioPowerGraphView.m */,
+			);
+			path = testTools;
+			sourceTree = "<group>";
+		};
 		18415A1F1FF61200007095AC /* Platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -372,6 +386,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				183434172008AB3B00ED9B05 /* LuckyDay.mp3 */,
 				187DFBC620084BEF002BDCB3 /* AACTest.m4a */,
 				184FF7501FF48BC0007D5826 /* game.mp4 */,
 			);
@@ -447,6 +462,7 @@
 		18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				18343413200862C600ED9B05 /* testTools */,
 				1834340B200851D600ED9B05 /* AudioUnit */,
 				18C66DCD1FF0F84B002BFBBC /* ExampleMenuViewController.h */,
 				18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */,
@@ -836,6 +852,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
 				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
@@ -869,6 +886,7 @@
 				180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */,
 				18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */,
 				184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */,
+				18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */,
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				892C12941FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,

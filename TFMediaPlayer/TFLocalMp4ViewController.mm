@@ -14,11 +14,15 @@
 #import "TFAudioUnitPlayer.h"
 #import "TFMPAVFormat.h"
 
+#import "TFAudioPowerGraphView.h"
+
 @interface TFLocalMp4ViewController (){
     TFMediaPlayer *_player;
     
     TFAudioFileReader *_reader;
     TFAudioUnitPlayer *_audioPlayer;
+    
+    TFAudioPowerGraphView *_graphView;
 }
 
 @end
@@ -28,7 +32,16 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+    
     self.view.backgroundColor = [UIColor whiteColor];
+    
+    _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 100)];
+    [self.view addSubview:_graphView];
+    
+    _graphView.sampleRate = 44100;
+    _graphView.bytesPerSample = 2;
     
     _player = [[TFMediaPlayer alloc] init];
     _player.displayView.frame = CGRectMake(0, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
@@ -44,6 +57,9 @@
 
 -(void)viewWillDisappear:(BOOL)animated{
     [_player stop];
+    
+    [_audioPlayer stop];
+    [_graphView stop];
 }
 
 -(void)startPlay{
@@ -75,13 +91,20 @@ int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *contex
     
     TFAudioBufferData *tfBufData = TFCreateAudioBufferData(&bufList, framesNum);
     
-    return [localPlayer->_reader readFrames:&framesNum toBufferData:tfBufData];
+    int status = [localPlayer->_reader readFrames:&framesNum toBufferData:tfBufData];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //graph
+        [localPlayer->_graphView showBuffer:buffer[0] size:oneLineize];
+    });
+    
+    return status;
 }
 
 -(void)audioUnitPlay{
     _reader = [[TFAudioFileReader alloc] init];
     
-    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"AACTest" ofType:@"m4a"];
+    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"LuckyDay" ofType:@"mp3"];
     [_reader setFilePath:audioPath];
     _reader.isRepeat = true;
     
@@ -99,6 +122,8 @@ int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *contex
     [_audioPlayer setFillStruct:fullStruct];
     
     [_audioPlayer play];
+    
+    [_graphView start];
 }
 
 -(BOOL)configureAVSession{
