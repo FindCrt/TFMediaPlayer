@@ -16,11 +16,9 @@ using namespace tfmpcore;
 
 double SyncClock::remainTime(double videoPts, double audioPts){
     
-    double currentTime = av_gettime_relative() / 1000000.0;
-    
     if (isAudioMajor) {
         
-        return audioPts + ptsCorrection - currentTime;
+        return audioPts - lastPts;
         
     }else{
         

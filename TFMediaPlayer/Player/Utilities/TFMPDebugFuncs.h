@@ -30,12 +30,12 @@ av_strerror(retval, errStr, 64);\
 printf("%s error(%s)\n",statement,errStr);\
 }\
 
-#define TFCheckRetvalAndReturn(statement)\
+#define TFCheckRetvalAndReturnFalse(statement)\
 if (retval < 0) {\
 char errStr[64];\
 av_strerror(retval, errStr, 64);\
 printf("%s error(%s)\n",statement,errStr);\
-return;\
+return false;\
 }\
 
 #define TFCheckRetvalAndGotoFail(statement)\

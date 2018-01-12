@@ -40,6 +40,8 @@ namespace tfmpcore {
         
         AudioResampler *audioResampler = nullptr;
         
+//        TFMPAudioStreamDescription adoptedAudioDesc;
+        
     public:
         
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
@@ -53,6 +55,7 @@ namespace tfmpcore {
         void setAudioResampler(AudioResampler *audioResampler){
             this->audioResampler = audioResampler;
         }
+//        void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc);
         
         RecycleBuffer<AVFrame*> *shareVideoBuffer;
         RecycleBuffer<AVFrame*> *shareAudioBuffer;

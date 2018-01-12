@@ -29,7 +29,9 @@ void DisplayController::startDisplay(){
     
     shouldDisplay = true;
     
-    pthread_create(&dispalyThread, nullptr, displayLoop, this);
+    bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
+    
+    if (showVideo) pthread_create(&dispalyThread, nullptr, displayLoop, this);
 }
 
 void DisplayController::stopDisplay(){
@@ -170,6 +172,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 }
                 
                 if (dataBuffer == nullptr) {
+                    av_frame_free(&frame);
                     continue;
                 }
                 
@@ -182,14 +185,23 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     memcpy(buffer, dataBuffer[i], linesize);
                     needReadSize -= linesize;
                     
+                    av_frame_free(&frame);
+                    
                 }else{
                     
                     //there is a little buffer left.
                     displayer->remainingSize[i] = linesize - needReadSize;
-                    displayer->remainingAudioBuffer[i] = dataBuffer[i] + needReadSize;
+                    
+                    //TODO: reuse malloced bytes.
+                    free(displayer->remainingAudioBuffer[i]);
+                    displayer->remainingAudioBuffer[i] = (uint8_t*)malloc(displayer->remainingSize[i]);
+                    memcpy(displayer->remainingAudioBuffer[i], dataBuffer[i] + needReadSize, displayer->remainingSize[i]);
                     
                     memcpy(buffer, dataBuffer, needReadSize);
                     needReadSize = 0;
+                    
+                    av_frame_free(&frame);
+                    free(dataBuffer);
                 }
             }
         }

@@ -20,6 +20,8 @@
 		180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */; };
 		180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */; };
 		180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5021FF4D16800AFB5F9 /* Decoder.cpp */; };
+		1834340E200851E300ED9B05 /* TFAudioFileReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 1834340D200851E300ED9B05 /* TFAudioFileReader.m */; };
+		183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */ = {isa = PBXBuildFile; fileRef = 183434112008535500ED9B05 /* TFAudioBufferData.c */; };
 		18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A1A1FF5D5F6007095AC /* UnitTest.mm */; };
 		18415A2A1FF6130D007095AC /* frameDisplay.fs in Resources */ = {isa = PBXBuildFile; fileRef = 18415A221FF6130D007095AC /* frameDisplay.fs */; };
 		18415A2B1FF6130D007095AC /* frameDisplay.vs in Resources */ = {isa = PBXBuildFile; fileRef = 18415A231FF6130D007095AC /* frameDisplay.vs */; };
@@ -30,12 +32,13 @@
 		18415A351FF62648007095AC /* SyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A331FF62648007095AC /* SyncClock.cpp */; };
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
 		1843A1F2200463890053694A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
-		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */; };
+		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
 		1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856F04C1FFB804D00B4F2A7 /* libx264.a */; };
 		185B7EDD2007694600ACB32D /* AudioResampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 185B7EDB2007694600ACB32D /* AudioResampler.cpp */; };
 		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
 		187A8AD820036EC80054A9E4 /* TFAudioUnitPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187A8AD720036EC80054A9E4 /* TFAudioUnitPlayer.mm */; };
+		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
 		18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */; };
 		18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA11FF0F1F6002BFBBC /* Main.storyboard */; };
@@ -77,6 +80,10 @@
 		180FA5031FF4D16800AFB5F9 /* Decoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Decoder.hpp; sourceTree = "<group>"; };
 		180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadConvience.h; sourceTree = "<group>"; };
 		180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RecycleBuffer.hpp; sourceTree = "<group>"; };
+		1834340C200851E300ED9B05 /* TFAudioFileReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioFileReader.h; sourceTree = "<group>"; };
+		1834340D200851E300ED9B05 /* TFAudioFileReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFAudioFileReader.m; sourceTree = "<group>"; };
+		183434102008535500ED9B05 /* TFAudioBufferData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioBufferData.h; sourceTree = "<group>"; };
+		183434112008535500ED9B05 /* TFAudioBufferData.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TFAudioBufferData.c; sourceTree = "<group>"; };
 		18415A191FF5D5F6007095AC /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTest.h; sourceTree = "<group>"; };
 		18415A1A1FF5D5F6007095AC /* UnitTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UnitTest.mm; sourceTree = "<group>"; };
 		18415A221FF6130D007095AC /* frameDisplay.fs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = frameDisplay.fs; sourceTree = "<group>"; };
@@ -95,7 +102,7 @@
 		18415A361FF64126007095AC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
 		18415A371FF64126007095AC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
 		184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLocalMp4ViewController.h; sourceTree = "<group>"; };
-		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLocalMp4ViewController.m; sourceTree = "<group>"; };
+		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
 		1856F0491FFB804D00B4F2A7 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
@@ -109,6 +116,7 @@
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		187A8AD620036EC80054A9E4 /* TFAudioUnitPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioUnitPlayer.h; sourceTree = "<group>"; };
 		187A8AD720036EC80054A9E4 /* TFAudioUnitPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFAudioUnitPlayer.mm; sourceTree = "<group>"; };
+		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TFMediaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18C66D991FF0F1F6002BFBBC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		18C66D9B1FF0F1F6002BFBBC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -314,6 +322,17 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		1834340B200851D600ED9B05 /* AudioUnit */ = {
+			isa = PBXGroup;
+			children = (
+				183434102008535500ED9B05 /* TFAudioBufferData.h */,
+				183434112008535500ED9B05 /* TFAudioBufferData.c */,
+				1834340C200851E300ED9B05 /* TFAudioFileReader.h */,
+				1834340D200851E300ED9B05 /* TFAudioFileReader.m */,
+			);
+			name = AudioUnit;
+			sourceTree = "<group>";
+		};
 		18415A1F1FF61200007095AC /* Platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -353,6 +372,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				187DFBC620084BEF002BDCB3 /* AACTest.m4a */,
 				184FF7501FF48BC0007D5826 /* game.mp4 */,
 			);
 			path = Resources;
@@ -427,12 +447,13 @@
 		18C66D971FF0F1F6002BFBBC /* TFMediaPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				1834340B200851D600ED9B05 /* AudioUnit */,
 				18C66DCD1FF0F84B002BFBBC /* ExampleMenuViewController.h */,
 				18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */,
 				18C66DD01FF0F96F002BFBBC /* TFNetMp4PlayViewController.h */,
 				18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */,
 				184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */,
-				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.m */,
+				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */,
 				18C66DC21FF0F253002BFBBC /* Player */,
 				892C12962003B63A0081CF79 /* FFmpeg */,
 				1856F0471FFB804D00B4F2A7 /* x264 */,
@@ -815,6 +836,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
@@ -846,7 +868,7 @@
 				18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */,
 				180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */,
 				18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */,
-				184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.m in Sources */,
+				184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */,
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				892C12941FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,
@@ -854,8 +876,10 @@
 				18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */,
 				18415A2E1FF6130D007095AC /* TFOPGLProgram.cpp in Sources */,
 				187A8AD820036EC80054A9E4 /* TFAudioUnitPlayer.mm in Sources */,
+				183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */,
 				18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */,
 				18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */,
+				1834340E200851E300ED9B05 /* TFAudioFileReader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

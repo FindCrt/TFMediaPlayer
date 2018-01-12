@@ -78,7 +78,7 @@ void *Decoder::decodeLoop(void *context){
     Decoder *decoder = (Decoder *)context;
     
     AVPacket pkt;
-    AVFrame *frame = av_frame_alloc();
+    AVFrame *frame = nullptr;
     
     while (decoder->shouldDecode) {
         
@@ -92,7 +92,8 @@ void *Decoder::decodeLoop(void *context){
         if (decoder->type == AVMEDIA_TYPE_AUDIO) { //may many frames in one packet.
             
             while (retval == 0) {
-//                frame = av_frame_alloc();
+                
+                frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 
                 if (retval != 0 && retval != AVERROR_EOF) {
@@ -120,6 +121,12 @@ void *Decoder::decodeLoop(void *context){
 //                }else{
 //                    decoder->frameBuffer.blockInsert(frame);
 //                }
+                if (frame->sample_rate <= 0 ||
+                    frame->channel_layout <= 0 ||
+                    frame->extended_data == nullptr) {
+                    printf("bad frame data1 <<<<<\n");
+                    continue;
+                }
                 
                 decoder->frameBuffer.blockInsert(frame);
             }

@@ -34,9 +34,9 @@ namespace tfmpcore {
         AVFormatContext *fmtCtx;
         AVPacket packet;
         
-        int videoStrem;
-        int audioStream;
-        int subTitleStream;
+        int videoStrem = -1;
+        int audioStream = -1;
+        int subTitleStream = -1;
         
         Decoder *videoDecoder;
         Decoder *audioDecoder;
@@ -56,7 +56,7 @@ namespace tfmpcore {
         //real audio format
         void resolveAudioStreamFormat();
         
-        TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+        TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
     public:
         
@@ -76,7 +76,7 @@ namespace tfmpcore {
         bool isAudioMajor = true;
         
         
-        void setDisplayMediaType(TFMPMediaType displayMediaType);
+        void setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType);
         
         void *displayContext;
         TFMPVideoFrameDisplayFunc displayVideoFrame;

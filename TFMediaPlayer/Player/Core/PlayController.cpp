@@ -21,11 +21,11 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     fmtCtx = avformat_alloc_context();
     int retval = avformat_open_input(&fmtCtx, mediaPath.c_str(), NULL, NULL);
-    TFCheckRetvalAndGotoFail("avformat_open_input");
+    TFCheckRetvalAndReturnFalse("avformat_open_input");
     
     //configure options to get faster
     retval = avformat_find_stream_info(fmtCtx, NULL);
-    TFCheckRetvalAndGotoFail("avformat_find_stream_info");
+    TFCheckRetvalAndReturnFalse("avformat_find_stream_info");
     
     for (int i = 0; i<fmtCtx->nb_streams; i++) {
         
@@ -42,6 +42,10 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         }
     }
     
+    if (videoStrem < 0 && audioStream < 0) {
+        return false;
+    }
+    
     if (videoDecoder && !videoDecoder->prepareDecode()) {
         return false;
     }
@@ -55,35 +59,46 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     }
     
     //audio format
-    resolveAudioStreamFormat();
+    if (audioStream >= 0) resolveAudioStreamFormat();
     
     
     //check whether stream can display.
-    if ((displayMediaType & TFMP_MEDIA_TYPE_VIDEO) && videoDecoder != nullptr && displayVideoFrame == nullptr) {
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && videoDecoder != nullptr && displayVideoFrame == nullptr) {
         return false;
     }else{
         displayer->displayVideoFrame = displayVideoFrame;
     }
     
     displayer->displayContext = displayContext;
-    displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
-    displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
+    if (videoStrem >= 0) displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
+    if (audioStream >= 0) displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
     
-    displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
-    displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
+    if (videoStrem >= 0) displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
+    if (audioStream >= 0) displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
     
+    if (audioStream < 0 && isAudioMajor) isAudioMajor = false;
+    if (videoStrem <0 && !isAudioMajor) isAudioMajor = true;
     displayer->syncClock = new SyncClock(isAudioMajor);
 
     prapareOK = true;
+    
+    int realType = 0;
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && (videoStrem >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_VIDEO;
+    }
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && (videoStrem >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_AUDIO;
+    }
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) && (videoStrem >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_SUBTITLE;
+    }
+    displayer->displayMediaType = (TFMPMediaType)realType;
     
     if (connectCompleted != nullptr) {
         connectCompleted(this);
     }
     
     return true;
-    
-fail:
-    return false;
 }
 
 void PlayController::play(){
@@ -125,9 +140,22 @@ void PlayController::stop(){
 
 /***** properties *****/
 
-void PlayController::setDisplayMediaType(TFMPMediaType displayMediaType){
-    this->displayMediaType = displayMediaType;
-    displayer->displayMediaType = displayMediaType;
+void PlayController::setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType){
+    this->desiredDisplayMediaType = desiredDisplayMediaType;
+    if (prapareOK) {
+        int realType = 0;
+        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && (videoStrem >= 0)) {
+            realType |= TFMP_MEDIA_TYPE_VIDEO;
+        }
+        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && (videoStrem >= 0)) {
+            realType |= TFMP_MEDIA_TYPE_AUDIO;
+        }
+        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) && (videoStrem >= 0)) {
+            realType |= TFMP_MEDIA_TYPE_SUBTITLE;
+        }
+        
+        displayer->displayMediaType = (TFMPMediaType)realType;
+    }
 }
 
 TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
@@ -155,8 +183,10 @@ void PlayController::resolveAudioStreamFormat(){
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
     
     //resample source audio to real-play audio format.
-    audioResampler->setAdoptedAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
+    auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
+    audioResampler->setAdoptedAudioDesc(adoptedAudioDesc);
     displayer->setAudioResampler(audioResampler);
+//    displayer->setAdoptedAudioDesc(adoptedAudioDesc);
 }
 
 void PlayController::startReadingFrames(){
@@ -173,7 +203,6 @@ void * PlayController::readFrame(void *context){
         
         if (packet->stream_index == controller->videoStrem) {
             
-            printf("video packet in");
             controller->videoDecoder->decodePacket(packet);
             
         }else if (packet->stream_index == controller->audioStream){

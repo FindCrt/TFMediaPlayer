@@ -12,6 +12,7 @@
 /** general */
 
 typedef enum{
+    TFMP_MEDIA_TYPE_NONE  = 0,
     TFMP_MEDIA_TYPE_VIDEO = 1 << 0,
     TFMP_MEDIA_TYPE_AUDIO = 1 << 1,
     TFMP_MEDIA_TYPE_SUBTITLE = 1 << 2,
