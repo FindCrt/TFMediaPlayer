@@ -82,7 +82,6 @@ void *Decoder::decodeLoop(void *context){
     AVFrame *frame = nullptr;
     
     while (decoder->shouldDecode) {
-        
         decoder->pktBuffer.blockGetOut(&pkt);
         int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
         if (retval != 0) {
@@ -96,7 +95,6 @@ void *Decoder::decodeLoop(void *context){
                 
                 frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
-                
                 if (retval == AVERROR(EAGAIN)) {
                     break;
                 }
@@ -126,7 +124,6 @@ void *Decoder::decodeLoop(void *context){
 //                }else{
 //                    decoder->frameBuffer.blockInsert(frame);
 //                }
-                
                 decoder->frameBuffer.blockInsert(frame);
             }
         }else{
@@ -140,7 +137,6 @@ void *Decoder::decodeLoop(void *context){
                 continue;
             }
         }
-        
         av_packet_unref(&pkt);
     }
     

@@ -36,19 +36,19 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100(no planar),but don't change channel number.
-//    tfmpResultDesc.sampleRate = 44100;
-//    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
-//                            true,
-//                            true,
-//                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
-//                            false);
-//    
-//    tfmpResultDesc.bitsPerChannel = 16;
-//    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
-//    
-//    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    tfmpResultDesc.sampleRate = 44100;
+    setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
+                            true,
+                            true,
+                            isBigEndianForFormatFlags(sourceDesc.formatFlags),
+                            false);
     
-    tfmpResultDesc = sourceDesc;
+    tfmpResultDesc.bitsPerChannel = 16;
+    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+    
+    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    
+//    tfmpResultDesc = sourceDesc;
     
     [self prepareAudioUnit];
     

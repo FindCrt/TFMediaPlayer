@@ -144,6 +144,8 @@
         default:
             break;
     }
+    
+    [_audioPlayer stop];
 }
 
 -(BOOL)configureAVSession{

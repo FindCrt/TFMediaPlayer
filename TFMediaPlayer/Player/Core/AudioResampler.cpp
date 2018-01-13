@@ -73,11 +73,12 @@ uint8_t **AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, i
         return nullptr;
     }
     
-    int nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+    int nb_samplesxx = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+    int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     
-    printf("outCount: %d, sourceCount: %d",*outSamples, inFrame->nb_samples);
+//    printf("outCount: %d, sourceCount: %d\n",*outSamples, inFrame->nb_samples);
     
     uint8_t **outBuffer = (uint8_t**)malloc(sizeof(uint8_t*));
     int retval = av_samples_alloc(outBuffer,

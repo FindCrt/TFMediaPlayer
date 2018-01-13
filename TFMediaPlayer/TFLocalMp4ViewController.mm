@@ -89,16 +89,9 @@
     _player.mediaURL = videoURL;
     
     [self configureAVSession];
-//    [_player play];
+    [_player play];
     
-    [self audioUnitPlay];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [_graphView stop];
-        [_audioPlayer stop];
-        
-        [_player stop];
-    });
+//    [self audioUnitPlay];
 }
 
 int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *context){

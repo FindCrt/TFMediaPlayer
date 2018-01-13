@@ -29,6 +29,10 @@ namespace tfmpcore {
         
         
     public:
+        
+        uint8_t **resampledBuffers;
+        int resampledLineCount;
+        
         void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc){
             this->adoptedAudioDesc = adoptedAudioDesc;
         }
