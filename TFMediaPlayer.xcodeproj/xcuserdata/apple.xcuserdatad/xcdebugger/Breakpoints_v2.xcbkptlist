@@ -9,22 +9,6 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Core/Decoder.cpp"
-            timestampString = "537530429.756179"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "125"
-            endingLineNumber = "125"
-            landmarkName = "Decoder::decodeLoop(void *context)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "TFMediaPlayer/Player/Core/SyncClock.cpp"
             timestampString = "537415901.241394"
             startingColumnNumber = "9223372036854775807"
@@ -58,22 +42,6 @@
             startingLineNumber = "82"
             endingLineNumber = "82"
             landmarkName = "AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Core/Decoder.cpp"
-            timestampString = "537605296.833093"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "96"
-            endingLineNumber = "96"
-            landmarkName = "Decoder::decodeLoop(void *context)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -125,22 +93,6 @@
                   offsetFromSymbolStart = "0">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Core/DisplayController.cpp"
-            timestampString = "537610438.574634"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "165"
-            endingLineNumber = "165"
-            landmarkName = "DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

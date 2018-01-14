@@ -123,7 +123,7 @@ void *Decoder::decodeLoop(void *context){
 //                    decoder->frameBuffer.blockInsert(resampledFrame);
 //                }else{
 //                    decoder->frameBuffer.blockInsert(frame);
-//                }
+//
                 decoder->frameBuffer.blockInsert(frame);
             }
         }else{

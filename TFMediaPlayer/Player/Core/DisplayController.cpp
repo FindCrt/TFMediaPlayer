@@ -148,6 +148,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 remainingBuffer.readIndex = 0;
                 remainingBuffer.validSize = 0;
+                unreadSize = 0;
             }
             
             
@@ -187,16 +188,20 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 }else{
                     
                     //there is a little buffer left.
-                    remainingBuffer.readIndex = needReadSize;
+                    remainingBuffer.readIndex = 0;
                     uint32_t remainingSize = linesize - needReadSize;
                     
-                    av_fast_malloc(&(remainingBuffer.head), &remainingBuffer.validSize, remainingSize);
-                    if (remainingBuffer.validSize == 0) {
+                    unsigned int mallocSize = 0;
+                    av_fast_malloc(&(remainingBuffer.head), &mallocSize, remainingSize);
+                    if (mallocSize == 0) {
                         TFMPDLOG_C("fast malloc remaining audio buffer error!\n");
+                        
+                        remainingBuffer.head = (uint8_t *)malloc(remainingSize);
                     }
+                    
+                    remainingBuffer.validSize = remainingSize;
                                    
                     memcpy(remainingBuffer.head, dataBuffer[i] + needReadSize, remainingSize);
-                    
                     
                     memcpy(buffer, dataBuffer, needReadSize);
                     needReadSize = 0;
