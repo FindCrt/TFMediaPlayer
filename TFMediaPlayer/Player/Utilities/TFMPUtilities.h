@@ -17,14 +17,16 @@ extern "C"{
 
 inline uint8_t formatFlagsFromFFmpegAudioFormat(AVSampleFormat audioFormat){
     
-    if (audioFormat == AV_SAMPLE_FMT_NONE || audioFormat == AV_SAMPLE_FMT_NB) {
+    if (audioFormat == AV_SAMPLE_FMT_NONE ||
+        audioFormat == AV_SAMPLE_FMT_NB) {
         return 0;
     }
     
     bool isBigEndian = BIG_ENDIAN == BYTE_ORDER; //format's data is always in native-endian order.
     bool isInt = false, isSigned = false, isPlanar = false;
     
-    if (audioFormat == AV_SAMPLE_FMT_U8 || AV_SAMPLE_FMT_U8P) {
+    if (audioFormat == AV_SAMPLE_FMT_U8 ||
+        audioFormat == AV_SAMPLE_FMT_U8P) {
         isSigned = false;
     }else{
         isSigned = true;

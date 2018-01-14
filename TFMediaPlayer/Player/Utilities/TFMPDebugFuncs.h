@@ -19,6 +19,12 @@
 #define TFMPDLog(format,...)
 #endif
 
+#if DEBUG & TFMPLOG
+#define TFMPDLOG_C(format,...) printf(format, ##__VA_ARGS__)
+#else
+#define TFMPDLOG_C(format,...)
+#endif
+
 /** function status check */
 
 #if DEBUG & TFMPLOG

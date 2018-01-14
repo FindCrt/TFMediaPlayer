@@ -30,8 +30,8 @@ namespace tfmpcore {
         
     public:
         
-        uint8_t **resampledBuffers;
-        int resampledLineCount;
+        uint8_t *resampledBuffers;
+        unsigned int resampleSize;
         
         void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc){
             this->adoptedAudioDesc = adoptedAudioDesc;
@@ -39,7 +39,7 @@ namespace tfmpcore {
         
         bool isNeedResample(AVFrame *sourceFrame);
         
-        uint8_t **reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize);
+        bool reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize);
     };
 }
 

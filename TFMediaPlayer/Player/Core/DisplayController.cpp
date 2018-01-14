@@ -7,6 +7,7 @@
 //
 
 #include "DisplayController.hpp"
+#include "TFMPDebugFuncs.h"
 extern "C"{
 #include <libavutil/time.h>
 }
@@ -126,48 +127,46 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     
     for (int i = 0; i<lineCount; i++) {
         
+        TFMPRemainingBuffer &remainingBuffer = displayer->remainingAudioBuffers[i];
+        uint32_t unreadSize = remainingBuffer.unreadSize();
+        
         uint8_t *buffer = buffersList[i];
         
-        if (displayer->remainingSize[i] >= oneLineSize) {
+        if (unreadSize >= oneLineSize) {
             //TODO: do more thing for planar audio.
-            memcpy(buffer, displayer->remainingAudioBuffer[i], oneLineSize);
+            memcpy(buffer, remainingBuffer.readingPoint(), oneLineSize);
             
-            displayer->remainingSize[i] -= oneLineSize;
-            displayer->remainingAudioBuffer[i] += oneLineSize;
+            remainingBuffer.readIndex += oneLineSize;
             
         }else{
             
             int needReadSize = oneLineSize;
-            if (displayer->remainingSize[i] > 0) {
+            if (unreadSize > 0) {
                 
-                needReadSize -= displayer->remainingSize[i];
-                memcpy(buffer, displayer->remainingAudioBuffer[i], displayer->remainingSize[i]);
+                needReadSize -= unreadSize;
+                memcpy(buffer, remainingBuffer.readingPoint(), unreadSize);
                 
-                displayer->remainingAudioBuffer[i] = nullptr;
-                displayer->remainingSize[i] = 0;
-                
-                //TODO: Maybe the frames of different line is different.We need to reatin/release different frames.
-//                av_frame_free(&displayer->remainFrame); // release this frame
+                remainingBuffer.readIndex = 0;
+                remainingBuffer.validSize = 0;
             }
             
+            
             AVFrame *frame = av_frame_alloc();
-//            int frameLineSize = 0; //Each channel plane size is same for audio.
             
             bool resample = false;
             uint8_t **dataBuffer = nullptr;
-            int linesize, outSamples;
+            int linesize = 0, outSamples = 0;
             
             while (needReadSize > 0) {
                 
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
-//                if (frame->extended_data == nullptr) {
-//                    continue;
-//                }
-                
                 if (displayer->audioResampler->isNeedResample(frame)) {
-                    dataBuffer = displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize);
-                    resample = true;
+                    if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
+                        dataBuffer = &(displayer->audioResampler->resampledBuffers);
+                        resample = true;
+                    }
+                    
                 }else{
                     dataBuffer = frame->extended_data;
                     linesize = frame->linesize[0];
@@ -177,10 +176,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     av_frame_free(&frame);
                     continue;
                 }
-                
-//                frameLineSize = frame->linesize[0];
-                
-//                printf("one sample size: %d | %d, %d\n",frameLineSize/frame->nb_samples,frameLineSize, frame->nb_samples);
                 
                 if (needReadSize >= linesize) {
                     
@@ -192,18 +187,21 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 }else{
                     
                     //there is a little buffer left.
-                    displayer->remainingSize[i] = linesize - needReadSize;
+                    remainingBuffer.readIndex = needReadSize;
+                    uint32_t remainingSize = linesize - needReadSize;
                     
-                    //TODO: reuse malloced bytes.
-//                    free(displayer->remainingAudioBuffer[i]);
-                    displayer->remainingAudioBuffer[i] = (uint8_t*)malloc(displayer->remainingSize[i]);
-                    memcpy(displayer->remainingAudioBuffer[i], dataBuffer[i] + needReadSize, displayer->remainingSize[i]);
+                    av_fast_malloc(&(remainingBuffer.head), &remainingBuffer.validSize, remainingSize);
+                    if (remainingBuffer.validSize == 0) {
+                        TFMPDLOG_C("fast malloc remaining audio buffer error!\n");
+                    }
+                                   
+                    memcpy(remainingBuffer.head, dataBuffer[i] + needReadSize, remainingSize);
+                    
                     
                     memcpy(buffer, dataBuffer, needReadSize);
                     needReadSize = 0;
                     
                     av_frame_free(&frame);
-                    if (resample) free(dataBuffer);
                 }
             }
         }

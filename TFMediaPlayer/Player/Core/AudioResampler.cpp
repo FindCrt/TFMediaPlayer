@@ -63,7 +63,7 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     lastSourceAudioDesc->channelsPerFrame = sourceFrame->channels;
 }
 
-uint8_t **AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
+bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
     
     if (_isNeedResample(inFrame, lastSourceAudioDesc)) {
         initResampleContext(inFrame);
@@ -73,32 +73,38 @@ uint8_t **AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, i
         return nullptr;
     }
     
-    int nb_samplesxx = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+//    int nb_samplesxx = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
     int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    int outsize = av_samples_get_buffer_size(linesize, adoptedAudioDesc.channelsPerFrame, nb_samples, destFmt, 0);
     
-//    printf("outCount: %d, sourceCount: %d\n",*outSamples, inFrame->nb_samples);
+    av_fast_malloc(&resampledBuffers, &resampleSize, outsize);
     
-    uint8_t **outBuffer = (uint8_t**)malloc(sizeof(uint8_t*));
-    int retval = av_samples_alloc(outBuffer,
-                                  linesize,
-                                  adoptedAudioDesc.channelsPerFrame,
-                                  nb_samples,
-                                  destFmt, 0);
-    
-    if (retval < 0) {
-        printf("av_samples_alloc error\n");
-        return nullptr;
+    if (resampleSize == 0) {
+        TFMPDLOG_C("memory alloc resample buffer error!\n");
+        return false;
     }
     
-    //    uint8_t* m_ain[SWR_CH_MAX];
-    //    setup_array(m_ain, inFrame, (AVSampleFormat)inFrame->format, inFrame->nb_samples);
     
-    swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
+    uint8_t **outBuffer = &resampledBuffers;
+    int actualOutSamples = swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
     
-    *outSamples = nb_samples;
-    return outBuffer;
+    if (actualOutSamples == 0) {
+        TFMPDLOG_C("memory alloc resample buffer error!\n");
+        return false;
+    }
+    
+    unsigned int actualOutSize = actualOutSamples * adoptedAudioDesc.channelsPerFrame * av_get_bytes_per_sample(destFmt);
+    
+    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
+    
+    *outSamples = actualOutSamples;
+    *linesize = actualOutSize;
+    
+    resampleSize = actualOutSize;
+    
+    return true;
 }
 
 //static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples)

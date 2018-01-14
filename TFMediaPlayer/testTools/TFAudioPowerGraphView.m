@@ -123,7 +123,7 @@ static CGFloat pointSpace = 2;
 }
 
 -(void)showNextData:(float)value{
-    value *= 5;
+    value *= 2;
     printf("<< %.6f\n",value);
     
     TFAudioPowerGraphContentView *cell = nil;

@@ -24,6 +24,18 @@ extern "C"{
 
 namespace tfmpcore {
     
+    typedef struct{
+//        uint32_t allocSize = 0;
+        uint32_t validSize = 0;
+        uint32_t readIndex = 0;
+        
+        uint8_t *head = nullptr;
+        
+        inline uint8_t *readingPoint(){return head+readIndex;}
+        inline uint32_t unreadSize(){return validSize-readIndex;};
+        
+    }TFMPRemainingBuffer;
+    
     class DisplayController{
         
         pthread_t dispalyThread;
@@ -31,10 +43,7 @@ namespace tfmpcore {
         
         bool shouldDisplay;
         
-        
-        uint64_t remainingSize[TFMP_MAX_AUDIO_CHANNEL];
-        uint8_t *remainingAudioBuffer[TFMP_MAX_AUDIO_CHANNEL];
-//        AVFrame *remainFrame;
+        TFMPRemainingBuffer remainingAudioBuffers[TFMP_MAX_AUDIO_CHANNEL];
         
         static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
         
