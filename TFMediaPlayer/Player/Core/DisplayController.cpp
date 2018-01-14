@@ -135,7 +135,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         if (unreadSize >= oneLineSize) {
             //TODO: do more thing for planar audio.
             memcpy(buffer, remainingBuffer.readingPoint(), oneLineSize);
-            printf("fill buffer1: %d\n",remainingBuffer.readIndex);
             
             remainingBuffer.readIndex += oneLineSize;
             
@@ -164,7 +163,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             while (needReadSize > 0) {
                 
                 displayer->shareAudioBuffer->blockGetOut(&frame);
-                printf("\n\n-------------\nframe out\n");
                 
                 if (displayer->audioResampler->isNeedResample(frame)) {
                     if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
@@ -208,7 +206,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     memcpy(remainingBuffer.head, dataBuffer[i] + needReadSize, remainingSize);
                     
                     memcpy(buffer, dataBuffer[i], needReadSize);
-                    printf("fill buffer2: %d\n",remainingBuffer.readIndex);
                     needReadSize = 0;
                     
                     av_frame_free(&frame);

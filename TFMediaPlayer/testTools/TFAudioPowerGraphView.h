@@ -12,6 +12,8 @@ static int APGOnePagePoints = 1024;
 
 @interface TFAudioPowerGraphView : UIView
 
+@property (nonatomic, assign) BOOL ignoreSign; //
+
 @property (nonatomic, assign) int bytesPerSample;
 
 @property (nonatomic, assign) uint64_t sampleRate;
@@ -34,5 +36,7 @@ static int APGOnePagePoints = 1024;
 @property (nonatomic, assign) BOOL horizontal;
 
 @property (nonatomic, strong) UIColor *fillColor;
+
+@property (nonatomic, assign) BOOL ignoreSign; //
 
 @end

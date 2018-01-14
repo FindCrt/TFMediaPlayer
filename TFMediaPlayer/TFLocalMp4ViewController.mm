@@ -43,6 +43,7 @@
     self.view.backgroundColor = [UIColor whiteColor];
     
     _showGraph = YES;
+    _autoStop = YES;
     
     _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 200)];
     [self.view addSubview:_graphView];
@@ -55,6 +56,7 @@
     
     _graphView.sampleRate = 44100;
     _graphView.bytesPerSample = 2;
+    _graphView.ignoreSign = YES;
     
     
     _player = [[TFMediaPlayer alloc] init];
@@ -112,7 +114,7 @@
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
     
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"王崴 - 大城小爱" withExtension:@"mp3"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
     
     NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
