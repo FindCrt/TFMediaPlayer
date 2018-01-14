@@ -25,7 +25,6 @@ extern "C"{
 namespace tfmpcore {
     
     typedef struct{
-//        uint32_t allocSize = 0;
         uint32_t validSize = 0;
         uint32_t readIndex = 0;
         

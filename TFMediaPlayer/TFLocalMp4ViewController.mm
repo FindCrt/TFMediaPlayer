@@ -42,6 +42,8 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
+    _showGraph = YES;
+    
     _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 200)];
     [self.view addSubview:_graphView];
     

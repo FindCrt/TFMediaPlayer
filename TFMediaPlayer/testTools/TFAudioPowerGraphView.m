@@ -30,6 +30,8 @@ static CGFloat pointSpace = 2;
     
     int _averageCount;
     int64_t _average;
+    
+    BOOL _colorFlag;
 }
 
 @property (nonatomic, assign) CGFloat moveSpeed;
@@ -55,19 +57,19 @@ static CGFloat pointSpace = 2;
         _scrollView.delegate = self;
         [self addSubview:_scrollView];
         
-        int count = _scrollView.bounds.size.width / pointSpace+1;
-        for (int i = 0; i<count; i++) {
-            TFAudioPowerGraphContentView *cell = [[TFAudioPowerGraphContentView alloc]initWithFrame:CGRectMake(i*pointSpace, 0, pointSpace, _scrollView.bounds.size.height)];
-            cell.horizontal = NO;
-            cell.id = i;
-            cell.backgroundColor = [UIColor whiteColor];
-            
-            [_scrollView addSubview:cell];
-            [_showedViews addObject:cell];
-        }
+//        int count = _scrollView.bounds.size.width / pointSpace+1;
+//        for (int i = 0; i<count; i++) {
+//            TFAudioPowerGraphContentView *cell = [[TFAudioPowerGraphContentView alloc]initWithFrame:CGRectMake(i*pointSpace, 0, pointSpace, _scrollView.bounds.size.height)];
+//            cell.horizontal = NO;
+//            cell.id = i;
+//            cell.backgroundColor = [UIColor whiteColor];
+//            
+//            [_scrollView addSubview:cell];
+//            [_showedViews addObject:cell];
+//        }
         
         _curIndex = 0;
-        _showingRange = NSMakeRange(0, count);
+//        _showingRange = NSMakeRange(0, count);
     }
     
     return self;
@@ -106,6 +108,9 @@ static CGFloat pointSpace = 2;
 //        _lastSampleCount += sampleCount;
 //    }
     
+    _colorFlag = !_colorFlag;
+    printf("now color flag is: %s\n",_colorFlag?"black":"orange");
+    
     for (int i = 0; i<sampleCount; i++) {
         SInt16 rawValue = *s16Buffer;
         
@@ -124,7 +129,7 @@ static CGFloat pointSpace = 2;
 
 -(void)showNextData:(float)value{
     value *= 2;
-    printf("<< %.6f\n",value);
+//    printf("<< %.6f\n",value);
     
     TFAudioPowerGraphContentView *cell = nil;
     if (NSLocationInRange(_curIndex, _showingRange)) {
@@ -139,6 +144,7 @@ static CGFloat pointSpace = 2;
         }
         cell.horizontal = NO;
         cell.backgroundColor = [UIColor whiteColor];
+        cell.fillColor = _colorFlag ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
         
         cell.frame = CGRectMake(_curIndex*pointSpace, 0, pointSpace, _scrollView.bounds.size.height);
         
@@ -232,7 +238,8 @@ static CGFloat pointSpace = 2;
         }
     }
     
-    CGContextSetFillColorWithColor(context, [UIColor blackColor].CGColor);
+    
+    CGContextSetFillColorWithColor(context, _fillColor.CGColor);
     CGContextFillRect(context, fillRect);
 }
 

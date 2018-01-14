@@ -33,4 +33,6 @@ static int APGOnePagePoints = 1024;
 
 @property (nonatomic, assign) BOOL horizontal;
 
+@property (nonatomic, strong) UIColor *fillColor;
+
 @end
