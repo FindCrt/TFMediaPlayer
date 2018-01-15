@@ -57,10 +57,11 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 
 -(void)prepareAudioUnit{
     
-    //gen Audio Unit audio description from tfmpResultDesc
-    
+    //gen AudioUnit audio description from tfmpResultDesc
     audioUnitResultDesc.mFormatFlags = 0; //reset.
     bool isInt = isIntForFormatFlags(tfmpResultDesc.formatFlags);
+    
+    //planar is same as nonInterleaved.
     bool isPlanar = isPlanarForFormatFlags(tfmpResultDesc.formatFlags);
     bool isBigEndian = isBigEndianForFormatFlags(tfmpResultDesc.formatFlags);
     
@@ -153,7 +154,9 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
     
     int retval = player->_fillStruct.fillFunc(buffers, count, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
     
-//    printf("fill audio buffer: %d\n",inNumberFrames);
+    free(buffers);
+    
+    
     
     if (player->_shareAudioStruct.shareAudioFunc) {
         int size = (int)ioData->mBuffers[0].mDataByteSize;

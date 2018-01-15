@@ -97,7 +97,6 @@ void *DisplayController::displayLoop(void *context){
             videoFrameBuf.linesize[i] = videoFrame->linesize[i];
         }
         
-        
         //TODO: unsupport format
         if (videoFrame->format == AV_PIX_FMT_YUV420P) {
             videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_YUV420P;
@@ -115,7 +114,6 @@ void *DisplayController::displayLoop(void *context){
         
         controller->syncClock->correctWithPresent(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
         if(showVideo) av_frame_unref(videoFrame);
-//        if(showAudio) av_frame_unref(audioFrame);
     }
     
     return 0;
@@ -133,12 +131,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         uint8_t *buffer = buffersList[i];
         
         if (unreadSize >= oneLineSize) {
-            //TODO: do more thing for planar audio.
+            
             memcpy(buffer, remainingBuffer.readingPoint(), oneLineSize);
             
             remainingBuffer.readIndex += oneLineSize;
-            
-            
             
         }else{
             
@@ -153,7 +149,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 unreadSize = 0;
             }
             
-            
             AVFrame *frame = av_frame_alloc();
             
             bool resample = false;
@@ -161,7 +156,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             int linesize = 0, outSamples = 0;
             
             while (needReadSize > 0) {
-                
+                //TODO: do more thing for planar audio.
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
                 if (displayer->audioResampler->isNeedResample(frame)) {
@@ -198,12 +193,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     if (mallocSize == 0) {
                         TFMPDLOG_C("fast malloc remaining audio buffer error!\n");
                         
+                        free(remainingBuffer.head);
                         remainingBuffer.head = (uint8_t *)malloc(remainingSize);
                     }
                     
                     remainingBuffer.validSize = remainingSize;
-                                   
                     memcpy(remainingBuffer.head, dataBuffer[i] + needReadSize, remainingSize);
+                    
                     
                     memcpy(buffer, dataBuffer[i], needReadSize);
                     needReadSize = 0;

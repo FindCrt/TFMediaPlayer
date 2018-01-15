@@ -12,12 +12,6 @@
 
 using namespace tfmpcore;
 
-static int SWR_CH_MAX = 2;
-
-//inline bool isNeedResample(AVFrame *sourceFrame, TFMPAudioStreamDescription *destDesc);
-//inline bool isNeedChangeSwrContext(AVFrame *sourceFrame, TFMPAudioStreamDescription *lastDesc);
-//static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples);
-
 bool Decoder::prepareDecode(){
     AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
     if (codec == nullptr) {
@@ -71,20 +65,20 @@ void Decoder::decodePacket(AVPacket *packet){
     int retval = av_packet_ref(refPacket, packet);
     TFCheckRetval("av_packet_ref")
     
-    pktBuffer.blockInsert(*refPacket);
+    pktBuffer.blockInsert(refPacket);
 }
 
 void *Decoder::decodeLoop(void *context){
     
     Decoder *decoder = (Decoder *)context;
     
-    AVPacket pkt;
+    AVPacket *pkt = nullptr;
     AVFrame *frame = nullptr;
     
     while (decoder->shouldDecode) {
         decoder->pktBuffer.blockGetOut(&pkt);
-        int retval = avcodec_send_packet(decoder->codecCtx, &pkt);
-        if (retval != 0) {
+        int retval = avcodec_send_packet(decoder->codecCtx, pkt);
+        if (retval < 0) {
             TFCheckRetval("avcodec send packet");
             continue;
         }
@@ -137,7 +131,7 @@ void *Decoder::decodeLoop(void *context){
                 continue;
             }
         }
-        av_packet_unref(&pkt);
+        av_packet_unref(pkt);
     }
     
     return 0;
