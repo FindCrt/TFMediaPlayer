@@ -34,7 +34,7 @@
         
         _playController = new tfmpcore::PlayController();
         
-        _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
+        _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_AUDIO);
         _playController->isAudioMajor = false;
         
         _playController->displayContext = (__bridge void *)self;

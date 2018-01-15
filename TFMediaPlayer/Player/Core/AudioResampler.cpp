@@ -79,7 +79,12 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     int outsize = av_samples_get_buffer_size(linesize, adoptedAudioDesc.channelsPerFrame, nb_samples, destFmt, 0);
     
-    av_fast_malloc(&resampledBuffers, &resampleSize, outsize);
+    //av_fast_malloc(&resampledBuffers, &resampleSize, outsize);
+    if (resampleSize < outsize) {
+//        free(resampledBuffers);
+        resampledBuffers = (uint8_t *)malloc(outsize);
+        resampleSize = outsize;
+    }
     
     if (resampleSize == 0) {
         TFMPDLOG_C("memory alloc resample buffer error!\n");
@@ -97,14 +102,14 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     
     unsigned int actualOutSize = actualOutSamples * adoptedAudioDesc.channelsPerFrame * av_get_bytes_per_sample(destFmt);
     
-    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
+//    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
     
-    *outSamples = actualOutSamples;
-    *linesize = actualOutSize;
-//    *outSamples = nb_samples;
-//    *linesize = outsize;
+//    *outSamples = actualOutSamples;
+//    *linesize = actualOutSize;
+    *outSamples = nb_samples;
+    *linesize = outsize;
     
-    resampleSize = actualOutSize;
+    resampleSize = outsize;
     
     return true;
 }

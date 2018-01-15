@@ -125,16 +125,16 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     
     for (int i = 0; i<lineCount; i++) {
         
-        TFMPRemainingBuffer &remainingBuffer = displayer->remainingAudioBuffers[i];
-        uint32_t unreadSize = remainingBuffer.unreadSize();
+        TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers[i]);
+        uint32_t unreadSize = remainingBuffer->unreadSize();
         
         uint8_t *buffer = buffersList[i];
         
         if (unreadSize >= oneLineSize) {
             
-            memcpy(buffer, remainingBuffer.readingPoint(), oneLineSize);
+            memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
             
-            remainingBuffer.readIndex += oneLineSize;
+            remainingBuffer->readIndex += oneLineSize;
             
         }else{
             
@@ -142,10 +142,11 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             if (unreadSize > 0) {
                 
                 needReadSize -= unreadSize;
-                memcpy(buffer, remainingBuffer.readingPoint(), unreadSize);
+                memcpy(buffer, remainingBuffer->readingPoint(), unreadSize);
                 
-                remainingBuffer.readIndex = 0;
-                remainingBuffer.validSize = 0;
+                remainingBuffer->readIndex = 0;
+                remainingBuffer->validSize = 0;
+                printf("reset validSize\n");
                 unreadSize = 0;
             }
             
@@ -185,20 +186,18 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 }else{
                     
                     //there is a little buffer left.
-                    remainingBuffer.readIndex = 0;
+                    remainingBuffer->readIndex = 0;
                     uint32_t remainingSize = linesize - needReadSize;
-                    
-                    unsigned int mallocSize = 0;
-                    av_fast_malloc(&(remainingBuffer.head), &mallocSize, remainingSize);
-                    if (mallocSize == 0) {
-                        TFMPDLOG_C("fast malloc remaining audio buffer error!\n");
-                        
-                        free(remainingBuffer.head);
-                        remainingBuffer.head = (uint8_t *)malloc(remainingSize);
+                
+                    //alloc a larger memory
+                    if (remainingBuffer->validSize < remainingSize) {
+                        free(remainingBuffer->head);
+                        remainingBuffer->head = (uint8_t *)malloc(remainingSize);
                     }
                     
-                    remainingBuffer.validSize = remainingSize;
-                    memcpy(remainingBuffer.head, dataBuffer[i] + needReadSize, remainingSize);
+                    remainingBuffer->validSize = remainingSize;
+                    printf("2>>> %d\n",remainingBuffer->validSize);
+                    memcpy(remainingBuffer->head, dataBuffer[i] + needReadSize, remainingSize);
                     
                     
                     memcpy(buffer, dataBuffer[i], needReadSize);

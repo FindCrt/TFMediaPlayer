@@ -42,7 +42,7 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
-    _showGraph = YES;
+//    _showGraph = YES;
 //    _autoStop = YES;
     
     if (_showGraph) {
@@ -58,7 +58,7 @@
     }
     
     _player = [[TFMediaPlayer alloc] init];
-    _player.displayView.frame = CGRectMake(0, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
+    _player.displayView.frame = CGRectMake(300, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
@@ -119,11 +119,11 @@
 
 -(void)startPlay{
     
-    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
     
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
+    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
     
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     

@@ -56,7 +56,11 @@ namespace tfmpcore {
         //real audio format
         void resolveAudioStreamFormat();
         
+        
         TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+        TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+        
+        void calculateRealDisplayMediaType();
         
     public:
         
@@ -77,6 +81,9 @@ namespace tfmpcore {
         
         
         void setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType);
+        TFMPMediaType getRealDisplayMediaType(){
+            return realDisplayMediaType;
+        }
         
         void *displayContext;
         TFMPVideoFrameDisplayFunc displayVideoFrame;

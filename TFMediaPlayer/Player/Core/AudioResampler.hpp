@@ -30,8 +30,8 @@ namespace tfmpcore {
         
     public:
         
-        uint8_t *resampledBuffers;
-        unsigned int resampleSize;
+        uint8_t *resampledBuffers = nullptr;
+        unsigned int resampleSize = 0;
         
         void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc){
             this->adoptedAudioDesc = adoptedAudioDesc;

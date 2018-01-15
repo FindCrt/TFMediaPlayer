@@ -44,7 +44,7 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
                             false);
     
     tfmpResultDesc.bitsPerChannel = 16;
-    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
+    tfmpResultDesc.channelsPerFrame = 1;//sourceDesc.channelsPerFrame;
     
     tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
     

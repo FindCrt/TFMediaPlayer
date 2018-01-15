@@ -82,17 +82,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
 
     prapareOK = true;
     
-    int realType = 0;
-    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && (videoStrem >= 0)) {
-        realType |= TFMP_MEDIA_TYPE_VIDEO;
-    }
-    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && (videoStrem >= 0)) {
-        realType |= TFMP_MEDIA_TYPE_AUDIO;
-    }
-    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) && (videoStrem >= 0)) {
-        realType |= TFMP_MEDIA_TYPE_SUBTITLE;
-    }
-    displayer->displayMediaType = (TFMPMediaType)realType;
+    calculateRealDisplayMediaType();
     
     if (connectCompleted != nullptr) {
         connectCompleted(this);
@@ -140,21 +130,26 @@ void PlayController::stop(){
 
 /***** properties *****/
 
+void PlayController::calculateRealDisplayMediaType(){
+    int realType = 0;
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && (videoStrem >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_VIDEO;
+    }
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && (audioStream >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_AUDIO;
+    }
+    if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) && (subTitleStream >= 0)) {
+        realType |= TFMP_MEDIA_TYPE_SUBTITLE;
+    }
+    
+    realDisplayMediaType = (TFMPMediaType)realType;
+    displayer->displayMediaType = (TFMPMediaType)realType;
+}
+
 void PlayController::setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType){
     this->desiredDisplayMediaType = desiredDisplayMediaType;
     if (prapareOK) {
-        int realType = 0;
-        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && (videoStrem >= 0)) {
-            realType |= TFMP_MEDIA_TYPE_VIDEO;
-        }
-        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && (videoStrem >= 0)) {
-            realType |= TFMP_MEDIA_TYPE_AUDIO;
-        }
-        if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) && (videoStrem >= 0)) {
-            realType |= TFMP_MEDIA_TYPE_SUBTITLE;
-        }
-        
-        displayer->displayMediaType = (TFMPMediaType)realType;
+        calculateRealDisplayMediaType();
     }
 }
 
@@ -201,15 +196,18 @@ void * PlayController::readFrame(void *context){
     
     while (av_read_frame(controller->fmtCtx, packet) == 0) {
         
-        if (packet->stream_index == controller->videoStrem) {
+        if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
+            packet->stream_index == controller->videoStrem) {
             
             controller->videoDecoder->decodePacket(packet);
             
-        }else if (packet->stream_index == controller->audioStream){
+        }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
+                  packet->stream_index == controller->audioStream){
             
             controller->audioDecoder->decodePacket(packet);
             
-        }else if (packet->stream_index == controller->subTitleStream){
+        }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
+                  packet->stream_index == controller->subTitleStream){
             
             controller->subtitleDecoder->decodePacket(packet);
         }
