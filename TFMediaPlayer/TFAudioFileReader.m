@@ -52,7 +52,7 @@
     _outputDesc.mFormatID = kAudioFormatLinearPCM;
     _outputDesc.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
     _outputDesc.mReserved = 0;
-    _outputDesc.mChannelsPerFrame = 1; //2
+    _outputDesc.mChannelsPerFrame = 2; //2
     _outputDesc.mBitsPerChannel = 16;
     _outputDesc.mFramesPerPacket = 1;
     _outputDesc.mBytesPerFrame = _outputDesc.mChannelsPerFrame * _outputDesc.mBitsPerChannel / 8;

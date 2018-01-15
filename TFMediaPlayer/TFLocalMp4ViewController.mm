@@ -42,37 +42,41 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
-//    _showGraph = YES;
+    _showGraph = YES;
 //    _autoStop = YES;
     
-    _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 200)];
-    [self.view addSubview:_graphView];
-    
-    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(160, 220, 55, 40)];
-    _stopButton.backgroundColor = [UIColor orangeColor];
-    [_stopButton setTitle:@"stop" forState:(UIControlStateNormal)];
-    [_stopButton addTarget:self action:@selector(clickButton:) forControlEvents:(UIControlEventTouchUpInside)];
-    [self.view addSubview:_stopButton];
-    
-    _graphView.sampleRate = 44100;
-    _graphView.bytesPerSample = 2;
-    _graphView.ignoreSign = YES;
-    
+    if (_showGraph) {
+        _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 200)];
+        [self.view addSubview:_graphView];
+        
+        _graphView.sampleRate = 44100;
+        _graphView.bytesPerSample = 2;
+//        _graphView.ignoreSign = YES;
+        _graphView.showRate = 20;
+        _graphView.changeColor = YES;
+//        _graphView.colorFlagCycleCount = 2;
+    }
     
     _player = [[TFMediaPlayer alloc] init];
     _player.displayView.frame = CGRectMake(0, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
-    
-    
     [self.view addSubview:_player.displayView];
+    
+    
+    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(160, 220, 55, 40)];
+    _stopButton.backgroundColor = [UIColor orangeColor];
+    [_stopButton setTitle:@"stop" forState:(UIControlStateNormal)];
+    [_stopButton addTarget:self action:@selector(clickButton:) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_stopButton];
 }
 
 -(void)clickButton:(UIButton *)button{
     NSLog(@"----------stop-----------");
     [_audioPlayer stop];
     [_graphView stop];
+    [_player stop];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
@@ -82,10 +86,15 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
-    [_player stop];
     
-    [_audioPlayer stop];
-    [_graphView stop];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [_player stop];
+        
+        [_audioPlayer stop];
+        [_graphView stop];
+    });
+    
+    NSLog(@"disappeared！");
 }
 
 
@@ -110,11 +119,11 @@
 
 -(void)startPlay{
     
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
     
-    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
     
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
@@ -154,13 +163,8 @@ int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *contex
     
     int status = [localPlayer->_reader readFrames:&framesNum toBufferData:tfBufData];
     
-    if (localPlayer->_showGraph) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //graph
-            if (buffer[0]) {
-                [localPlayer->_graphView showBuffer:buffer[0] size:oneLineize];
-            }
-        });
+    if (localPlayer->_showGraph && buffer) {
+        [localPlayer->_graphView showBuffer:buffer[0] size:oneLineize];
     }
     
     return status;
@@ -171,8 +175,8 @@ int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *contex
 -(void)audioUnitPlay{
     _reader = [[TFAudioFileReader alloc] init];
     
-//    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"LuckyDay" ofType:@"mp3"];
-    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"pure1" ofType:@"caf"];
+    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"LuckyDay" ofType:@"mp3"];
+//    NSString *audioPath = [[NSBundle mainBundle] pathForResource:@"pure1" ofType:@"caf"];
     [_reader setFilePath:audioPath];
     _reader.isRepeat = true;
     
@@ -200,10 +204,7 @@ void shareAudioBuffer(uint8_t **buffer, int size, void *context){
     
     TFLocalMp4ViewController *localPlayer = (__bridge TFLocalMp4ViewController *)context;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //graph
-        if (buffer) [localPlayer->_graphView showBuffer:buffer[0] size:size];
-    });
+    if (buffer) [localPlayer->_graphView showBuffer:buffer[0] size:size];
 }
 
 @end

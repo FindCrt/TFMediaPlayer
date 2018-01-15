@@ -14,6 +14,12 @@ static int APGOnePagePoints = 1024;
 
 @property (nonatomic, assign) BOOL ignoreSign; //
 
+@property (nonatomic, assign) BOOL changeColor;
+
+@property (nonatomic, assign) int colorFlagCycleCount;
+
+@property (nonatomic, assign) float showRate;
+
 @property (nonatomic, assign) int bytesPerSample;
 
 @property (nonatomic, assign) uint64_t sampleRate;

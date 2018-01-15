@@ -208,7 +208,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 }
             }
         }
-
+        
+//        for (int i = 0; i<oneLineSize; i++) {
+//            *(buffer+i) += 0xffff*0.0001f;
+//        }
     }
     
     return 0;

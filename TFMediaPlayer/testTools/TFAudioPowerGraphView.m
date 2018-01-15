@@ -31,7 +31,7 @@ static CGFloat pointSpace = 2;
     int _averageCount;
     int64_t _average;
     
-    BOOL _colorFlag;
+    int _colorFlag;
     
     BOOL _canDraw;
 }
@@ -51,6 +51,9 @@ static CGFloat pointSpace = 2;
         _showedViews = [[NSMutableArray alloc] init];
         _unuseViews = [[NSMutableSet alloc] init];
         _canDraw = YES;
+        _showRate = 1;
+        _colorFlag = 0;
+        _colorFlagCycleCount = 1;
         
         _sampleValueMax = 1 << (sizeof(SInt16)*8-1);
         
@@ -80,7 +83,7 @@ static CGFloat pointSpace = 2;
 
 -(void)showBuffer:(void *)buffer size:(uint32_t)size{
     
-    if (!_canDraw) {
+    if (!_canDraw || buffer == nil) {
         return;
     }
     
@@ -91,7 +94,12 @@ static CGFloat pointSpace = 2;
     
     //暂时按s16来读取
     SInt16 *s16Buffer = buffer;
-//    _colorFlag = !_colorFlag;
+    if (_changeColor) {
+        _colorFlag ++;
+        if (_colorFlag == 2*_colorFlagCycleCount) {
+            _colorFlag = 0;
+        }
+    }
 //    printf("now color flag is: %s\n",_colorFlag?"black":"orange");
     
     for (int i = 0; i<sampleCount; i++) {
@@ -111,7 +119,7 @@ static CGFloat pointSpace = 2;
 }
 
 -(void)showNextData:(float)value{
-    value *= 2;
+    value *= _showRate;
 //    printf("<< %.6f\n",value);
     
     TFAudioPowerGraphContentView *cell = nil;
@@ -128,17 +136,18 @@ static CGFloat pointSpace = 2;
         }
         cell.horizontal = NO;
         cell.backgroundColor = [UIColor whiteColor];
-        cell.fillColor = _colorFlag ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
+        cell.fillColor = (_colorFlag >= _colorFlagCycleCount) ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
         
         cell.frame = CGRectMake(_curIndex*pointSpace, 0, pointSpace, _scrollView.bounds.size.height);
         
         
-        [_scrollView addSubview:cell];
+        _showingRange.length += 1;
         [_showedViews addObject:cell];
         
-        _scrollView.contentSize = CGSizeMake((_showingRange.length+_showingRange.location)*pointSpace, _scrollView.bounds.size.height);
-        
-        _showingRange.length += 1;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_scrollView addSubview:cell];
+            _scrollView.contentSize = CGSizeMake((_showingRange.length+_showingRange.location)*pointSpace, _scrollView.bounds.size.height);
+        });
     }
     
     cell.value = value;

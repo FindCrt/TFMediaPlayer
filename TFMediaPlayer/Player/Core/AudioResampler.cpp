@@ -73,8 +73,8 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
         return nullptr;
     }
     
-//    int nb_samplesxx = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
-    int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
+    int nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+//    int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     int outsize = av_samples_get_buffer_size(linesize, adoptedAudioDesc.channelsPerFrame, nb_samples, destFmt, 0);
@@ -101,6 +101,8 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     
     *outSamples = actualOutSamples;
     *linesize = actualOutSize;
+//    *outSamples = nb_samples;
+//    *linesize = outsize;
     
     resampleSize = actualOutSize;
     

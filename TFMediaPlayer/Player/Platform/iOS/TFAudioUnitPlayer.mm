@@ -154,14 +154,13 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
     
     int retval = player->_fillStruct.fillFunc(buffers, count, ioData->mBuffers[0].mDataByteSize, player->_fillStruct.context);
     
-    free(buffers);
-    
-    
-    
     if (player->_shareAudioStruct.shareAudioFunc) {
         int size = (int)ioData->mBuffers[0].mDataByteSize;
         player->_shareAudioStruct.shareAudioFunc(buffers, size, player->_shareAudioStruct.context);
     }
+    
+    free(buffers);
+    buffers = nullptr;
     
     return retval;
 }
