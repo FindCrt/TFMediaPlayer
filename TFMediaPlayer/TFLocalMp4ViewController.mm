@@ -13,7 +13,7 @@
 #import "TFAudioFileReader.h"
 #import "TFAudioUnitPlayer.h"
 #import "TFMPAVFormat.h"
-
+#import "TFMPDebugFuncs.h"
 #import "TFAudioPowerGraphView.h"
 
 @interface TFLocalMp4ViewController (){
@@ -42,7 +42,7 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
-//    _showGraph = YES;
+    _showGraph = YES;
 //    _autoStop = YES;
     
     if (_showGraph) {
@@ -52,8 +52,9 @@
         _graphView.sampleRate = 44100;
         _graphView.bytesPerSample = 2;
 //        _graphView.ignoreSign = YES;
-        _graphView.showRate = 1;
-//        _graphView.changeColor = YES;
+        _graphView.showRate = 20;
+        _graphView.changeColor = YES;
+        _graphView.changeBGColor = YES;
 //        _graphView.colorFlagCycleCount = 2;
     }
     

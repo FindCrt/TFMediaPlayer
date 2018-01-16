@@ -34,7 +34,7 @@
         AudioStreamBasicDescription audioDesc;
         configAudioDescWithSpecifics(&audioDesc, &_resultSpecifics);
         
-        _resultSpecifics.samples = 1024;
+        _resultSpecifics.samples = 1100;
         _resultSpecifics.bufferSize = _resultSpecifics.bitsPerChannel/8 * _resultSpecifics.channelsPerFrame * _resultSpecifics.samples;
         
         
@@ -67,7 +67,7 @@
     
     //all return s16+44100(no planar),but don't change channel number.
     _resultSpecifics.samples = sourceDesc.samples;
-    _resultSpecifics.sampleRate = 48000;
+    _resultSpecifics.sampleRate = 44100;
     setFormatFlagsWithFlags(&(_resultSpecifics.formatFlags),
                             true,
                             true,
@@ -186,7 +186,15 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
         }
         
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
+        
+        
+        if (controller->_shareAudioStruct.shareAudioFunc) {
+            int size = (int)inBuffer->mAudioDataByteSize;
+            controller->_shareAudioStruct.shareAudioFunc(buffers, size, controller->_shareAudioStruct.context);
+        }
     }
+    
+    free(buffers);
 }
 
 -(void)dealloc{

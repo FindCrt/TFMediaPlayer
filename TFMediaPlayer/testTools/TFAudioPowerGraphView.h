@@ -18,6 +18,8 @@ static int APGOnePagePoints = 1024;
 
 @property (nonatomic, assign) int colorFlagCycleCount;
 
+@property (nonatomic, assign) BOOL changeBGColor;
+
 @property (nonatomic, assign) float showRate;
 
 @property (nonatomic, assign) int bytesPerSample;

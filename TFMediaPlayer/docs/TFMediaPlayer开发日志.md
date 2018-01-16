@@ -32,7 +32,7 @@
 6. 音频的重采样
  * resample的参数是channel_layout，而不是channels，修改channels而没有修改channel_layout，导致不匹配错误。
  * `swr_convert`的输入和输出都是针对perChannel的
- * 重大突破：使用audioQueue，把sampleRate设为和音频源一致，然后每次的size也和resample之后每帧一致，一点杂音都没有。**resample和读取可能都有问题，错位的感觉**
+
  
 7. 哒哒声的问题：
   >今天刚好碰到同样的问题，google, baidu均无解，无奈自己研究，是因为语音数据里包含了RTP包头的原因，自己写了个转换工具，把12Bytes的RTP包头去掉，哒哒声就没了
@@ -49,3 +49,7 @@
   * 带视频的双声道音频AAC还是杂音，纯音频AAC可以了，第一个sampleRate是48k,第二个是44.1k。码率不同，而且不是倍数，很可能造成错位问题。
   * 11.025k的MP3格式播放基本没问题，高音处会有杂音，有点像数值溢出。
   * game视频播放已经没有音爆了，说明之前的代码也是有上述问题，就是buffer读错了。现在的问题是变音了，像扭曲了一样，但是真个的节奏都在，声音没丢。` memcpy(buffer, dataBuffer, needReadSize);`错误就是这句，一直在。
+  * 重大突破：使用audioQueue，把sampleRate设为和音频源一致，然后每次的size也和resample之后每帧一致，一点杂音都没有。**resample和读取可能都有问题，错位的感觉**
+ * 把queueBuffer的samples调整到2048,出现后半截就是空值。
+ * **问题找到了，跟resample没关系，还是我代码写错了，拷贝buffer的时候，没有考虑到可能已经拷贝了一段内存，所以后面的会覆盖前面的内存，导致后面的内存空掉**
+ * **有价值的是：那些莎莎声，都是丢失的数据，也就是空白**这也和为什么电脑卡顿之类的情况时，会有莎莎声。运行不流畅，数据没有接上，导致数据空白。

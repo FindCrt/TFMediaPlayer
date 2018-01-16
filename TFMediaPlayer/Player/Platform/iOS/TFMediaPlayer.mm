@@ -6,14 +6,20 @@
 //  Copyright © 2017年 shiwei. All rights reserved.
 //
 
+#define TFMPUseAudioUnitPlayer 1
+
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"
 #import "TFOPGLESDisplayView.h"
-#import "TFAudioUnitPlayer.h"
 #import "TFMPDebugFuncs.h"
-#import "TFAudioQueueController.h"
 
-#define TFMPUseAudioUnitPlayer 1
+#if TFMPUseAudioUnitPlayer
+#import "TFAudioUnitPlayer.h"
+#else
+#import "TFAudioQueueController.h"
+#endif
+
+
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
@@ -68,6 +74,7 @@
             return result;
 #else
             _audioPlayer = [[TFAudioQueueController alloc] initWithSpecifics:sourceDesc];
+            _audioPlayer.shareAudioStruct = _shareAudioStruct;
             _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
             
             return _audioPlayer.resultSpecifics;
@@ -179,11 +186,10 @@
     return YES;
 }
 
-#if TFMPUseAudioUnitPlayer
 -(void)setShareAudioStruct:(TFMPShareAudioBufferStruct)shareAudioStruct{
+    _shareAudioStruct = shareAudioStruct;
     [_audioPlayer setShareAudioStruct:shareAudioStruct];
 }
-#endif
 
 #pragma mark - platform special
 

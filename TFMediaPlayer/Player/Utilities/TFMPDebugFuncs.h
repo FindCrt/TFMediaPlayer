@@ -85,11 +85,19 @@ NSLog(@"%@ error:\n{%@}",log,error); return;\
 
 /** check buffer */
 
-#define TFMPPrintBuffer(buffer, start, length)\
-int *checkP = (int*)buffer;\
-for(int i = 0; i<length/4;i++){\
-    printf("%x |",*checkP);\
+#define TFMPPrintBuffer_S16(buffer, start, length)\
+signed short *checkP = ((signed short*)buffer)+start;\
+for(int i = 0; i<length;i++){\
+    printf("%d ",*checkP);\
     checkP++;\
+}\
+printf("\n-------------\n");
+
+#define TFMPPrintBuffer(buffer, start, length)\
+uint8_t *checkP = (uint8_t*)buffer;\
+for(int i = 0; i<length;i++){\
+printf("%x ",*checkP);\
+checkP++;\
 }\
 printf("\n-------------\n");
 

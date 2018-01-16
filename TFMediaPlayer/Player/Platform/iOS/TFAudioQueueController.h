@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import "TFMPAVFormat.h"
+#import "TFAudioUnitPlayer.h"
 
 #define TFAudioQueueBufferCount     3
 
@@ -25,5 +26,7 @@
 -(void)pause;
 
 -(void)stop;
+
+@property (nonatomic, assign) TFMPShareAudioBufferStruct shareAudioStruct;
 
 @end

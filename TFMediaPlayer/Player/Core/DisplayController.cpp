@@ -156,7 +156,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             unreadSize = 0;
         }
         
-        AVFrame *frame = av_frame_alloc();
+        AVFrame *frame = nullptr;
         
         bool resample = false;
         uint8_t *dataBuffer = nullptr;
@@ -164,6 +164,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         
         while (needReadSize > 0) {
             //TODO: do more thing for planar audio.
+            frame = av_frame_alloc();
             displayer->shareAudioBuffer->blockGetOut(&frame);
             
             TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);
@@ -186,14 +187,18 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 continue;
             }
             
+            
+            
             if (needReadSize >= linesize) {
                 
-                memcpy(buffer, dataBuffer, linesize);
+                //buffer has be copyed some data what size is oneLineSize - needReadSize.
+                memcpy(buffer+(oneLineSize - needReadSize), dataBuffer, linesize);
                 needReadSize -= linesize;
                 
                 TFMPBufferReadLog("copy frame %d",oneLineSize);
                 
                 av_frame_free(&frame);
+
                 
             }else{
                 
@@ -214,7 +219,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memcpy(remainingBuffer->head, dataBuffer + needReadSize, remainingSize);
                 
                 
-                memcpy(buffer, dataBuffer, needReadSize);
+                memcpy(buffer+(oneLineSize - needReadSize), dataBuffer, needReadSize);
                 needReadSize = 0;
                 
                 av_frame_free(&frame);

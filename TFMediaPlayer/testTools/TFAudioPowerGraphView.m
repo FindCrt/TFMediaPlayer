@@ -7,6 +7,7 @@
 //
 
 #import "TFAudioPowerGraphView.h"
+#import "TFMPDebugFuncs.h"
 
 static CGFloat pointSpace = 2;
 
@@ -100,7 +101,6 @@ static CGFloat pointSpace = 2;
             _colorFlag = 0;
         }
     }
-//    printf("now color flag is: %s\n",_colorFlag?"black":"orange");
     
     for (int i = 0; i<sampleCount; i++) {
         SInt16 rawValue = *s16Buffer;
@@ -109,6 +109,7 @@ static CGFloat pointSpace = 2;
         _averageCount++;
         
         if (_averageCount == frequency) {
+//            printf("index: %d",i);
             [self showNextData:_average/(double)frequency/_sampleValueMax];
             _average = 0;
             _averageCount = 0;
@@ -135,8 +136,15 @@ static CGFloat pointSpace = 2;
             cell.ignoreSign = _ignoreSign;
         }
         cell.horizontal = NO;
-        cell.backgroundColor = [UIColor whiteColor];
-        cell.fillColor = (_colorFlag >= _colorFlagCycleCount) ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
+        
+        if (_changeBGColor) {
+            cell.fillColor = [UIColor whiteColor];
+            cell.backgroundColor = (_colorFlag >= _colorFlagCycleCount) ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
+        }else{
+            cell.backgroundColor = [UIColor whiteColor];
+            cell.fillColor = (_colorFlag >= _colorFlagCycleCount) ? [UIColor blackColor] : [UIColor colorWithRed:1 green:0.9 blue:0.8 alpha:1];
+        }
+        
         
         cell.frame = CGRectMake(_curIndex*pointSpace, 0, pointSpace, _scrollView.bounds.size.height);
         
