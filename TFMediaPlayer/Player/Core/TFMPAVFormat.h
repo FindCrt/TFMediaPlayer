@@ -56,6 +56,9 @@ typedef struct{
     
     uint64_t ffmpeg_channel_layout;
     
+    int bufferSize;
+    int samples;
+    
 }TFMPAudioStreamDescription;
 
 inline void setFormatFlagsWithFlags(uint8_t *formatFlags, bool isInt, bool isSigned, bool isBigEndian, bool isPlanar){
@@ -88,6 +91,8 @@ typedef struct{
     TFMPFillAudioBufferFunc fillFunc; //The system audio player call this function to obtain audio buffer.
     void *context;  //The var that assigned to fillFunc‘s parameter context.
 }TFMPFillAudioBufferStruct;
+
+
 
 
 #endif /* VideoFormat_h */

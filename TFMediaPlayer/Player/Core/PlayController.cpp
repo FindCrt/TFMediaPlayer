@@ -177,6 +177,11 @@ void PlayController::resolveAudioStreamFormat(){
     sourceDesc.channelsPerFrame = codecpar->channels;
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
     
+    {
+        //audio queue player
+        sourceDesc.samples = 2304;
+    }
+    
     //resample source audio to real-play audio format.
     auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
     audioResampler->setAdoptedAudioDesc(adoptedAudioDesc);

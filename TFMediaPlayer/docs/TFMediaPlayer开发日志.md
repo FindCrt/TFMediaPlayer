@@ -32,6 +32,7 @@
 6. 音频的重采样
  * resample的参数是channel_layout，而不是channels，修改channels而没有修改channel_layout，导致不匹配错误。
  * `swr_convert`的输入和输出都是针对perChannel的
+ * 重大突破：使用audioQueue，把sampleRate设为和音频源一致，然后每次的size也和resample之后每帧一致，一点杂音都没有。**resample和读取可能都有问题，错位的感觉**
  
 7. 哒哒声的问题：
   >今天刚好碰到同样的问题，google, baidu均无解，无奈自己研究，是因为语音数据里包含了RTP包头的原因，自己写了个转换工具，把12Bytes的RTP包头去掉，哒哒声就没了

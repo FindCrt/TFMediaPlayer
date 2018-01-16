@@ -37,7 +37,7 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100(no planar),but don't change channel number.
-    tfmpResultDesc.sampleRate = 44100;
+    tfmpResultDesc.sampleRate = 48000;
     setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
                             true,
                             true,
@@ -45,7 +45,7 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
                             false);
     
     tfmpResultDesc.bitsPerChannel = 16;
-    tfmpResultDesc.channelsPerFrame = 2;//sourceDesc.channelsPerFrame;
+    tfmpResultDesc.channelsPerFrame = sourceDesc.channelsPerFrame;
     
     tfmpResultDesc.ffmpeg_channel_layout = channelLayoutForChannels(tfmpResultDesc.channelsPerFrame);//sourceDesc.ffmpeg_channel_layout;
     

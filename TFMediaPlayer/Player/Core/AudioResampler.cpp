@@ -8,6 +8,9 @@
 
 #include "AudioResampler.hpp"
 #include "TFMPDebugFuncs.h"
+extern "C"{
+#include <libavcodec/avcodec.h>
+}
 
 #pragma mark - resample audio
 
@@ -63,7 +66,7 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     lastSourceAudioDesc->channelsPerFrame = sourceFrame->channels;
 }
 
-bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
+bool AudioResampler::reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *linesize){
     
     if (_isNeedResample(inFrame, lastSourceAudioDesc)) {
         initResampleContext(inFrame);
@@ -86,11 +89,6 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
         resampleSize = outsize;
     }
     
-    if (resampleSize == 0) {
-        TFMPDLOG_C("memory alloc resample buffer error!\n");
-        return false;
-    }
-    
     uint8_t **outBuffer = &resampledBuffers;
     int actualOutSamples = swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
     
@@ -101,12 +99,90 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     
     unsigned int actualOutSize = actualOutSamples * adoptedAudioDesc.channelsPerFrame * av_get_bytes_per_sample(destFmt);
     
-//    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
+    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
     
     *outSamples = actualOutSamples;
     *linesize = actualOutSize;
     
-    resampleSize = outsize;
+    resampleSize = actualOutSize;
     
     return true;
 }
+
+bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
+    
+    AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
+    AVSampleFormat sourceFmt = (AVSampleFormat)inFrame->format;
+    
+    if (_isNeedResample(inFrame, lastSourceAudioDesc)) {
+        
+        uint64_t dec_channel_layout =
+        (inFrame->channel_layout && inFrame->channels == av_get_channel_layout_nb_channels(inFrame->channel_layout)) ?
+        inFrame->channel_layout : av_get_default_channel_layout(inFrame->channels);
+        
+        swrCtx = swr_alloc_set_opts(NULL,
+                                    adoptedAudioDesc.ffmpeg_channel_layout,
+                                    destFmt,
+                                    adoptedAudioDesc.sampleRate,
+                                    dec_channel_layout,
+                                    sourceFmt,
+                                    inFrame->sample_rate,
+                                    0, NULL);
+        if (swrCtx == nullptr || swr_init(swrCtx) < 0) {
+            swr_free(&swrCtx);
+            return false;
+        }
+        
+        lastSourceAudioDesc = new TFMPAudioStreamDescription();
+        lastSourceAudioDesc->sampleRate = inFrame->sample_rate;
+        lastSourceAudioDesc->formatFlags = formatFlagsFromFFmpegAudioFormat(sourceFmt);
+        lastSourceAudioDesc->bitsPerChannel = bitPerChannelFromFFmpegAudioFormat(sourceFmt);
+        lastSourceAudioDesc->ffmpeg_channel_layout = inFrame->channel_layout;
+        lastSourceAudioDesc->channelsPerFrame = inFrame->channels;
+    }
+    
+    if (!swrCtx) {
+        return false;
+    }
+    
+    const uint8_t **in = (const uint8_t **)inFrame->extended_data;
+    uint8_t **out = &resampledBuffers1;
+    int out_count = (int64_t)inFrame->nb_samples * adoptedAudioDesc.sampleRate / inFrame->sample_rate + 256;
+    int out_size  = av_samples_get_buffer_size(NULL, adoptedAudioDesc.channelsPerFrame, out_count, destFmt, 0);
+    
+    int len2;
+    if (out_size < 0) {
+        av_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size() failed\n");
+        return -1;
+    }
+//    if (wanted_nb_samples != af->frame->nb_samples) {
+//        if (swr_set_compensation(is->swr_ctx, (wanted_nb_samples - af->frame->nb_samples) * is->audio_tgt.freq / af->frame->sample_rate,
+//                                 wanted_nb_samples * is->audio_tgt.freq / af->frame->sample_rate) < 0) {
+//            av_log(NULL, AV_LOG_ERROR, "swr_set_compensation() failed\n");
+//            return -1;
+//        }
+//    }
+    av_fast_malloc(&resampledBuffers1, &resampleSize, out_size);
+    if (resampledBuffers1 == nullptr)
+        return AVERROR(ENOMEM);
+    len2 = swr_convert(swrCtx, out, out_count, in, inFrame->nb_samples);
+    if (len2 < 0) {
+        av_log(NULL, AV_LOG_ERROR, "swr_convert() failed\n");
+        return -1;
+    }
+    
+    if (len2 == out_count) {
+        av_log(NULL, AV_LOG_WARNING, "audio buffer is probably too small\n");
+        if (swr_init(swrCtx) < 0)
+            swr_free(&swrCtx);
+    }
+    
+    resampledBuffers = resampledBuffers1;
+    resampleSize = len2 * adoptedAudioDesc.channelsPerFrame * av_get_bytes_per_sample(destFmt);
+    
+    *outSamples = len2;
+    *linesize = resampleSize;
+    
+    return true;
+}
+

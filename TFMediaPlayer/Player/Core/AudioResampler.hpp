@@ -27,7 +27,7 @@ namespace tfmpcore {
         
         TFMPAudioStreamDescription *lastSourceAudioDesc = nullptr;
         
-        
+        uint8_t *resampledBuffers1 = nullptr;
     public:
         
         uint8_t *resampledBuffers = nullptr;
@@ -40,6 +40,7 @@ namespace tfmpcore {
         bool isNeedResample(AVFrame *sourceFrame);
         
         bool reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize);
+        bool reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *linesize);
     };
 }
 

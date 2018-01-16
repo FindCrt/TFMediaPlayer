@@ -11,8 +11,9 @@
 #import "TFOPGLESDisplayView.h"
 #import "TFAudioUnitPlayer.h"
 #import "TFMPDebugFuncs.h"
+#import "TFAudioQueueController.h"
 
-//#import <AVFoundation/AVFoundation.h>
+#define TFMPUseAudioUnitPlayer 1
 
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
@@ -20,7 +21,12 @@
     BOOL _innerPlayWhenReady;
     
     TFOPGLESDisplayView *_displayView;
+    
+#if TFMPUseAudioUnitPlayer
     TFAudioUnitPlayer *_audioPlayer;
+#else
+    TFAudioQueueController *_audioPlayer;
+#endif
 }
 
 @end
@@ -51,15 +57,21 @@
             }
         };
         
-        
+#if TFMPUseAudioUnitPlayer
         _audioPlayer = [[TFAudioUnitPlayer alloc] init];
         _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
+#endif
         
         _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
-            
+#if TFMPUseAudioUnitPlayer
             TFMPAudioStreamDescription result = [_audioPlayer resultAudioDescForSource:sourceDesc];
-            
             return result;
+#else
+            _audioPlayer = [[TFAudioQueueController alloc] initWithSpecifics:sourceDesc];
+            _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
+            
+            return _audioPlayer.resultSpecifics;
+#endif
         };
     }
     
@@ -167,9 +179,11 @@
     return YES;
 }
 
+#if TFMPUseAudioUnitPlayer
 -(void)setShareAudioStruct:(TFMPShareAudioBufferStruct)shareAudioStruct{
     [_audioPlayer setShareAudioStruct:shareAudioStruct];
 }
+#endif
 
 #pragma mark - platform special
 

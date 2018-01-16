@@ -52,8 +52,8 @@
         _graphView.sampleRate = 44100;
         _graphView.bytesPerSample = 2;
 //        _graphView.ignoreSign = YES;
-        _graphView.showRate = 20;
-        _graphView.changeColor = YES;
+        _graphView.showRate = 1;
+//        _graphView.changeColor = YES;
 //        _graphView.colorFlagCycleCount = 2;
     }
     
