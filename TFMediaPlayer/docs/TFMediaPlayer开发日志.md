@@ -30,7 +30,8 @@
  * 核心问题是音频packet和视频packet的数量对比，还有frame。他们可能不是1：1的。
 
 6. 音频的重采样
-
+ * resample的参数是channel_layout，而不是channels，修改channels而没有修改channel_layout，导致不匹配错误。
+ * `swr_convert`的输入和输出都是针对perChannel的
  
 7. 哒哒声的问题：
   >今天刚好碰到同样的问题，google, baidu均无解，无奈自己研究，是因为语音数据里包含了RTP包头的原因，自己写了个转换工具，把12Bytes的RTP包头去掉，哒哒声就没了
@@ -46,4 +47,4 @@
   * 还需要检查之前的代码是否也是这个问题，还有AAC播放是否可以了。
   * 带视频的双声道音频AAC还是杂音，纯音频AAC可以了，第一个sampleRate是48k,第二个是44.1k。码率不同，而且不是倍数，很可能造成错位问题。
   * 11.025k的MP3格式播放基本没问题，高音处会有杂音，有点像数值溢出。
-  * game视频播放已经没有音爆了，说明之前的代码也是有上述问题，就是buffer读错了。现在的问题是变音了，像扭曲了一样，但是真个的节奏都在，声音没丢。` memcpy(buffer, dataBuffer, needReadSize);`错误就是这句，一直在
+  * game视频播放已经没有音爆了，说明之前的代码也是有上述问题，就是buffer读错了。现在的问题是变音了，像扭曲了一样，但是真个的节奏都在，声音没丢。` memcpy(buffer, dataBuffer, needReadSize);`错误就是这句，一直在。

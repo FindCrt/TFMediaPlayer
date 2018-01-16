@@ -119,11 +119,11 @@
 
 -(void)startPlay{
     
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
     
-    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
     
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     

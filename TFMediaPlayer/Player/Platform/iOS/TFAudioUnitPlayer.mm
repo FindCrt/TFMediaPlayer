@@ -10,6 +10,7 @@
 #import <AudioUnit/AudioUnit.h>
 #include <AVFoundation/AVFoundation.h>
 #import "TFMPDebugFuncs.h"
+#import "TFMPUtilities.h"
 
 static UInt32 renderAudioElement = 0;//the id of element that render to system audio component.
 
@@ -44,9 +45,9 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
                             false);
     
     tfmpResultDesc.bitsPerChannel = 16;
-    tfmpResultDesc.channelsPerFrame = 1;//sourceDesc.channelsPerFrame;
+    tfmpResultDesc.channelsPerFrame = 2;//sourceDesc.channelsPerFrame;
     
-    tfmpResultDesc.ffmpeg_channel_layout = sourceDesc.ffmpeg_channel_layout;
+    tfmpResultDesc.ffmpeg_channel_layout = channelLayoutForChannels(tfmpResultDesc.channelsPerFrame);//sourceDesc.ffmpeg_channel_layout;
     
 //    tfmpResultDesc = sourceDesc;
     

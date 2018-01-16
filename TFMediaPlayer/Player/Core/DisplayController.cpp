@@ -12,6 +12,8 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
+#define TFMPBufferReadLog(fmt,...) //printf(fmt,__VA_ARGS__);printf("\n");
+
 using namespace tfmpcore;
 
 static unsigned int minExeTime = 0.01; //microsecond
@@ -79,7 +81,7 @@ void *DisplayController::displayLoop(void *context){
         
         double remainTime = controller->syncClock->remainTime(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
         
-        printf("remainTime: %.6f\n",remainTime);
+        TFMPBufferReadLog("remainTime: %.6f\n",remainTime);
         
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
@@ -121,20 +123,24 @@ void *DisplayController::displayLoop(void *context){
 
 int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
     
+    TFMPBufferReadLog("\n------start read--------%d,%d",oneLineSize,lineCount);
+    
     DisplayController *displayer = (DisplayController *)context;
     
-    for (int i = 0; i<lineCount; i++) {
-        
-        TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers[i]);
+//    for (int i = 0; i<lineCount; i++) {
+    
+        TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
         uint32_t unreadSize = remainingBuffer->unreadSize();
         
-        uint8_t *buffer = buffersList[i];
+        uint8_t *buffer = buffersList[0];
         
         if (unreadSize >= oneLineSize) {
             
             memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
             
             remainingBuffer->readIndex += oneLineSize;
+            
+            TFMPBufferReadLog("copy remaining[少%d,余%d:总%d]",oneLineSize,remainingBuffer->unreadSize(),remainingBuffer->validSize);
             
         }else{
             
@@ -146,28 +152,34 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 remainingBuffer->readIndex = 0;
                 remainingBuffer->validSize = 0;
-                printf("reset validSize\n");
+                
+                TFMPBufferReadLog("copy remaining[少%d,余%d:总%d], need:%d",unreadSize,remainingBuffer->unreadSize(),remainingBuffer->validSize, needReadSize);
+                
                 unreadSize = 0;
             }
             
             AVFrame *frame = av_frame_alloc();
             
             bool resample = false;
-            uint8_t **dataBuffer = nullptr;
+            uint8_t *dataBuffer = nullptr;
             int linesize = 0, outSamples = 0;
             
             while (needReadSize > 0) {
                 //TODO: do more thing for planar audio.
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
+                TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);
+                
                 if (displayer->audioResampler->isNeedResample(frame)) {
                     if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
-                        dataBuffer = &(displayer->audioResampler->resampledBuffers);
+                        dataBuffer = displayer->audioResampler->resampledBuffers;
                         resample = true;
+                        
+                        TFMPBufferReadLog("resample %d, %d",linesize, outSamples);
                     }
                     
                 }else{
-                    dataBuffer = frame->extended_data;
+                    dataBuffer = frame->extended_data[0];
                     linesize = frame->linesize[0];
                 }
                 
@@ -178,15 +190,16 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 if (needReadSize >= linesize) {
                     
-                    memcpy(buffer, dataBuffer[i], linesize);
+                    memcpy(buffer, dataBuffer, linesize);
                     needReadSize -= linesize;
+                    
+                    TFMPBufferReadLog("copy frame %d",oneLineSize);
                     
                     av_frame_free(&frame);
                     
                 }else{
                     
                     //there is a little buffer left.
-                    remainingBuffer->readIndex = 0;
                     uint32_t remainingSize = linesize - needReadSize;
                 
                     //alloc a larger memory
@@ -195,21 +208,20 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                         remainingBuffer->head = (uint8_t *)malloc(remainingSize);
                     }
                     
+                    remainingBuffer->readIndex = 0;
                     remainingBuffer->validSize = remainingSize;
-                    printf("2>>> %d\n",remainingBuffer->validSize);
-                    memcpy(remainingBuffer->head, dataBuffer[i] + needReadSize, remainingSize);
+                    
+                    TFMPBufferReadLog("copy last %d, remain[加%d,余%d:总%d], frame:%d",needReadSize,remainingSize,remainingBuffer->unreadSize(),remainingBuffer->validSize, linesize);
+                    
+                    memcpy(remainingBuffer->head, dataBuffer + needReadSize, remainingSize);
                     
                     
-                    memcpy(buffer, dataBuffer[i], needReadSize);
+                    memcpy(buffer, dataBuffer, needReadSize);
                     needReadSize = 0;
                     
                     av_frame_free(&frame);
                 }
             }
-        }
-        
-//        for (int i = 0; i<oneLineSize; i++) {
-//            *(buffer+i) += 0xffff*0.0001f;
 //        }
     }
     

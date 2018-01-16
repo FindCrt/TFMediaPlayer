@@ -102,5 +102,8 @@ inline AVSampleFormat FFmpegAudioFormatFromTFMPAudioDesc(uint8_t formatFlags, in
     return AV_SAMPLE_FMT_NONE;
 }
 
+inline uint64_t channelLayoutForChannels(int channels){
+    return av_get_default_channel_layout(channels);
+}
 
 #endif /* TFUtilities_h */

@@ -73,15 +73,15 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
         return nullptr;
     }
     
-    int nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
-//    int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
+//    int nb_samples = (int)av_rescale_rnd(swr_get_delay(swrCtx, adoptedAudioDesc.sampleRate) + inFrame->nb_samples,adoptedAudioDesc.sampleRate, inFrame->sample_rate, AV_ROUND_UP);
+    int nb_samples = swr_get_out_samples(swrCtx, inFrame->nb_samples);
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     int outsize = av_samples_get_buffer_size(linesize, adoptedAudioDesc.channelsPerFrame, nb_samples, destFmt, 0);
     
     //av_fast_malloc(&resampledBuffers, &resampleSize, outsize);
     if (resampleSize < outsize) {
-//        free(resampledBuffers);
+        free(resampledBuffers);
         resampledBuffers = (uint8_t *)malloc(outsize);
         resampleSize = outsize;
     }
@@ -90,7 +90,6 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
         TFMPDLOG_C("memory alloc resample buffer error!\n");
         return false;
     }
-    
     
     uint8_t **outBuffer = &resampledBuffers;
     int actualOutSamples = swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
@@ -104,29 +103,10 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     
 //    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
     
-//    *outSamples = actualOutSamples;
-//    *linesize = actualOutSize;
-    *outSamples = nb_samples;
-    *linesize = outsize;
+    *outSamples = actualOutSamples;
+    *linesize = actualOutSize;
     
     resampleSize = outsize;
     
     return true;
 }
-
-//static void setup_array(uint8_t* out[SWR_CH_MAX], AVFrame* in_frame, int format, int samples)
-//{
-//    if (av_sample_fmt_is_planar((AVSampleFormat)format))
-//    {
-//        int i;int plane_size = av_get_bytes_per_sample((AVSampleFormat)(format & 0xFF)) * samples;format &= 0xFF;
-//
-//        for (i = 0; i < in_frame->channels; i++)
-//        {
-//            out[i] = in_frame->data[i];
-//        }
-//    }
-//    else
-//    {
-//        out[0] = in_frame->data[0];
-//    }
-//}

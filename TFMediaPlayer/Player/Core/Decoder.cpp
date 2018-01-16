@@ -76,7 +76,9 @@ void *Decoder::decodeLoop(void *context){
     AVFrame *frame = nullptr;
     
     while (decoder->shouldDecode) {
+        
         decoder->pktBuffer.blockGetOut(&pkt);
+        
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
@@ -102,22 +104,6 @@ void *Decoder::decodeLoop(void *context){
                     continue;
                 }
                 
-//                if (isNeedResample(frame, &(decoder->adoptedAudioDesc))) {
-//                    
-//                    //source audio desc may change.
-//                    if (isNeedResample(frame, (decoder->lastSourceAudioDesc))) {
-//                        decoder->initResampleContext(frame);
-//                    }
-//                    
-//                    AVFrame *resampledFrame = av_frame_alloc();
-//                    if (!decoder->reampleAudioFrame(frame, resampledFrame)) {
-//                        continue;
-//                    }
-//                    
-//                    decoder->frameBuffer.blockInsert(resampledFrame);
-//                }else{
-//                    decoder->frameBuffer.blockInsert(frame);
-//
                 decoder->frameBuffer.blockInsert(frame);
             }
         }else{

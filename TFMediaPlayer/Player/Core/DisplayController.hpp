@@ -42,7 +42,7 @@ namespace tfmpcore {
         
         bool shouldDisplay;
         
-        TFMPRemainingBuffer remainingAudioBuffers[TFMP_MAX_AUDIO_CHANNEL];
+        TFMPRemainingBuffer remainingAudioBuffers;
         
         static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
         

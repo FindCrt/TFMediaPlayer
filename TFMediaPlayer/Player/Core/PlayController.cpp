@@ -182,6 +182,8 @@ void PlayController::resolveAudioStreamFormat(){
     audioResampler->setAdoptedAudioDesc(adoptedAudioDesc);
     displayer->setAudioResampler(audioResampler);
 //    displayer->setAdoptedAudioDesc(adoptedAudioDesc);
+    
+    
 }
 
 void PlayController::startReadingFrames(){
