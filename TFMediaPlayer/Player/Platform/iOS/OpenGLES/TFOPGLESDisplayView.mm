@@ -11,6 +11,8 @@
 #import "TFOPGLProgram.hpp"
 #import "TFMPDebugFuncs.h"
 
+//texture对齐和裁剪 http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html
+
 #define TFReallocRenderIfLayerSizeChanged   1
 
 #pragma mark - shaders
@@ -72,7 +74,7 @@ void main()                                             \n\
     
     BOOL _needReallocRenderBuffer;
     
-//    TFMPVideoPixelFormat _format;
+    CGSize _lastFrameSize;
 }
 
 @end
@@ -200,16 +202,11 @@ void main()                                             \n\
     float width = frameBuf->width;
     float height = frameBuf->height;
     
-    CGSize viewPort;
-    if (width / height > self.bufferSize.width / self.bufferSize.height) {
-        viewPort.width = self.bufferSize.width;
-        viewPort.height = height / width * self.bufferSize.width;
-    }else{
-        viewPort.width = width / height * self.bufferSize.height;
-        viewPort.height = self.bufferSize.height;
+    if (width != _lastFrameSize.width || height != _lastFrameSize.height) {
+        [self calculateContentFrame:CGSizeMake(width, height)];
+        _lastFrameSize = CGSizeMake(width, height);
     }
-    glViewport(0, 0, viewPort.width, viewPort.height);
-    
+
     if (frameBuf->format == TFMP_VIDEO_PIX_FMT_YUV420P) {
         genTextures_YUV420P(frameBuf, textures, width, height, frameBuf->linesize);
     }
@@ -252,19 +249,26 @@ void main()                                             \n\
 
 inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize){
     //yuv420p has 3 planes: y u v. U plane and v plane have half width and height of y plane.
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[0]);  //linesize may isn't equal to width.
+    
     glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[0], height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
+    
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[1]);
     
     glBindTexture(GL_TEXTURE_2D, textures[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[1], height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2.0, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
     glGenerateMipmap(GL_TEXTURE_2D);
+    
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[2]);
     
     glBindTexture(GL_TEXTURE_2D, textures[2]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[2], height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2.0, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
     glGenerateMipmap(GL_TEXTURE_2D);
-    
-    
 }
 
 inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textures){
