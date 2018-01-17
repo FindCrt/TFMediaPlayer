@@ -148,31 +148,49 @@
 }
 
 -(void)pause{
-    
+    switch (_state) {
+        case TFMediaPlayerStateConnecting:
+            //TODO: stop connecting
+            _autoPlayWhenReady = false;
+            _innerPlayWhenReady = false;
+            break;
+        case TFMediaPlayerStateReady:
+            _autoPlayWhenReady = false;
+            _innerPlayWhenReady = false;
+            break;
+        case TFMediaPlayerStatePlaying:
+            _playController->pause();
+            
+            break;
+        default:
+            break;
+    }
+    _state = TFMediaPlayerStatePause;
 }
 
 -(void)stop{
     
     switch (_state) {
         case TFMediaPlayerStateConnecting:
+            _autoPlayWhenReady = false;
+            _innerPlayWhenReady = false;
             _playController->stop();
             break;
         case TFMediaPlayerStateReady:
+            _autoPlayWhenReady = false;
+            _innerPlayWhenReady = false;
             _playController->stop();
             break;
         case TFMediaPlayerStatePlaying:
             _playController->stop();
-            
             break;
-        case TFMediaPlayerStatePause:
-            
-            break;
-            
         default:
             break;
     }
     
     [_audioPlayer stop];
+    
+    _state = TFMediaPlayerStateNone;
 }
 
 -(BOOL)configureAVSession{

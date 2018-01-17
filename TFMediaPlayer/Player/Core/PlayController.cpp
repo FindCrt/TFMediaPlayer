@@ -111,7 +111,17 @@ void PlayController::play(){
 }
 
 void PlayController::pause(){
+    if (videoDecoder) {
+        videoDecoder->stopDecode();
+    }
+    if (audioDecoder) {
+        audioDecoder->stopDecode();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->stopDecode();
+    }
     
+    displayer->stopDisplay();
 }
 
 void PlayController::stop(){
@@ -126,6 +136,8 @@ void PlayController::stop(){
     }
     
     displayer->stopDisplay();
+    
+    //TODO: free resources
 }
 
 /***** properties *****/

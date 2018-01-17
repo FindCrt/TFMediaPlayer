@@ -81,6 +81,14 @@ void main()                                             \n\
 
 @implementation TFOPGLESDisplayView
 
+-(instancetype)initWithFrame:(CGRect)frame{
+    if (self = [super initWithFrame:frame]) {
+        self.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    
+    return self;
+}
+
 -(void)didMoveToSuperview{
     //[super didMoveToSuperview];
     

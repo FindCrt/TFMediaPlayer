@@ -105,9 +105,9 @@
 -(void)stopAndPlay:(UIButton *)button{
     
     if (_playing) {
-        [_audioPlayer stop];
+        [_audioPlayer pause];
         [_graphView stop];
-        [_player stop];
+        [_player pause];
         
         [button setTitle:@"play" forState:(UIControlStateNormal)];
     }else{

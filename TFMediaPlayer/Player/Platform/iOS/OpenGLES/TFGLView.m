@@ -103,8 +103,6 @@
     _bufferSize.width = width;
     _bufferSize.height = height;
     
-    [self calculateContentFrame:CGSizeMake(width, height)];
-    
     if (_needDepthBuffer) {
         glGenRenderbuffers(1, &_depthRenderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
@@ -117,7 +115,7 @@
 -(void)calculateContentFrame:(CGSize)sourceSize{
     
     CGRect contentFrame;
-    CGFloat width = self.bounds.size.width, height = self.bounds.size.height;
+    CGFloat width = self.bufferSize.width, height = self.bufferSize.height;
     
     if (self.contentMode == UIViewContentModeScaleAspectFit) {
         
@@ -127,7 +125,7 @@
             contentFrame = CGRectMake((width-scaledWidth)/2.0, 0, scaledWidth, height);
         }else{
             CGFloat scaledHeight = sourceSize.height * width/sourceSize.width;
-            contentFrame = CGRectMake(0, (scaledHeight-height)/2.0, width, scaledHeight);
+            contentFrame = CGRectMake(0, (height-scaledHeight)/2.0, width, scaledHeight);
         }
     }else if (self.contentMode == UIViewContentModeScaleAspectFill){
         
@@ -161,7 +159,8 @@
         contentFrame = CGRectMake(width-sourceSize.width, height-sourceSize.height, sourceSize.width, sourceSize.height);
     }
     
-    glViewport(contentFrame.origin.x, contentFrame.origin.y, contentFrame.size.width, contentFrame.size.height);
+    //opengl's y axis is inverse with UIKit's y asix.
+    glViewport(contentFrame.origin.x, height - CGRectGetMaxY(contentFrame), contentFrame.size.width, contentFrame.size.height);
 }
 
 -(void)dealloc{
