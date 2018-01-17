@@ -161,6 +161,8 @@
     
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"testVideo1" withExtension:@"mp4"];
+    
     _player.mediaURL = videoURL;
     
     [self configureAVSession];

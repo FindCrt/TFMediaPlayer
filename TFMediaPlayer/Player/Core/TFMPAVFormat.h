@@ -35,10 +35,11 @@ typedef struct{
     int width;
     int height;
     TFMPVideoPixelFormat format;
+    
     int planes;
     
-    unsigned char *pixels[8];
-    unsigned short linesize[8];
+    uint8_t *pixels[8];
+    int linesize[8];
     
 }TFMPVideoFrameBuffer;
 

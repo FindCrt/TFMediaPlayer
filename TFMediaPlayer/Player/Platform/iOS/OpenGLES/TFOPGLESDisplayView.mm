@@ -9,6 +9,7 @@
 #import "TFOPGLESDisplayView.h"
 #import <OpenGLES/ES3/gl.h>
 #import "TFOPGLProgram.hpp"
+#import "TFMPDebugFuncs.h"
 
 #define TFReallocRenderIfLayerSizeChanged   1
 
@@ -210,7 +211,7 @@ void main()                                             \n\
     glViewport(0, 0, viewPort.width, viewPort.height);
     
     if (frameBuf->format == TFMP_VIDEO_PIX_FMT_YUV420P) {
-        genTextures_YUV420P(frameBuf, textures, width, height);
+        genTextures_YUV420P(frameBuf, textures, width, height, frameBuf->linesize);
     }
     
     [self rendering:frameBuf->format];
@@ -233,7 +234,6 @@ void main()                                             \n\
     
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     
-    
     glBindRenderbuffer(GL_RENDERBUFFER, self.colorBuffer);
     [self.context presentRenderbuffer:GL_RENDERBUFFER];
 }
@@ -250,19 +250,21 @@ void main()                                             \n\
 
 #pragma mark - display different format
 
-inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height){
+inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize){
     //yuv420p has 3 planes: y u v. U plane and v plane have half width and height of y plane.
     glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[0], height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
     
     glBindTexture(GL_TEXTURE_2D, textures[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[1], height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
     glGenerateMipmap(GL_TEXTURE_2D);
     
     glBindTexture(GL_TEXTURE_2D, textures[2]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, linesize[2], height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
     glGenerateMipmap(GL_TEXTURE_2D);
+    
+    
 }
 
 inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textures){

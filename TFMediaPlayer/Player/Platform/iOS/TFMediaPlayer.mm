@@ -205,7 +205,6 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
     TFMediaPlayer *player = (__bridge TFMediaPlayer *)context;
     
     [player->_displayView displayFrameBuffer:frameBuf];
-    
     return 0;
 }
 

@@ -45,7 +45,7 @@ void *DisplayController::displayLoop(void *context){
     
     DisplayController *controller = (DisplayController *)context;
     
-    AVFrame *videoFrame = av_frame_alloc();
+    AVFrame *videoFrame = nullptr;
     
     while (controller->shouldDisplay) {
         
@@ -68,33 +68,32 @@ void *DisplayController::displayLoop(void *context){
             continue;
         }
         
-        TFMPVideoFrameBuffer videoFrameBuf;
-        videoFrameBuf.width = videoFrame->width;
-        videoFrameBuf.height = videoFrame->height;
+        TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
+        interimBuffer->width = videoFrame->width;
+        interimBuffer->height = videoFrame->height;
         
         for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
             
-            videoFrameBuf.pixels[i] = videoFrame->data[i];
-            videoFrameBuf.linesize[i] = videoFrame->linesize[i];
+            interimBuffer->pixels[i] = videoFrame->data[i]+videoFrame->linesize[i];
+            interimBuffer->linesize[i] = videoFrame->linesize[i];
         }
         
         //TODO: unsupport format
         if (videoFrame->format == AV_PIX_FMT_YUV420P) {
-            videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_YUV420P;
+            interimBuffer->format = TFMP_VIDEO_PIX_FMT_YUV420P;
         }else if (videoFrame->format == AV_PIX_FMT_NV12){
-            videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_NV12;
+            interimBuffer->format = TFMP_VIDEO_PIX_FMT_NV12;
         }else if (videoFrame->format == AV_PIX_FMT_NV21){
-            videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_NV21;
+            interimBuffer->format = TFMP_VIDEO_PIX_FMT_NV21;
         }else if (videoFrame->format == AV_PIX_FMT_RGB32){
-            videoFrameBuf.format = TFMP_VIDEO_PIX_FMT_RGB32;
+            interimBuffer->format = TFMP_VIDEO_PIX_FMT_RGB32;
         }
         
-        controller->displayVideoFrame(&videoFrameBuf, controller->displayContext);
-        
-        //TODO: audio
+        controller->displayVideoFrame(interimBuffer, controller->displayContext);
         
         controller->syncClock->correctWithPresent(videoFrame->pts * av_q2d(controller->videoTimeBase), 0);
-        av_frame_unref(videoFrame);
+        
+        av_frame_free(&videoFrame);
     }
     
     return 0;
