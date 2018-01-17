@@ -36,7 +36,6 @@
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
 		1843A1F2200463890053694A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
 		184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */; };
-		184C08E9200F20F40093FFF9 /* testVideo1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184C08E8200F20F40093FFF9 /* testVideo1.mp4 */; };
 		184C8E12200B481D0063EAC3 /* pure1.caf in Resources */ = {isa = PBXBuildFile; fileRef = 184C8E11200B481D0063EAC3 /* pure1.caf */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
@@ -113,7 +112,6 @@
 		18415A361FF64126007095AC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
 		18415A371FF64126007095AC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
 		184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocosvideo.mp4; sourceTree = "<group>"; };
-		184C08E8200F20F40093FFF9 /* testVideo1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = testVideo1.mp4; sourceTree = "<group>"; };
 		184C8E11200B481D0063EAC3 /* pure1.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = pure1.caf; sourceTree = "<group>"; };
 		184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLocalMp4ViewController.h; sourceTree = "<group>"; };
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
@@ -397,7 +395,6 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				184C08E8200F20F40093FFF9 /* testVideo1.mp4 */,
 				184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */,
 				184C8E11200B481D0063EAC3 /* pure1.caf */,
 				183434172008AB3B00ED9B05 /* LuckyDay.mp3 */,
@@ -873,7 +870,6 @@
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
 				184C8E12200B481D0063EAC3 /* pure1.caf in Resources */,
-				184C08E9200F20F40093FFF9 /* testVideo1.mp4 in Resources */,
 				18415A2A1FF6130D007095AC /* frameDisplay.fs in Resources */,
 				184FF7511FF48BC0007D5826 /* game.mp4 in Resources */,
 				18415A2B1FF6130D007095AC /* frameDisplay.vs in Resources */,
