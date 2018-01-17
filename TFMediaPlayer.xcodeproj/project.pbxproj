@@ -35,6 +35,7 @@
 		18415A351FF62648007095AC /* SyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A331FF62648007095AC /* SyncClock.cpp */; };
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
 		1843A1F2200463890053694A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
+		184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */; };
 		184C8E12200B481D0063EAC3 /* pure1.caf in Resources */ = {isa = PBXBuildFile; fileRef = 184C8E11200B481D0063EAC3 /* pure1.caf */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
@@ -110,6 +111,7 @@
 		18415A341FF62648007095AC /* SyncClock.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SyncClock.hpp; sourceTree = "<group>"; };
 		18415A361FF64126007095AC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
 		18415A371FF64126007095AC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
+		184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocosvideo.mp4; sourceTree = "<group>"; };
 		184C8E11200B481D0063EAC3 /* pure1.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = pure1.caf; sourceTree = "<group>"; };
 		184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLocalMp4ViewController.h; sourceTree = "<group>"; };
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
@@ -393,6 +395,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */,
 				184C8E11200B481D0063EAC3 /* pure1.caf */,
 				183434172008AB3B00ED9B05 /* LuckyDay.mp3 */,
 				187DFBC620084BEF002BDCB3 /* AACTest.m4a */,
@@ -860,6 +863,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
 				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
 				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,

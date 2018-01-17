@@ -46,7 +46,7 @@
         
         _playController = new tfmpcore::PlayController();
         
-        _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_AUDIO);
+        _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
         _playController->isAudioMajor = false;
         
         _playController->displayContext = (__bridge void *)self;
@@ -98,6 +98,14 @@
     if (_state != TFMediaPlayerStateNone) {
         [self stop];
     }
+}
+
+-(void)setMediaType:(TFMPMediaType)mediaType{
+    _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
+}
+
+-(TFMPMediaType)mediaType{
+    return _playController->getRealDisplayMediaType();
 }
 
 -(void)preparePlay{

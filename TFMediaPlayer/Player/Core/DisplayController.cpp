@@ -12,7 +12,7 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
-#define TFMPBufferReadLog(fmt,...) printf(fmt,__VA_ARGS__);printf("\n");
+#define TFMPBufferReadLog(fmt,...) //printf(fmt,__VA_ARGS__);printf("\n");
 
 using namespace tfmpcore;
 
@@ -45,41 +45,20 @@ void *DisplayController::displayLoop(void *context){
     
     DisplayController *controller = (DisplayController *)context;
     
-    AVFrame *videoFrame = av_frame_alloc(), *audioFrame = av_frame_alloc();
-    bool showVideo = controller->displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
-//    bool showAudio = controller->displayMediaType & TFMP_MEDIA_TYPE_AUDIO;
+    AVFrame *videoFrame = av_frame_alloc();
     
     while (controller->shouldDisplay) {
         
-        printf("got display frame1\n");
-        
-        if (showVideo) {
-            controller->shareVideoBuffer->blockGetOut(&videoFrame);
-            printf("got video frame\n");
-        }
-//        if (showAudio) {
-//            controller->shareAudioBuffer->blockGetOut(&audioFrame);
-//            printf("got audio frame\n");
-//        }
+        controller->shareVideoBuffer->blockGetOut(&videoFrame);
         
         int64_t nextMediaPts = controller->syncClock->nextMediaPts(videoFrame->pts, 0);
         
-        if (showVideo) {
-            while (videoFrame->pts < nextMediaPts) {
-                controller->shareVideoBuffer->getOut(nullptr);
-                controller->shareVideoBuffer->back(&videoFrame);
-            }
+        while (videoFrame->pts < nextMediaPts) {
+            controller->shareVideoBuffer->getOut(nullptr);
+            controller->shareVideoBuffer->back(&videoFrame);
         }
         
-//        if (showAudio) {
-//            while (audioFrame->pts < nextMediaPts) {
-//                controller->shareAudioBuffer->getOut(nullptr);
-//                controller->shareAudioBuffer->back(&audioFrame);
-//            }
-//        }
-        
-        
-        double remainTime = controller->syncClock->remainTime(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
+        double remainTime = controller->syncClock->remainTime(videoFrame->pts * av_q2d(controller->videoTimeBase), 0);
         
         TFMPBufferReadLog("remainTime: %.6f\n",remainTime);
         
@@ -114,8 +93,8 @@ void *DisplayController::displayLoop(void *context){
         
         //TODO: audio
         
-        controller->syncClock->correctWithPresent(videoFrame->pts * av_q2d(controller->videoTimeBase), audioFrame->pts * av_q2d(controller->audioTimeBase));
-        if(showVideo) av_frame_unref(videoFrame);
+        controller->syncClock->correctWithPresent(videoFrame->pts * av_q2d(controller->videoTimeBase), 0);
+        av_frame_unref(videoFrame);
     }
     
     return 0;

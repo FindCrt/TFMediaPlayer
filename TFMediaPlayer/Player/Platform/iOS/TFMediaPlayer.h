@@ -19,6 +19,9 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 
 @interface TFMediaPlayer : NSObject
 
+/** setter value may isn't equal to getter value. Setter is the vale you desired, while getter is value that actual played.  */
+@property (nonatomic, assign) TFMPMediaType mediaType;
+
 @property (nonatomic, strong) NSURL *mediaURL;
 
 @property (nonatomic, strong, readonly) UIView *displayView;

@@ -26,8 +26,12 @@
     
     UIButton *_stopButton;
     
+    UIButton *_mediaTypeButton;
+    
     BOOL _showGraph;
     BOOL _autoStop;
+    
+    BOOL _playing;
 }
 
 @end
@@ -42,48 +46,32 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
-    _showGraph = YES;
+//    _showGraph = YES;
 //    _autoStop = YES;
     
+    [self setupButtons];
+    
     if (_showGraph) {
-        _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 200)];
+        _graphView = [[TFAudioPowerGraphView alloc] initWithFrame:CGRectMake(0, 100, [UIScreen mainScreen].bounds.size.width, 200)];
         [self.view addSubview:_graphView];
         
         _graphView.sampleRate = 44100;
         _graphView.bytesPerSample = 2;
 //        _graphView.ignoreSign = YES;
-        _graphView.showRate = 20;
+        _graphView.showRate = 1;
         _graphView.changeColor = YES;
         _graphView.changeBGColor = YES;
 //        _graphView.colorFlagCycleCount = 2;
     }
     
     _player = [[TFMediaPlayer alloc] init];
-    _player.displayView.frame = CGRectMake(300, self.view.bounds.size.height/2.0 - 300/2, self.view.bounds.size.width, 300);
+    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, self.view.bounds.size.width, 300);
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
     [self.view addSubview:_player.displayView];
     
     
-    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(160, 220, 55, 40)];
-    _stopButton.backgroundColor = [UIColor orangeColor];
-    [_stopButton setTitle:@"stop" forState:(UIControlStateNormal)];
-    [_stopButton addTarget:self action:@selector(clickButton:) forControlEvents:(UIControlEventTouchUpInside)];
-    [self.view addSubview:_stopButton];
-}
-
--(void)clickButton:(UIButton *)button{
-    NSLog(@"----------stop-----------");
-    [_audioPlayer stop];
-    [_graphView stop];
-    [_player stop];
-}
-
--(void)viewDidAppear:(BOOL)animated{
-    [super viewDidAppear:animated];
-    
-    [self startPlay];
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
@@ -96,6 +84,51 @@
     });
     
     NSLog(@"disappeared！");
+}
+
+#pragma mark - actions
+
+-(void)setupButtons{
+    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(80, 20, 60, 40)];
+    _stopButton.backgroundColor = [UIColor orangeColor];
+    [_stopButton setTitle:@"play" forState:(UIControlStateNormal)];
+    [_stopButton addTarget:self action:@selector(stopAndPlay:) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_stopButton];
+    
+    _mediaTypeButton = [[UIButton alloc] initWithFrame:CGRectMake(160, CGRectGetMinY(_stopButton.frame), 100, 40)];
+    _mediaTypeButton.backgroundColor = [UIColor orangeColor];
+    [_mediaTypeButton setTitle:@"mediaType" forState:(UIControlStateNormal)];
+    [_mediaTypeButton addTarget:self action:@selector(changeMediaType:) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_mediaTypeButton];
+}
+
+-(void)stopAndPlay:(UIButton *)button{
+    
+    if (_playing) {
+        [_audioPlayer stop];
+        [_graphView stop];
+        [_player stop];
+        
+        [button setTitle:@"play" forState:(UIControlStateNormal)];
+    }else{
+        [self startPlay];
+        [button setTitle:@"stop" forState:(UIControlStateNormal)];
+    }
+    
+    _playing = !_playing;
+}
+
+-(void)changeMediaType:(UIButton *)button{
+    TFMPMediaType mediaType = _player.mediaType;
+    if (mediaType == TFMP_MEDIA_TYPE_AUDIO) {
+        _player.mediaType = TFMP_MEDIA_TYPE_VIDEO;
+    }else if (mediaType == TFMP_MEDIA_TYPE_VIDEO){
+        _player.mediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+    }else if (mediaType == TFMP_MEDIA_TYPE_ALL_AVIABLE){
+        _player.mediaType = TFMP_MEDIA_TYPE_AUDIO;
+    }
+    
+    
 }
 
 
@@ -120,8 +153,8 @@
 
 -(void)startPlay{
     
-    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
+//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
     
 //    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
