@@ -25,13 +25,16 @@
     TFAudioPowerGraphView *_graphView;
     
     UIButton *_stopButton;
-    
     UIButton *_mediaTypeButton;
+    UIButton *_switchMediaSourceBtn;
+    UIButton *_switchContentModeBtn;
     
     BOOL _showGraph;
     BOOL _autoStop;
     
     BOOL _playing;
+    
+    NSURL *_currentMediaURL;
 }
 
 @end
@@ -89,17 +92,29 @@
 #pragma mark - actions
 
 -(void)setupButtons{
-    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(80, 20, 60, 40)];
+    _stopButton = [[UIButton alloc] initWithFrame:CGRectMake(10, 20, 60, 40)];
     _stopButton.backgroundColor = [UIColor orangeColor];
     [_stopButton setTitle:@"play" forState:(UIControlStateNormal)];
     [_stopButton addTarget:self action:@selector(stopAndPlay:) forControlEvents:(UIControlEventTouchUpInside)];
     [self.view addSubview:_stopButton];
     
-    _mediaTypeButton = [[UIButton alloc] initWithFrame:CGRectMake(160, CGRectGetMinY(_stopButton.frame), 100, 40)];
+    _mediaTypeButton = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_stopButton.frame)+10, CGRectGetMinY(_stopButton.frame), 100, 40)];
     _mediaTypeButton.backgroundColor = [UIColor orangeColor];
-    [_mediaTypeButton setTitle:@"mediaType" forState:(UIControlStateNormal)];
+    [_mediaTypeButton setTitle:@"M-Type" forState:(UIControlStateNormal)];
     [_mediaTypeButton addTarget:self action:@selector(changeMediaType:) forControlEvents:(UIControlEventTouchUpInside)];
     [self.view addSubview:_mediaTypeButton];
+    
+    _switchMediaSourceBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_mediaTypeButton.frame)+10, CGRectGetMinY(_stopButton.frame), 60, 40)];
+    _switchMediaSourceBtn.backgroundColor = [UIColor orangeColor];
+    [_switchMediaSourceBtn setTitle:@"source" forState:(UIControlStateNormal)];
+    [_switchMediaSourceBtn addTarget:self action:@selector(switchMediaSource) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_switchMediaSourceBtn];
+    
+    _switchContentModeBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_switchMediaSourceBtn.frame)+10, CGRectGetMinY(_stopButton.frame), 100, 40)];
+    _switchContentModeBtn.backgroundColor = [UIColor orangeColor];
+    [_switchContentModeBtn setTitle:@"C-mode" forState:(UIControlStateNormal)];
+    [_switchContentModeBtn addTarget:self action:@selector(switchContentMode) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_switchContentModeBtn];
 }
 
 -(void)stopAndPlay:(UIButton *)button{
@@ -127,8 +142,68 @@
     }else if (mediaType == TFMP_MEDIA_TYPE_ALL_AVIABLE){
         _player.mediaType = TFMP_MEDIA_TYPE_AUDIO;
     }
+}
+
+static int mediaIndex = 0;
+-(void)switchMediaSource{
+    
+    NSURL *videoURL1 = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+    NSURL *videoURL2 = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
+    NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
+
+    NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
+
+    NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
+    
+    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL3,videoURL4,videoURL5];
+    
+    _currentMediaURL = mediaSources[mediaIndex];
+    mediaIndex++;
+    if (mediaIndex > mediaSources.count) {
+        mediaIndex = 0;
+    }
+    
+    [self stop];
+    [self startPlay];
+}
+
+-(void)switchContentMode{
+    NSInteger contentMode = _player.displayView.contentMode;
+    if (contentMode == UIViewContentModeBottomRight) {
+        contentMode = 0;
+    }
+    _player.displayView.contentMode = (UIViewContentMode)(contentMode + 1);
+}
+
+-(void)stop{
+    [_player stop];
+    [_audioPlayer stop];
+    
+    if (_graphView) [_graphView stop];
+}
+
+-(void)startPlay{
+    
+    if (!_currentMediaURL) {
+        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+    }
+    
+    _player.mediaURL = _currentMediaURL;
+    [self configureAVSession];
     
     
+    [_player play];
+//    [self audioUnitPlay];
+    
+    
+    if (_autoStop) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [_graphView stop];
+            [_player stop];
+            
+            [_audioPlayer stop];
+        });
+    }
 }
 
 
@@ -149,37 +224,6 @@
     }
     
     return YES;
-}
-
--(void)startPlay{
-    
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
-    
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
-    
-//    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
-    
-    NSURL *videoURL = [[NSBundle mainBundle] URLForResource:@"testVideo1" withExtension:@"mp4"];
-    
-    _player.mediaURL = videoURL;
-    
-    [self configureAVSession];
-    
-    
-    [_player play];
-//    [self audioUnitPlay];
-    
-    
-    if (_autoStop) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [_graphView stop];
-            [_player stop];
-            
-            [_audioPlayer stop];
-        });
-    }
 }
 
 #pragma mark - system decode + audio unit player
