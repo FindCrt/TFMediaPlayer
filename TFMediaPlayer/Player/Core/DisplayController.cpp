@@ -70,7 +70,7 @@ void *DisplayController::displayLoop(void *context){
         
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
         interimBuffer->width = videoFrame->width;
-        interimBuffer->height = videoFrame->height;
+        interimBuffer->height = videoFrame->height+10;
         
         for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
             

@@ -14,4 +14,8 @@
 
 -(void)displayFrameBuffer:(TFMPVideoFrameBuffer *)frameBuf;
 
+/** calculate content frame base on source video frame size and content mode */
+-(void)calculateContentFrame:(CGSize)sourceSize;
+
+
 @end

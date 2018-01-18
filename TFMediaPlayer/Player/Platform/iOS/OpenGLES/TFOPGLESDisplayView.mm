@@ -90,8 +90,6 @@ void main()                                             \n\
 }
 
 -(void)didMoveToSuperview{
-    //[super didMoveToSuperview];
-    
     if (!self.context) {
         [self setupOpenGLContext];
     }
@@ -101,12 +99,21 @@ void main()                                             \n\
     [super layoutSubviews];
     
     //If context has setuped and layer's size has changed, realloc renderBuffer.
+    //TODO: render buffer need to be alloced at the duration when self.context is current context.
     if (self.context && !CGSizeEqualToSize(self.layer.frame.size, self.bufferSize)) {
 #if TFReallocRenderIfLayerSizeChanged
         _needReallocRenderBuffer = YES;
 #else
         //self.layer.contentsScale = [UIScreen mainScreen].scale * ()
 #endif
+    }
+}
+
+-(void)setContentMode:(UIViewContentMode)contentMode{
+    if (self.contentMode != contentMode) {
+        [super setContentMode:contentMode];
+        
+        [self calculateContentFrame:_lastFrameSize];
     }
 }
 
@@ -277,12 +284,69 @@ inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2.0, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
     glGenerateMipmap(GL_TEXTURE_2D);
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    
+    TFMPPrintBuffer(frameBuf->pixels[1], (height-1)*linesize[1], linesize[1]);
 }
 
 inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textures){
     program->setTexture("yPlaneTex", GL_TEXTURE_2D, textures[0], 0);
     program->setTexture("uPlaneTex", GL_TEXTURE_2D, textures[1], 1);
     program->setTexture("vPlaneTex", GL_TEXTURE_2D, textures[2], 2);
+}
+
+-(void)calculateContentFrame:(CGSize)sourceSize{
+    
+    CGRect contentFrame;
+    CGFloat width = self.bufferSize.width, height = self.bufferSize.height;
+    
+    if (self.contentMode == UIViewContentModeScaleAspectFit) {
+        
+        CGFloat scaledWidth = sourceSize.width * height/sourceSize.height;
+        
+        if (scaledWidth < width) { //height is relatively larger .
+            contentFrame = CGRectMake((width-scaledWidth)/2.0, 0, scaledWidth, height);
+        }else{
+            CGFloat scaledHeight = sourceSize.height * width/sourceSize.width;
+            contentFrame = CGRectMake(0, (height-scaledHeight)/2.0, width, scaledHeight);
+        }
+    }else if (self.contentMode == UIViewContentModeScaleAspectFill){
+        
+        CGFloat scaledWidth = sourceSize.width * height/sourceSize.height;
+        
+        if (scaledWidth > width) { //height is relatively larger .
+            contentFrame = CGRectMake((width-scaledWidth)/2.0, 0, scaledWidth, height);
+        }else{
+            CGFloat scaledHeight = sourceSize.height * width/sourceSize.width;
+            contentFrame = CGRectMake(0, (scaledHeight-height)/2.0, width, scaledHeight);
+        }
+    }else if (self.contentMode == UIViewContentModeScaleToFill){
+        contentFrame = CGRectMake(0, 0, width, height);
+    }else if (self.contentMode == UIViewContentModeCenter){
+        contentFrame = CGRectMake((width-sourceSize.width)/2.0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeTop){
+        contentFrame = CGRectMake((width-sourceSize.width)/2.0, 0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeBottom){
+        contentFrame = CGRectMake((width-sourceSize.width)/2.0, height-sourceSize.height, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeLeft){
+        contentFrame = CGRectMake(0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeRight){
+        contentFrame = CGRectMake(width-sourceSize.width, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeTopLeft){
+        contentFrame = CGRectMake(0, 0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeTopRight){
+        contentFrame = CGRectMake(width-sourceSize.width, 0, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeBottomLeft){
+        contentFrame = CGRectMake(0, height-sourceSize.height, sourceSize.width, sourceSize.height);
+    }else if (self.contentMode == UIViewContentModeBottomRight){
+        contentFrame = CGRectMake(width-sourceSize.width, height-sourceSize.height, sourceSize.width, sourceSize.height);
+    }
+    
+    contentFrame = CGRectMake((int)contentFrame.origin.x, (int)contentFrame.origin.y, (int)contentFrame.size.width, (int)contentFrame.size.height);
+    
+    //opengl's y axis is inverse with UIKit's y asix.
+    glViewport(contentFrame.origin.x, height - CGRectGetMaxY(contentFrame), contentFrame.size.width, contentFrame.size.height);
 }
 
 #pragma mark -

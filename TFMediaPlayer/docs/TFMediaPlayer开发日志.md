@@ -61,3 +61,6 @@
  * 如果把播放宽度设为linesize,那么播放画面正常，但是结尾是绿色，就是没有数据。
  * 每个plane的数据是连续的，但是显示到界面上是2维的，也就是要切割成n段，每段是屏幕上的一行。而linesize就是每一段的长度，影响着从哪里切开的问题。上面的问题就是使用width当做linesize,而width<linesize,导致切割的地方短了，剩余的部分流到了下一层，把下一层往后挤，导致层层错位。
  * **构建texture同时需要width和linesize,width决定哪些数据时有效的，linesize决定每一行的数据怎么划分**
+ * [texture对齐和裁剪](http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html)
+ * 使用`glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[0]);`来形成裁剪后的图像，避开结尾无用的数据。
+ * 底部还是有绿色，说明还是有空数据，高度有问题？texture的高度是240

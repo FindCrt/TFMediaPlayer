@@ -112,57 +112,6 @@
     }
 }
 
--(void)calculateContentFrame:(CGSize)sourceSize{
-    
-    CGRect contentFrame;
-    CGFloat width = self.bufferSize.width, height = self.bufferSize.height;
-    
-    if (self.contentMode == UIViewContentModeScaleAspectFit) {
-        
-        CGFloat scaledWidth = sourceSize.width * height/sourceSize.height;
-
-        if (scaledWidth < width) { //height is relatively larger .
-            contentFrame = CGRectMake((width-scaledWidth)/2.0, 0, scaledWidth, height);
-        }else{
-            CGFloat scaledHeight = sourceSize.height * width/sourceSize.width;
-            contentFrame = CGRectMake(0, (height-scaledHeight)/2.0, width, scaledHeight);
-        }
-    }else if (self.contentMode == UIViewContentModeScaleAspectFill){
-        
-        CGFloat scaledWidth = sourceSize.width * height/sourceSize.height;
-        
-        if (scaledWidth > width) { //height is relatively larger .
-            contentFrame = CGRectMake((width-scaledWidth)/2.0, 0, scaledWidth, height);
-        }else{
-            CGFloat scaledHeight = sourceSize.height * width/sourceSize.width;
-            contentFrame = CGRectMake(0, (scaledHeight-height)/2.0, width, scaledHeight);
-        }
-    }else if (self.contentMode == UIViewContentModeScaleToFill){
-        contentFrame = CGRectMake(0, 0, width, height);
-    }else if (self.contentMode == UIViewContentModeCenter){
-        contentFrame = CGRectMake((width-sourceSize.width)/2.0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeTop){
-        contentFrame = CGRectMake((width-sourceSize.width)/2.0, 0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeBottom){
-        contentFrame = CGRectMake((width-sourceSize.width)/2.0, height-sourceSize.height, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeLeft){
-        contentFrame = CGRectMake(0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeRight){
-        contentFrame = CGRectMake(width-sourceSize.width, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeTopLeft){
-        contentFrame = CGRectMake(0, 0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeTopRight){
-        contentFrame = CGRectMake(width-sourceSize.width, 0, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeBottomLeft){
-        contentFrame = CGRectMake(0, height-sourceSize.height, sourceSize.width, sourceSize.height);
-    }else if (self.contentMode == UIViewContentModeBottomRight){
-        contentFrame = CGRectMake(width-sourceSize.width, height-sourceSize.height, sourceSize.width, sourceSize.height);
-    }
-    
-    //opengl's y axis is inverse with UIKit's y asix.
-    glViewport(contentFrame.origin.x, height - CGRectGetMaxY(contentFrame), contentFrame.size.width, contentFrame.size.height);
-}
-
 -(void)dealloc{
     if (_colorBuffer) {
         glDeleteRenderbuffers(1, &_colorBuffer);
