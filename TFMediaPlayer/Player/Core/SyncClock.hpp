@@ -11,25 +11,30 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <libavutil/rational.h>
 
 namespace tfmpcore {
     class SyncClock{
         //frame pts + correction = the real present time that come from av_gettime_relative.
-        double ptsCorrection;
+        int64_t ptsCorrection = -1;
         
-        bool isAudioMajor;
+        bool isAudioMajor = true;
         
     public:
         
         SyncClock(bool isAudioMajor = true):isAudioMajor(isAudioMajor){};
         
+        //unit is microseconds 
+        int64_t lastRealPts = 0;
         
-        double lastPts = 0;
-        double remainTime(double videoPts, double audioPts);
+        double presentTimeForVideo(int64_t videoPts, AVRational timeBase);
+        double presentTimeForAudio(int64_t audioPts, AVRational timeBase);
         
-        double nextMediaPts(double videoPts, double audioPts);
+        double remainTimeForVideo(int64_t videoPts, AVRational timeBase);
+        double remainTimeForAudio(int64_t audioPts, AVRational timeBase);
         
-        void correctWithPresent(double videoPts, double audioPts);
+        void presentVideo(int64_t videoPts, AVRational timeBase);
+        void presentAudio(int64_t audioPts, AVRational timeBase, double delay);
     };
 }
 

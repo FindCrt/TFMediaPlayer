@@ -38,7 +38,23 @@ bool AudioResampler::isNeedResample(AVFrame *sourceFrame){
     return _isNeedResample(sourceFrame,&adoptedAudioDesc);
 }
 
+void AudioResampler::freeResources(){
+    free(resampledBuffers);
+    
+    resampledBuffers = resampledBuffers1 = nullptr;
+    resampleSize = 0;
+    adoptedAudioDesc = {};
+}
+
 void AudioResampler::initResampleContext(AVFrame *sourceFrame){
+    
+    if (sourceFrame->sample_rate == 0 ||
+        sourceFrame->channel_layout == 0 ||
+        sourceFrame->format == 0) {
+        TFMPDLOG_C("init swr_context with error frame\n");
+        return;
+    }
+    
     swrCtx = swr_alloc();
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
@@ -66,7 +82,7 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     lastSourceAudioDesc->channelsPerFrame = sourceFrame->channels;
 }
 
-bool AudioResampler::reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *linesize){
+bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
     
     if (_isNeedResample(inFrame, lastSourceAudioDesc)) {
         initResampleContext(inFrame);
@@ -99,8 +115,6 @@ bool AudioResampler::reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *
     
     unsigned int actualOutSize = actualOutSamples * adoptedAudioDesc.channelsPerFrame * av_get_bytes_per_sample(destFmt);
     
-    printf("samples:%d --> %d, size:%d --> %d \n",nb_samples, actualOutSamples, outsize, actualOutSize);
-    
     *outSamples = actualOutSamples;
     *linesize = actualOutSize;
     
@@ -109,7 +123,7 @@ bool AudioResampler::reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *
     return true;
 }
 
-bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize){
+bool AudioResampler::reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *linesize){
     
     AVSampleFormat destFmt = FFmpegAudioFormatFromTFMPAudioDesc(adoptedAudioDesc.formatFlags, adoptedAudioDesc.bitsPerChannel);
     AVSampleFormat sourceFmt = (AVSampleFormat)inFrame->format;

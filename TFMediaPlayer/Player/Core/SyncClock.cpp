@@ -14,42 +14,54 @@ extern "C"{
 
 using namespace tfmpcore;
 
-double SyncClock::remainTime(double videoPts, double audioPts){
-    
-    if (isAudioMajor) {
-        
-        return audioPts - lastPts;
-        
-    }else{
-        
-        if (videoPts <= 0) {
-            printf("video pts is 0\n");
-            return -1;
-        }
-        return videoPts - lastPts;
-        
-        //return videoPts + ptsCorrection - currentTime;
+static double timeDen = 1000000;
+
+double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
+    if (ptsCorrection < 0) {
+        return av_gettime_relative()/timeDen;
     }
+    
+    
+    
+    int64_t sourcePts = videoPts *av_q2d(timeBase)*timeDen;
+    
+    return (ptsCorrection+sourcePts - lastRealPts)/timeDen;
 }
 
-double SyncClock::nextMediaPts(double videoPts, double audioPts){
+double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     
-    if (isAudioMajor) {
-        return videoPts;
-    }else{
-        return audioPts;
+    if (ptsCorrection < 0) {
+        return av_gettime_relative()/timeDen;
     }
+    
+    int64_t sourcePts = audioPts *av_q2d(timeBase)*timeDen;
+    
+    return (ptsCorrection+sourcePts - lastRealPts)/timeDen;
 }
 
-void SyncClock::correctWithPresent(double videoPts, double audioPts){
+double SyncClock::remainTimeForVideo(int64_t videoPts, AVRational timeBase){
     
-    double currentTime = av_gettime_relative() / 1000000.0;
-    
+    return presentTimeForVideo(videoPts, timeBase) - av_gettime_relative()/timeDen;
+}
+
+double SyncClock::remainTimeForAudio(int64_t audioPts, AVRational timeBase){
+    return presentTimeForVideo(audioPts, timeBase) - av_gettime_relative()/timeDen;
+}
+
+void SyncClock::presentVideo(int64_t videoPts, AVRational timeBase){
     if (isAudioMajor) {
-        lastPts = audioPts;
-        ptsCorrection = currentTime - audioPts;
-    }else{
-        lastPts = videoPts;
-        ptsCorrection = currentTime - videoPts;
+        return;
     }
+    
+    ptsCorrection = av_gettime_relative() - videoPts*av_q2d(timeBase)*timeDen;
+}
+
+void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay){
+    if (!isAudioMajor) {
+        return;
+    }
+    
+    ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
+    
+    printf("preBufferDuration: %.6f, delay: %f",ptsCorrection/timeDen, delay);
 }

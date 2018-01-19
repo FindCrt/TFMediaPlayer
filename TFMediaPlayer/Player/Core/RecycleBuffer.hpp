@@ -103,7 +103,11 @@ namespace tfmpcore {
             backNode = frontNode->pre;
         }
         
-        char identifier[16];
+        /** name for identifying this RecycleNode */
+        char name[16];
+        
+        /** Use this func to free RecycleNode.val as RecycleBuffer doesn't know what T exactly is. */
+        void (*valueFreeFunc)(T *val);
         
         bool isFull(){
             return usedSize == limitSize;
@@ -140,7 +144,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-//            printf("%s: %ld\n",identifier,usedSize);
+            printf("get out\n");
             
             return true;
         }
@@ -148,11 +152,11 @@ namespace tfmpcore {
         void blockInsert(T val){
             
             if (usedSize >= limitSize) {
-//                printf(">>>>lock full %s\n",identifier);
+                printf(">>>>lock full %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
-//                printf("<<<<unlock full %s\n",identifier);
+                printf("<<<<unlock full %s\n",name);
             }
             
             insert(val);
@@ -192,6 +196,38 @@ namespace tfmpcore {
             *valP = frontNode->val;
             
             return true;
+        }
+        
+        void clear(){
+            pthread_mutex_lock(&mutex);
+            
+            //free valid datas
+            if (usedSize > 0 && valueFreeFunc != nullptr) {
+                RecycleNode *curNode = frontNode;
+                do {
+                    valueFreeFunc(&(curNode->val));
+                    curNode = curNode->next;
+                } while (curNode != backNode->next);
+            }
+            
+            //free all nodes
+            RecycleNode *curNode = frontNode;
+            do {
+                RecycleNode *next = curNode->next;
+                free(curNode);
+                curNode = next;
+            } while (curNode != backNode->next);
+            
+            frontNode = nullptr;
+            backNode = nullptr;
+            
+            allocedSize = 0;
+            usedSize = 0;
+            limitSize = LONG_MAX;
+            
+            printf("free %s\n",name);
+            
+            pthread_mutex_unlock(&mutex);
         }
     };
 }

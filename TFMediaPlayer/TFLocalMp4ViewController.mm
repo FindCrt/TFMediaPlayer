@@ -185,7 +185,7 @@ static int mediaIndex = 0;
 -(void)startPlay{
     
     if (!_currentMediaURL) {
-        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
+        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
     }
     
     _player.mediaURL = _currentMediaURL;

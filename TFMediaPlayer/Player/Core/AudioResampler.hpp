@@ -21,7 +21,7 @@ namespace tfmpcore {
     
     class AudioResampler{
         
-        TFMPAudioStreamDescription adoptedAudioDesc;
+        
         SwrContext *swrCtx = nullptr;
         void initResampleContext(AVFrame *sourceFrame);
         
@@ -33,14 +33,14 @@ namespace tfmpcore {
         uint8_t *resampledBuffers = nullptr;
         unsigned int resampleSize = 0;
         
-        void setAdoptedAudioDesc(TFMPAudioStreamDescription adoptedAudioDesc){
-            this->adoptedAudioDesc = adoptedAudioDesc;
-        }
+        TFMPAudioStreamDescription adoptedAudioDesc;
         
         bool isNeedResample(AVFrame *sourceFrame);
         
         bool reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *linesize);
         bool reampleAudioFrame2(AVFrame *inFrame, int *outSamples, int *linesize);
+        
+        void freeResources();
     };
 }
 

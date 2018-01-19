@@ -49,6 +49,7 @@ namespace tfmpcore {
         bool prapareOK;
         
         //read frames
+        bool shouldRead = false;
         void startReadingFrames();
         pthread_t readThread;
         static void * readFrame(void *context);

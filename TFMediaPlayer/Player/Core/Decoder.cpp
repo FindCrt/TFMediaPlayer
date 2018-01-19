@@ -12,6 +12,14 @@
 
 using namespace tfmpcore;
 
+inline void freePacket(AVPacket **pkt){
+    av_packet_free(pkt);
+}
+
+inline void freeFrame(AVFrame **frame){
+    av_frame_free(frame);
+}
+
 bool Decoder::prepareDecode(){
     AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
     if (codec == nullptr) {
@@ -35,28 +43,41 @@ bool Decoder::prepareDecode(){
     
 #if DEBUG
     if (type == AVMEDIA_TYPE_AUDIO) {
-        strcpy(frameBuffer.identifier, "audio_frame");
-        strcpy(pktBuffer.identifier, "audio_packet");
+        strcpy(frameBuffer.name, "audio_frame");
+        strcpy(pktBuffer.name, "audio_packet");
     }else if (type == AVMEDIA_TYPE_VIDEO){
-        strcpy(frameBuffer.identifier, "video_frame");
-        strcpy(pktBuffer.identifier, "video_packet");
+        strcpy(frameBuffer.name, "video_frame");
+        strcpy(pktBuffer.name, "video_packet");
     }else{
-        strcpy(frameBuffer.identifier, "subtitle_frame");
-        strcpy(pktBuffer.identifier, "subtitle_packet");
+        strcpy(frameBuffer.name, "subtitle_frame");
+        strcpy(pktBuffer.name, "subtitle_packet");
     }
 #endif
     
     shouldDecode = true;
+    
+    pktBuffer.valueFreeFunc = freePacket;
+    frameBuffer.valueFreeFunc = freeFrame;
+    
+    RecycleBuffer<TFMPMediaType> intBuffer;
+    TFMPMediaType a;
+    intBuffer.getOut(&a);
     
     return true;
 }
 
 void Decoder::startDecode(){
     pthread_create(&decodeThread, NULL, decodeLoop, this);
+    pthread_detach(decodeThread);
 }
 
 void Decoder::stopDecode(){
     shouldDecode = false;
+}
+
+void Decoder::freeResources(){
+    frameBuffer.clear();
+    pktBuffer.clear();
 }
 
 void Decoder::decodePacket(AVPacket *packet){
@@ -104,13 +125,15 @@ void *Decoder::decodeLoop(void *context){
                     continue;
                 }
                 
-                decoder->frameBuffer.blockInsert(frame);
+                if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
             }
         }else{
             
             frame = av_frame_alloc();
             retval = avcodec_receive_frame(decoder->codecCtx, frame);
-            decoder->frameBuffer.blockInsert(frame);
+            if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
+            
+            //TODO: frame本身要free
             
             if (retval != 0) {
                 TFCheckRetval("avcodec receive frame");

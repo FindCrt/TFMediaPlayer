@@ -286,8 +286,6 @@ inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures
     glGenerateMipmap(GL_TEXTURE_2D);
     
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    
-    TFMPPrintBuffer(frameBuf->pixels[1], (height-1)*linesize[1], linesize[1]);
 }
 
 inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textures){

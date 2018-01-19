@@ -96,6 +96,8 @@ void PlayController::play(){
         return;
     }
     
+    shouldRead = true;
+    
     startReadingFrames();
     if (videoDecoder) {
         videoDecoder->startDecode();
@@ -111,6 +113,9 @@ void PlayController::play(){
 }
 
 void PlayController::pause(){
+    
+    shouldRead = false;
+    
     if (videoDecoder) {
         videoDecoder->stopDecode();
     }
@@ -125,19 +130,24 @@ void PlayController::pause(){
 }
 
 void PlayController::stop(){
+    
+    shouldRead = false;
+    
+    displayer->stopDisplay();
+    displayer->freeResource();
+    
     if (videoDecoder) {
         videoDecoder->stopDecode();
+        videoDecoder->freeResources();
     }
     if (audioDecoder) {
         audioDecoder->stopDecode();
+        audioDecoder->freeResources();
     }
     if (subtitleDecoder) {
         subtitleDecoder->stopDecode();
+        subtitleDecoder->freeResources();
     }
-    
-    displayer->stopDisplay();
-    
-    //TODO: free resources
 }
 
 /***** properties *****/
@@ -196,7 +206,7 @@ void PlayController::resolveAudioStreamFormat(){
     
     //resample source audio to real-play audio format.
     auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
-    audioResampler->setAdoptedAudioDesc(adoptedAudioDesc);
+    audioResampler->adoptedAudioDesc = adoptedAudioDesc;
     displayer->setAudioResampler(audioResampler);
 //    displayer->setAdoptedAudioDesc(adoptedAudioDesc);
     
@@ -205,6 +215,7 @@ void PlayController::resolveAudioStreamFormat(){
 
 void PlayController::startReadingFrames(){
     pthread_create(&readThread, nullptr, readFrame, this);
+    pthread_detach(readThread);
 }
 
 void * PlayController::readFrame(void *context){
@@ -213,7 +224,7 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = av_packet_alloc();
     
-    while (av_read_frame(controller->fmtCtx, packet) == 0) {
+    while (controller->shouldRead && av_read_frame(controller->fmtCtx, packet) == 0) {
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {

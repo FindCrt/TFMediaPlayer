@@ -94,7 +94,7 @@ for(int i = 0; i<length;i++){\
 printf("\n-------------\n");
 
 #define TFMPPrintBuffer(buffer, start, length)\
-uint8_t *checkP = (uint8_t*)buffer;\
+uint8_t *checkP = ((uint8_t*)buffer)+start;\
 for(int i = 0; i<length;i++){\
 printf("%x ",*checkP);\
 checkP++;\

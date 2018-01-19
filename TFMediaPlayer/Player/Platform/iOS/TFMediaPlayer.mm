@@ -6,7 +6,7 @@
 //  Copyright © 2017年 shiwei. All rights reserved.
 //
 
-#define TFMPUseAudioUnitPlayer 1
+#define TFMPUseAudioUnitPlayer 0
 
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"
@@ -47,7 +47,7 @@
         _playController = new tfmpcore::PlayController();
         
         _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
-        _playController->isAudioMajor = false;
+        _playController->isAudioMajor = true;
         
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
@@ -170,6 +170,8 @@
 
 -(void)stop{
     
+    [_audioPlayer stop];
+    
     switch (_state) {
         case TFMediaPlayerStateConnecting:
             _autoPlayWhenReady = false;
@@ -187,8 +189,6 @@
         default:
             break;
     }
-    
-    [_audioPlayer stop];
     
     _state = TFMediaPlayerStateNone;
 }

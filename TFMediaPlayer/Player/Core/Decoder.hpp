@@ -49,8 +49,9 @@ namespace tfmpcore {
         
         void startDecode();
         void stopDecode();
-        void decodePacket(AVPacket *packet);
+        void freeResources();
         
+        void decodePacket(AVPacket *packet);
     };
 }
 
