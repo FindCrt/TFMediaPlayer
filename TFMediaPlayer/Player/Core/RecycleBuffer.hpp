@@ -27,6 +27,8 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
+        const static int defaultInitAllocSize = 8;
+        
         long limitSize = LONG_MAX;
         long allocedSize = 0;
         long usedSize = 0;
@@ -37,9 +39,16 @@ namespace tfmpcore {
         pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
+        bool noBlock = false;
+        
         bool expand(){
             if (allocedSize >= limitSize) {
                 return false;
+            }
+            if (allocedSize == 0) {
+                allocedSize = defaultInitAllocSize;
+                initAlloc();
+                return true;
             }
             
             long expandSize = allocedSize < (limitSize-allocedSize) ? allocedSize : (limitSize-allocedSize);
@@ -64,25 +73,9 @@ namespace tfmpcore {
             allocedSize += expandSize;
             
             return true;
-            
-            
         }
         
-    public:
-        
-        RecycleBuffer(long limitSize = 0, bool allocToLimit = false){
-            if (limitSize > 0) {
-                this->limitSize = limitSize;
-            }
-            
-            if (limitSize && allocToLimit) {
-                
-                allocedSize = limitSize;
-            }else{
-                allocedSize = 8; //init size
-            }
-            
-            
+        void initAlloc(){
             frontNode = new RecycleNode();
             RecycleNode *lastNode = frontNode;
             
@@ -103,6 +96,23 @@ namespace tfmpcore {
             backNode = frontNode->pre;
         }
         
+    public:
+        
+        RecycleBuffer(long limitSize = 0, bool allocToLimit = false){
+            if (limitSize > 0) {
+                this->limitSize = limitSize;
+            }
+            
+            if (limitSize && allocToLimit) {
+                
+                allocedSize = limitSize;
+            }else{
+                allocedSize = defaultInitAllocSize; //init size
+            }
+            
+            initAlloc();
+        }
+        
         /** name for identifying this RecycleNode */
         char name[16];
         
@@ -117,7 +127,7 @@ namespace tfmpcore {
         }
         
         bool insert(T val){
-            if (usedSize == allocedSize) {
+            if (usedSize >= allocedSize) {
                 if (!expand()) {
                     //stop pushing until there is unused node.
                     return false;
@@ -151,7 +161,7 @@ namespace tfmpcore {
         
         void blockInsert(T val){
             
-            if (usedSize >= limitSize) {
+            if (!noBlock && usedSize >= limitSize) {
                 printf(">>>>lock full %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
@@ -165,14 +175,11 @@ namespace tfmpcore {
         
         void blockGetOut(T *valP){
 
-            if (usedSize == 0) {
-                
+            if (!noBlock && usedSize == 0) {
 //                printf(">>>>lock empty %s\n",identifier);
-                
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
-                
 //                printf("<<<<unlock empty %s\n",identifier);
             }
             
@@ -199,6 +206,7 @@ namespace tfmpcore {
         }
         
         void signalAllBlock(){
+            printf("signalAllBlock\n");
             pthread_cond_broadcast(&cond);
         }
         

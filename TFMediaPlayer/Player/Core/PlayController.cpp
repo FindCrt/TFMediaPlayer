@@ -273,6 +273,8 @@ void * PlayController::readFrame(void *context){
         }
     }
     
+    TFMPDLOG_C("readFrame thread end!");
+    
     return 0;
 }
 

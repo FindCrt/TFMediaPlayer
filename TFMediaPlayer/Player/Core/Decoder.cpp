@@ -79,16 +79,15 @@ void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
-    if (codecCtx) avcodec_free_context(&codecCtx);
-    
     frameBuffer.signalAllBlock();
     pktBuffer.signalAllBlock();
     while (isDecoding) {
-//        TFMPDLOG_C("wait one decode loop end.\n");
+        TFMPDLOG_C("wait one decode loop end.\n");
     }
     frameBuffer.clear();
     pktBuffer.clear();
     
+    if (codecCtx) avcodec_free_context(&codecCtx);
     fmtCtx = nullptr;
 }
 
