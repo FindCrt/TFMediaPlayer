@@ -39,11 +39,18 @@ bool AudioResampler::isNeedResample(AVFrame *sourceFrame){
 }
 
 void AudioResampler::freeResources(){
-    free(resampledBuffers);
     
+    swr_free(&swrCtx);
+    
+    free(resampledBuffers);
     resampledBuffers = resampledBuffers1 = nullptr;
+    
+    free(lastSourceAudioDesc);
+    lastSourceAudioDesc = nullptr;
+    
     resampleSize = 0;
     adoptedAudioDesc = {};
+    TFMPDLOG_C("nil lastSourceAudioDesc\n");
 }
 
 void AudioResampler::initResampleContext(AVFrame *sourceFrame){
@@ -72,8 +79,10 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     
     TFCheckRetval("swr init");
     
-    if (lastSourceAudioDesc != nullptr) free(lastSourceAudioDesc);
+    TFMPDLOG_C("lastSourceAudioDesc: %d",lastSourceAudioDesc == nullptr);
     
+    if (lastSourceAudioDesc != nullptr) free(lastSourceAudioDesc);
+    TFMPDLOG_C("new lastSourceAudioDesc\n");
     lastSourceAudioDesc = new TFMPAudioStreamDescription();
     lastSourceAudioDesc->sampleRate = sourceFrame->sample_rate;
     lastSourceAudioDesc->formatFlags = formatFlagsFromFFmpegAudioFormat(sourceFmt);

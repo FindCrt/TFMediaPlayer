@@ -62,12 +62,11 @@ void DisplayController::freeResource(){
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
     
-    audioResampler->freeResources();
-    free(audioResampler);
-    
     free(syncClock);
+    syncClock = nullptr;
     
     displayContext = nullptr;
+    audioResampler = nullptr;
     shareVideoBuffer = nullptr;
     shareAudioBuffer = nullptr;
     displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;

@@ -58,6 +58,8 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         return false;
     }
     
+    displayer = new DisplayController();
+    
     //audio format
     if (audioStream >= 0) resolveAudioStreamFormat();
     
@@ -135,19 +137,32 @@ void PlayController::stop(){
     
     displayer->stopDisplay();
     displayer->freeResource();
+    free(displayer);
+    displayer = nullptr;
+    
+    audioResampler->freeResources();
+    free(audioResampler);
+    audioResampler = nullptr;
     
     if (videoDecoder) {
         videoDecoder->stopDecode();
         videoDecoder->freeResources();
+        free(videoDecoder);
+        videoDecoder = nullptr;
     }
     if (audioDecoder) {
         audioDecoder->stopDecode();
         audioDecoder->freeResources();
+        free(audioDecoder);
+        audioDecoder = nullptr;
     }
     if (subtitleDecoder) {
         subtitleDecoder->stopDecode();
         subtitleDecoder->freeResources();
+        free(audioDecoder);
+        audioDecoder = nullptr;
     }
+
     
     TFMPDLOG_C("player stoped!\n");
 }
@@ -208,6 +223,8 @@ void PlayController::resolveAudioStreamFormat(){
     
     //resample source audio to real-play audio format.
     auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
+    
+    audioResampler = new AudioResampler();
     audioResampler->adoptedAudioDesc = adoptedAudioDesc;
     displayer->setAudioResampler(audioResampler);
 //    displayer->setAdoptedAudioDesc(adoptedAudioDesc);

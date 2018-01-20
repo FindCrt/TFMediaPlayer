@@ -198,6 +198,10 @@ namespace tfmpcore {
             return true;
         }
         
+        void signalAllBlock(){
+            pthread_cond_broadcast(&cond);
+        }
+        
         void clear(){
             pthread_mutex_lock(&mutex);
             

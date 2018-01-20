@@ -79,8 +79,10 @@ void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
+    frameBuffer.signalAllBlock();
+    pktBuffer.signalAllBlock();
     while (isDecoding) {
-        //wait one decode loop end.
+//        TFMPDLOG_C("wait one decode loop end.\n");
     }
     frameBuffer.clear();
     pktBuffer.clear();

@@ -42,9 +42,9 @@ namespace tfmpcore {
         Decoder *audioDecoder;
         Decoder *subtitleDecoder;
         
-        DisplayController *displayer = new DisplayController();
+        DisplayController *displayer = nullptr;
         
-        AudioResampler *audioResampler = new AudioResampler();
+        AudioResampler *audioResampler = nullptr;
         
         bool prapareOK;
         
