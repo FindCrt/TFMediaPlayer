@@ -42,6 +42,10 @@ namespace tfmpcore {
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
         
+        ~Decoder(){
+            freeResources();
+        }
+        
         RecycleBuffer<AVFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };

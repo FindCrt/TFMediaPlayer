@@ -209,6 +209,7 @@ namespace tfmpcore {
             if (usedSize > 0 && valueFreeFunc != nullptr) {
                 RecycleNode *curNode = frontNode;
                 do {
+                    printf("free one %s\n",name);
                     valueFreeFunc(&(curNode->val));
                     curNode = curNode->next;
                 } while (curNode != backNode->next);
@@ -225,11 +226,9 @@ namespace tfmpcore {
             frontNode = nullptr;
             backNode = nullptr;
             
+            //don't change limitsize.
             allocedSize = 0;
             usedSize = 0;
-            limitSize = LONG_MAX;
-            
-            printf("free %s\n",name);
             
             pthread_mutex_unlock(&mutex);
         }

@@ -118,6 +118,8 @@ void PlayController::pause(){
     
     shouldRead = false;
     
+    displayer->stopDisplay();
+    
     if (videoDecoder) {
         videoDecoder->stopDecode();
     }
@@ -127,44 +129,56 @@ void PlayController::pause(){
     if (subtitleDecoder) {
         subtitleDecoder->stopDecode();
     }
-    
-    displayer->stopDisplay();
 }
 
 void PlayController::stop(){
     
     shouldRead = false;
     
+    //displayer
     displayer->stopDisplay();
-    displayer->freeResource();
-    free(displayer);
-    displayer = nullptr;
     
-    audioResampler->freeResources();
-    free(audioResampler);
-    audioResampler = nullptr;
-    
+    //decodes
     if (videoDecoder) {
         videoDecoder->stopDecode();
+    }
+    if (audioDecoder) {
+        audioDecoder->stopDecode();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->stopDecode();
+    }
+    
+    freeResources();
+    
+    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+
+    TFMPDLOG_C("player stoped!\n");
+}
+
+void PlayController::freeResources(){
+    displayer->freeResources();
+    
+    //decodes
+    if (videoDecoder) {
         videoDecoder->freeResources();
         free(videoDecoder);
         videoDecoder = nullptr;
     }
     if (audioDecoder) {
-        audioDecoder->stopDecode();
         audioDecoder->freeResources();
         free(audioDecoder);
         audioDecoder = nullptr;
     }
     if (subtitleDecoder) {
-        subtitleDecoder->stopDecode();
         subtitleDecoder->freeResources();
-        free(audioDecoder);
-        audioDecoder = nullptr;
+        free(subtitleDecoder);
+        subtitleDecoder = nullptr;
     }
-
     
-    TFMPDLOG_C("player stoped!\n");
+    //ffmpeg
+    if (fmtCtx) avformat_free_context(fmtCtx);
 }
 
 /***** properties *****/
@@ -224,12 +238,9 @@ void PlayController::resolveAudioStreamFormat(){
     //resample source audio to real-play audio format.
     auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
     
-    audioResampler = new AudioResampler();
+    auto audioResampler = new AudioResampler();
     audioResampler->adoptedAudioDesc = adoptedAudioDesc;
     displayer->setAudioResampler(audioResampler);
-//    displayer->setAdoptedAudioDesc(adoptedAudioDesc);
-    
-    
 }
 
 void PlayController::startReadingFrames(){

@@ -38,13 +38,11 @@ namespace tfmpcore {
         int audioStream = -1;
         int subTitleStream = -1;
         
-        Decoder *videoDecoder;
-        Decoder *audioDecoder;
-        Decoder *subtitleDecoder;
+        Decoder *videoDecoder = nullptr;
+        Decoder *audioDecoder = nullptr;
+        Decoder *subtitleDecoder = nullptr;
         
         DisplayController *displayer = nullptr;
-        
-        AudioResampler *audioResampler = nullptr;
         
         bool prapareOK;
         
@@ -63,7 +61,14 @@ namespace tfmpcore {
         
         void calculateRealDisplayMediaType();
         
+        void freeResources();
+        
     public:
+        
+        ~PlayController(){
+            stop();
+            delete displayer;
+        }
         
         /** controls **/
         
@@ -86,8 +91,8 @@ namespace tfmpcore {
             return realDisplayMediaType;
         }
         
-        void *displayContext;
-        TFMPVideoFrameDisplayFunc displayVideoFrame;
+        void *displayContext = nullptr;
+        TFMPVideoFrameDisplayFunc displayVideoFrame = nullptr;
 
         TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         

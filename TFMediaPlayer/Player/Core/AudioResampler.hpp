@@ -29,6 +29,9 @@ namespace tfmpcore {
         
         uint8_t *resampledBuffers1 = nullptr;
     public:
+        ~AudioResampler(){
+            freeResources();
+        }
         
         uint8_t *resampledBuffers = nullptr;
         unsigned int resampleSize = 0;

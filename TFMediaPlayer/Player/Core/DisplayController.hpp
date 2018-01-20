@@ -52,6 +52,12 @@ namespace tfmpcore {
         
     public:
         
+        ~DisplayController(){
+            freeResources();
+            delete audioResampler;
+            delete syncClock;
+        }
+        
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
         void *displayContext;
@@ -70,13 +76,13 @@ namespace tfmpcore {
         AVRational videoTimeBase;
         AVRational audioTimeBase;
         
-        SyncClock *syncClock;
+        SyncClock *syncClock = nullptr;
         
 
         void startDisplay();
         void stopDisplay();
         
-        void freeResource();
+        void freeResources();
     };
 }
 

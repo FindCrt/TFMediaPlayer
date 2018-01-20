@@ -40,7 +40,7 @@ bool AudioResampler::isNeedResample(AVFrame *sourceFrame){
 
 void AudioResampler::freeResources(){
     
-    swr_free(&swrCtx);
+    if (swrCtx) swr_free(&swrCtx);
     
     free(resampledBuffers);
     resampledBuffers = resampledBuffers1 = nullptr;

@@ -78,7 +78,7 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
-    
+    [super viewWillDisappear:animated];
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [_player stop];
         

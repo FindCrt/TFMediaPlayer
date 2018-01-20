@@ -79,6 +79,8 @@ void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
+    if (codecCtx) avcodec_free_context(&codecCtx);
+    
     frameBuffer.signalAllBlock();
     pktBuffer.signalAllBlock();
     while (isDecoding) {
@@ -86,6 +88,8 @@ void Decoder::freeResources(){
     }
     frameBuffer.clear();
     pktBuffer.clear();
+    
+    fmtCtx = nullptr;
 }
 
 void Decoder::decodePacket(AVPacket *packet){

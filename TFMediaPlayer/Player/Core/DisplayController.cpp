@@ -47,7 +47,7 @@ void DisplayController::stopDisplay(){
     printf("shouldDisplay to false\n");
 }
 
-void DisplayController::freeResource(){
+void DisplayController::freeResources(){
     
     if (shouldDisplay){
         TFMPDLOG_C("free DisplayController resource before stop display\n");
@@ -58,15 +58,13 @@ void DisplayController::freeResource(){
         TFMPDLOG_C("waiting video or audio displaying loop end\n");
     }
     
+    audioResampler->freeResources();
+    
     free(remainingAudioBuffers.head);
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
     
-    free(syncClock);
-    syncClock = nullptr;
-    
     displayContext = nullptr;
-    audioResampler = nullptr;
     shareVideoBuffer = nullptr;
     shareAudioBuffer = nullptr;
     displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
@@ -163,8 +161,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             remainingBuffer->readIndex = 0;
             remainingBuffer->validSize = 0;
-            
-            unreadSize = 0;
         }
         
         AVFrame *frame = nullptr;
