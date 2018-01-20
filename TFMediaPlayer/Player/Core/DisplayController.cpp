@@ -32,6 +32,8 @@ void DisplayController::startDisplay(){
     
     shouldDisplay = true;
     
+    TFMPDLOG_C("shouldDisplay to true\n");
+    
     bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
     
     if (showVideo) {
@@ -42,6 +44,7 @@ void DisplayController::startDisplay(){
 
 void DisplayController::stopDisplay(){
     shouldDisplay = false;
+    printf("shouldDisplay to false\n");
 }
 
 void DisplayController::freeResource(){
@@ -49,6 +52,10 @@ void DisplayController::freeResource(){
     if (shouldDisplay){
         TFMPDLOG_C("free DisplayController resource before stop display\n");
         shouldDisplay = false;
+    }
+    
+    while (isDispalyingVideo || isFillingAudio) {
+        TFMPDLOG_C("waiting video or audio displaying loop end\n");
     }
     
     free(remainingAudioBuffers.head);
@@ -73,6 +80,8 @@ void *DisplayController::displayLoop(void *context){
     AVFrame *videoFrame = nullptr;
     
     while (controller->shouldDisplay) {
+        
+        controller->isDispalyingVideo = true;
         
         controller->shareVideoBuffer->blockGetOut(&videoFrame);
         
@@ -114,6 +123,8 @@ void *DisplayController::displayLoop(void *context){
         }
         
         av_frame_free(&videoFrame);
+        
+        controller->isDispalyingVideo = false;
     }
     
     return 0;
@@ -121,11 +132,16 @@ void *DisplayController::displayLoop(void *context){
 
 int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
     
-    TFMPBufferReadLog("\n------start read--------%d,%d",oneLineSize,lineCount);
-    
     DisplayController *displayer = (DisplayController *)context;
     
-    if (!displayer->shouldDisplay) return 0;
+    TFMPDLOG_C("\n\nstart audio fill 1: %d\n",displayer->shouldDisplay);
+    if (!displayer->shouldDisplay){
+        return 0;
+    }
+    
+    TFMPDLOG_C("start audio fill 2: %d\n",displayer->shouldDisplay);
+    
+    displayer->isFillingAudio = true;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
     uint32_t unreadSize = remainingBuffer->unreadSize();
@@ -226,7 +242,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         }
     }
     
-    
+    displayer->isFillingAudio = false;
     
     return 0;
 }

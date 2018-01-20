@@ -40,7 +40,9 @@ namespace tfmpcore {
         pthread_t dispalyThread;
         static void *displayLoop(void *context);
         
-        bool shouldDisplay;
+        bool shouldDisplay = false;
+        bool isDispalyingVideo = false;
+        bool isFillingAudio = false;
         
         TFMPRemainingBuffer remainingAudioBuffers;
         

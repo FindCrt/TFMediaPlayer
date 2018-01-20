@@ -36,6 +36,7 @@ namespace tfmpcore {
         static void *decodeLoop(void *context);
         
         bool shouldDecode;
+        bool isDecoding;
         
     public:
         AVMediaType type;

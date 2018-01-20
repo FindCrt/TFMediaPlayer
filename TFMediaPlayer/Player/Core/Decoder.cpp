@@ -76,6 +76,12 @@ void Decoder::stopDecode(){
 }
 
 void Decoder::freeResources(){
+    
+    if (!shouldDecode) shouldDecode = false;
+    
+    while (isDecoding) {
+        //wait one decode loop end.
+    }
     frameBuffer.clear();
     pktBuffer.clear();
 }
@@ -97,6 +103,8 @@ void *Decoder::decodeLoop(void *context){
     AVFrame *frame = nullptr;
     
     while (decoder->shouldDecode) {
+        
+        decoder->isDecoding = true;
         
         decoder->pktBuffer.blockGetOut(&pkt);
         
@@ -146,6 +154,8 @@ void *Decoder::decodeLoop(void *context){
             }
         }
         av_packet_unref(pkt);
+        
+        decoder->isDecoding = false;
     }
     
     return 0;

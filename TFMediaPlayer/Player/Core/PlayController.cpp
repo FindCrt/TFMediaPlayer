@@ -148,6 +148,8 @@ void PlayController::stop(){
         subtitleDecoder->stopDecode();
         subtitleDecoder->freeResources();
     }
+    
+    TFMPDLOG_C("player stoped!\n");
 }
 
 /***** properties *****/
