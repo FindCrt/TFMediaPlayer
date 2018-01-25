@@ -321,8 +321,6 @@ inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textur
         }
     }else if (self.contentMode == UIViewContentModeScaleToFill){
         contentFrame = CGRectMake(0, 0, width, height);
-    }else if (self.contentMode == UIViewContentModeCenter){
-        contentFrame = CGRectMake((width-sourceSize.width)/2.0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
     }else if (self.contentMode == UIViewContentModeTop){
         contentFrame = CGRectMake((width-sourceSize.width)/2.0, 0, sourceSize.width, sourceSize.height);
     }else if (self.contentMode == UIViewContentModeBottom){
@@ -339,12 +337,19 @@ inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textur
         contentFrame = CGRectMake(0, height-sourceSize.height, sourceSize.width, sourceSize.height);
     }else if (self.contentMode == UIViewContentModeBottomRight){
         contentFrame = CGRectMake(width-sourceSize.width, height-sourceSize.height, sourceSize.width, sourceSize.height);
+    }else{
+        //其他都按center的模式来显示
+        contentFrame = CGRectMake((width-sourceSize.width)/2.0, (height-sourceSize.height)/2.0, sourceSize.width, sourceSize.height);
     }
     
     contentFrame = CGRectMake((int)contentFrame.origin.x, (int)contentFrame.origin.y, (int)contentFrame.size.width, (int)contentFrame.size.height);
     
     //opengl's y axis is inverse with UIKit's y asix.
-    glViewport(contentFrame.origin.x, height - CGRectGetMaxY(contentFrame), contentFrame.size.width, contentFrame.size.height);
+    TFGLSwitchContextToDo(self.context, {
+        glViewport(contentFrame.origin.x, height - CGRectGetMaxY(contentFrame), contentFrame.size.width, contentFrame.size.height);
+    });
+    
+    NSLog(@"contentFrame: %@",NSStringFromCGRect(contentFrame));
 }
 
 #pragma mark -

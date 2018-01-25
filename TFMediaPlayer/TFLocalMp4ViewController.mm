@@ -70,7 +70,7 @@
     }
     
     _player = [[TFMediaPlayer alloc] init];
-    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, self.view.bounds.size.width, 300);
+    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, 320, 300);
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
@@ -172,9 +172,10 @@ static int mediaIndex = 0;
 -(void)switchContentMode{
     NSInteger contentMode = _player.displayView.contentMode;
     if (contentMode == UIViewContentModeBottomRight) {
-        contentMode = 0;
+        contentMode = -1;
     }
     _player.displayView.contentMode = (UIViewContentMode)(contentMode + 1);
+    NSLog(@"contentMode %ld",_player.displayView.contentMode);
 }
 
 -(void)stop{

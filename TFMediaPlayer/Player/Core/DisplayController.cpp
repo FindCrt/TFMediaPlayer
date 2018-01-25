@@ -12,7 +12,7 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
-#define TFMPBufferReadLog(fmt,...) printf(fmt,__VA_ARGS__);printf("\n");
+#define TFMPBufferReadLog(fmt,...) //printf(fmt,__VA_ARGS__);printf("\n");
 
 using namespace tfmpcore;
 
