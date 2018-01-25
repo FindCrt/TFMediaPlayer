@@ -13,6 +13,8 @@
 #include <pthread.h>
 #include <limits.h>
 
+#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
+
 /* |->--front-----back------>| */
 
 namespace tfmpcore {
@@ -138,7 +140,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
-            printf("%s: %ld\n",name,usedSize);
+            RecycleBufferLog("%s: %ld\n",name,usedSize);
             
             return true;
         }
@@ -154,7 +156,6 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-            printf("get out\n");
             
             return true;
         }
@@ -162,11 +163,11 @@ namespace tfmpcore {
         void blockInsert(T val){
             
             if (!noBlock && usedSize >= limitSize) {
-                printf(">>>>lock full %s\n",name);
+                RecycleBufferLog(">>>>lock full %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
-                printf("<<<<unlock full %s\n",name);
+                RecycleBufferLog("<<<<unlock full %s\n",name);
             }
             
             insert(val);
@@ -176,11 +177,11 @@ namespace tfmpcore {
         void blockGetOut(T *valP){
 
             if (!noBlock && usedSize == 0) {
-//                printf(">>>>lock empty %s\n",identifier);
+//                RecycleBufferLog(">>>>lock empty %s\n",identifier);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
-//                printf("<<<<unlock empty %s\n",identifier);
+//                RecycleBufferLog("<<<<unlock empty %s\n",identifier);
             }
             
             getOut(valP);
@@ -206,7 +207,7 @@ namespace tfmpcore {
         }
         
         void signalAllBlock(){
-            printf("signalAllBlock\n");
+            RecycleBufferLog("signalAllBlock\n");
             pthread_cond_broadcast(&cond);
         }
         
@@ -217,7 +218,6 @@ namespace tfmpcore {
             if (usedSize > 0 && valueFreeFunc != nullptr) {
                 RecycleNode *curNode = frontNode;
                 do {
-                    printf("free one %s\n",name);
                     valueFreeFunc(&(curNode->val));
                     curNode = curNode->next;
                 } while (curNode != backNode->next);

@@ -62,6 +62,4 @@ void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay
     }
     
     ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
-    
-    printf("preBufferDuration: %.6f, delay: %f",ptsCorrection/timeDen, delay);
 }

@@ -64,3 +64,6 @@
  * [texture对齐和裁剪](http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html)
  * 使用`glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[0]);`来形成裁剪后的图像，避开结尾无用的数据。
  * 底部还是有绿色，说明还是有空数据，高度有问题？texture的高度是240
+
+ 
+之前调试一致是用的本地文件，没想到网略音频一下就可以播通了，高兴！

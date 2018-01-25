@@ -97,7 +97,7 @@ void PlayController::play(){
     if (!prapareOK) {
         return;
     }
-    
+    printf("start Play: %s\n",mediaPath.c_str());
     shouldRead = true;
     
     startReadingFrames();
@@ -153,6 +153,10 @@ void PlayController::stop(){
     
     desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
     realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+    
+    videoStrem = -1;
+    audioStream = -1;
+    subTitleStream = -1;
 
     TFMPDLOG_C("player stoped!\n");
 }
@@ -165,11 +169,13 @@ void PlayController::freeResources(){
         videoDecoder->freeResources();
         free(videoDecoder);
         videoDecoder = nullptr;
+        TFMPDLOG_C("videoDecoder null\n");
     }
     if (audioDecoder) {
         audioDecoder->freeResources();
         free(audioDecoder);
         audioDecoder = nullptr;
+        TFMPDLOG_C("audioDecoder null\n");
     }
     if (subtitleDecoder) {
         subtitleDecoder->freeResources();

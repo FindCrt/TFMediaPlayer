@@ -52,6 +52,8 @@
 //    _showGraph = YES;
 //    _autoStop = YES;
     
+    
+    
     [self setupButtons];
     
     if (_showGraph) {
@@ -155,11 +157,11 @@ static int mediaIndex = 0;
 
     NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
-    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL3,videoURL4,videoURL5];
+    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL5];
     
     _currentMediaURL = mediaSources[mediaIndex];
     mediaIndex++;
-    if (mediaIndex > mediaSources.count) {
+    if (mediaIndex >= mediaSources.count) {
         mediaIndex = 0;
     }
     
@@ -186,6 +188,7 @@ static int mediaIndex = 0;
     
     if (!_currentMediaURL) {
         _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+//        _currentMediaURL = [NSURL URLWithString:@"http://oys9374yl.bkt.clouddn.com/voice/278/15d8a04d-15eb-4d12-809b-c9be924ad92f.mp3"];
     }
     
     _player.mediaURL = _currentMediaURL;

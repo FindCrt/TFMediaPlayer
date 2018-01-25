@@ -11,7 +11,8 @@
 
 /** log */
 
-#define TFMPLOG 1
+#define TFMPLOG 0
+#define TFMPErrorLog 1
 
 #if DEBUG & TFMPLOG
 #define TFMPDLog(format,...) NSLog(format, ##__VA_ARGS__)
@@ -27,7 +28,7 @@
 
 /** function status check */
 
-#if DEBUG & TFMPLOG
+#if DEBUG & TFMPErrorLog
 
 #define TFCheckRetval(statement)\
 if (retval < 0) {\
