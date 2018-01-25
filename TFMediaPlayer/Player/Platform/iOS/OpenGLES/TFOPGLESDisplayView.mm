@@ -13,51 +13,57 @@
 
 //texture对齐和裁剪 http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html
 
-#define TFReallocRenderIfLayerSizeChanged   1
-
 #pragma mark - shaders
 
-const GLchar *TFVideoDisplay_common_vs ="               \n\
-#version 300 es                                         \n\
-                                                        \n\
-layout (location = 0) in highp vec3 position;           \n\
-layout (location = 1) in highp vec2 inTexcoord;         \n\
-                                                        \n\
-out highp vec2 texcoord;                                \n\
-                                                        \n\
-void main()                                             \n\
-{                                                       \n\
-gl_Position = vec4(position, 1.0);                      \n\
-texcoord = inTexcoord;                                  \n\
-}                                                       \n\
-";
+//shader代码开头带#，但放在这里会破坏宏
+const GLchar *TFVideoDisplay_common_vs = TFGLShaderSource_sharp
+(
+ version 300 es
+ 
+ layout (location = 0) in mediump vec3 position;
+ layout (location = 1) in mediump vec2 inTexcoord;
+ 
+ out mediump vec2 texcoord;
+ 
+ void main()
+ {
+     gl_Position = vec4(position, 1.0);
+     texcoord = inTexcoord;
+ }
+);
 
-const GLchar *TFVideoDisplay_yuv420_fs ="               \n\
-#version 300 es                                         \n\
-precision highp float;                                  \n\
-                                                        \n\
-in vec2 texcoord;                                       \n\
-out vec4 FragColor;                                     \n\
-uniform lowp sampler2D yPlaneTex;                       \n\
-uniform lowp sampler2D uPlaneTex;                       \n\
-uniform lowp sampler2D vPlaneTex;                       \n\
-                                                        \n\
-void main()                                             \n\
-{                                                       \n\
-    // (1) y - 16 (2) rgb * 1.164                       \n\
-    vec3 yuv;                                           \n\
-    yuv.x = texture(yPlaneTex, texcoord).r;             \n\
-    yuv.y = texture(uPlaneTex, texcoord).r - 0.5f;      \n\
-    yuv.z = texture(vPlaneTex, texcoord).r - 0.5f;      \n\
-                                                        \n\
-    mat3 trans = mat3(1, 1 ,1,                          \n\
-                      0, -0.34414, 1.772,               \n\
-                      1.402, -0.71414, 0                \n\
-                      );                                \n\
-                                                        \n\
-    FragColor = vec4(trans*yuv, 1.0);                   \n\
-}                                                       \n\
-";
+const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
+(
+ version 300 es
+ 
+ precision mediump float;
+ 
+ in vec2 texcoord;
+ 
+ out vec4 FragColor;
+ 
+ uniform sampler2D yPlaneTex;
+ uniform sampler2D uPlaneTex;
+ uniform sampler2D vPlaneTex;
+ 
+ 
+ void main()
+{
+    // (1) y - 16 (2) rgb * 1.164
+    vec3 yuv;
+    yuv.x = texture(yPlaneTex, texcoord).r;
+    yuv.y = texture(uPlaneTex, texcoord).r - 0.5f;
+    yuv.z = texture(vPlaneTex, texcoord).r - 0.5f;
+    
+    mat3 trans = mat3(1, 1 ,1,
+                      0, -0.34414, 1.772,
+                      1.402, -0.71414, 0
+                      );
+    
+    FragColor = vec4(trans*yuv, 1.0);
+}
+ );
+
 
 #pragma mark -
 
@@ -99,13 +105,11 @@ void main()                                             \n\
     [super layoutSubviews];
     
     //If context has setuped and layer's size has changed, realloc renderBuffer.
-    //TODO: render buffer need to be alloced at the duration when self.context is current context.
-    if (self.context && !CGSizeEqualToSize(self.layer.frame.size, self.bufferSize)) {
-#if TFReallocRenderIfLayerSizeChanged
-        _needReallocRenderBuffer = YES;
-#else
-        //self.layer.contentsScale = [UIScreen mainScreen].scale * ()
-#endif
+    if (self.context && !CGSizeEqualToSize(CGSizeMultiply(self.layer.frame.size, self.layer.contentsScale), self.bufferSize)) {
+        TFGLSwitchContextToDo(self.context, {
+            [self reallocRenderBuffer];
+            [self calculateContentFrame:_lastFrameSize];
+        });
     }
 }
 
@@ -205,7 +209,7 @@ void main()                                             \n\
     [EAGLContext setCurrentContext:self.context];
     
     if (_needReallocRenderBuffer) {
-        [self reallocRenderBuffer];
+//        [self reallocRenderBuffer];
         
         _needReallocRenderBuffer = NO;
     }

@@ -29,6 +29,8 @@
     UIButton *_switchMediaSourceBtn;
     UIButton *_switchContentModeBtn;
     
+    UIButton *_changeFrameBtn;
+    
     BOOL _showGraph;
     BOOL _autoStop;
     
@@ -70,13 +72,18 @@
     }
     
     _player = [[TFMediaPlayer alloc] init];
-    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, 320, 300);
+    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, [UIScreen mainScreen].bounds.size.width, 300);
+    _player.displayView.contentMode = UIViewContentModeScaleToFill;
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
     [self.view addSubview:_player.displayView];
     
-    
+    _changeFrameBtn = [[UIButton alloc] initWithFrame:CGRectMake(100, 540, 60, 40)];
+    [_changeFrameBtn setTitle:@"change" forState:(UIControlStateNormal)];
+    _changeFrameBtn.backgroundColor = [UIColor orangeColor];
+    [_changeFrameBtn addTarget:self action:@selector(changeFrame:) forControlEvents:(UIControlEventTouchUpInside)];
+    [self.view addSubview:_changeFrameBtn];
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
@@ -89,6 +96,12 @@
     });
     
     NSLog(@"disappeared！");
+}
+
+-(void)changeFrame:(UIButton *)button{
+    CGRect frame = _player.displayView.frame;
+    frame.size.height += 20;
+    _player.displayView.frame = frame;
 }
 
 #pragma mark - actions

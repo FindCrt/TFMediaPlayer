@@ -8,12 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <OpenGLES/ES3/gl.h>
-
-#define TFGLSwitchContextToDo(ctx, code)\
-EAGLContext *preContext = [EAGLContext currentContext];\
-[EAGLContext setCurrentContext:ctx];\
-code\
-[EAGLContext setCurrentContext:preContext];\
+#import "TFGLUtility.h"
 
 @interface TFGLView : UIView
 
