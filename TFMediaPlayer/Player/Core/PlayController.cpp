@@ -77,14 +77,11 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     if (videoStrem >= 0) displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
     if (audioStream >= 0) displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
-    
-    if (audioStream < 0 && isAudioMajor) isAudioMajor = false;
-    if (videoStrem <0 && !isAudioMajor) isAudioMajor = true;
-    displayer->syncClock = new SyncClock(isAudioMajor);
 
     prapareOK = true;
     
     calculateRealDisplayMediaType();
+    setupSyncClock();
     
     if (connectCompleted != nullptr) {
         connectCompleted(this);
@@ -162,7 +159,6 @@ void PlayController::stop(){
 }
 
 void PlayController::freeResources(){
-    displayer->freeResources();
     
     //decodes
     if (videoDecoder) {
@@ -182,6 +178,8 @@ void PlayController::freeResources(){
         free(subtitleDecoder);
         subtitleDecoder = nullptr;
     }
+    
+    displayer->freeResources();
     
     //ffmpeg
     if (fmtCtx) avformat_free_context(fmtCtx);
@@ -209,7 +207,17 @@ void PlayController::setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMedi
     this->desiredDisplayMediaType = desiredDisplayMediaType;
     if (prapareOK) {
         calculateRealDisplayMediaType();
+        
+        //media type may changed, sync clock need to change.
+        setupSyncClock();
     }
+}
+
+void PlayController::setupSyncClock(){
+    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && isAudioMajor) isAudioMajor = false;
+    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && !isAudioMajor) isAudioMajor = true;
+    
+    displayer->syncClock = new SyncClock(isAudioMajor);
 }
 
 TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){

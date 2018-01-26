@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <limits.h>
 
-#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>| */
 
@@ -140,7 +140,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
-            RecycleBufferLog("%s: %ld\n",name,usedSize);
+            RecycleBufferLog("insert: %s",name);
             
             return true;
         }
@@ -156,7 +156,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-            
+            RecycleBufferLog("getout: %s",name);
             return true;
         }
         
@@ -177,11 +177,11 @@ namespace tfmpcore {
         void blockGetOut(T *valP){
 
             if (!noBlock && usedSize == 0) {
-//                RecycleBufferLog(">>>>lock empty %s\n",identifier);
+                RecycleBufferLog(">>>>lock empty %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
                 pthread_mutex_unlock(&mutex);
-//                RecycleBufferLog("<<<<unlock empty %s\n",identifier);
+                RecycleBufferLog("<<<<unlock empty %s\n",name);
             }
             
             getOut(valP);
@@ -208,6 +208,7 @@ namespace tfmpcore {
         
         void signalAllBlock(){
             RecycleBufferLog("signalAllBlock\n");
+            noBlock = true;
             pthread_cond_broadcast(&cond);
         }
         

@@ -24,6 +24,8 @@
 @interface TFMediaPlayer (){
     tfmpcore::PlayController *_playController;
     
+    TFMPMediaType _mediaType;
+    
     BOOL _innerPlayWhenReady;
     
     TFOPGLESDisplayView *_displayView;
@@ -101,11 +103,12 @@
 }
 
 -(void)setMediaType:(TFMPMediaType)mediaType{
-    _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
+    _mediaType = mediaType;
+    _playController->setDesiredDisplayMediaType(mediaType);
 }
 
 -(TFMPMediaType)mediaType{
-    return _playController->getRealDisplayMediaType();
+    return _mediaType;
 }
 
 -(void)preparePlay{
@@ -129,6 +132,10 @@
     if (![self configureAVSession]) {
         _state = TFMediaPlayerStateNone;
         return;
+    }
+    
+    if (_playController->getRealDisplayMediaType() != _mediaType) {
+        _playController->setDesiredDisplayMediaType(_mediaType);
     }
     
     if (_state == TFMediaPlayerStateNone) {

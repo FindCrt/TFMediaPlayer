@@ -13,6 +13,7 @@
 extern "C"{
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/time.h>
 }
 
 #include "RecycleBuffer.hpp"
@@ -30,7 +31,7 @@ namespace tfmpcore {
         
         RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, false);
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(200, false);
+        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(50, false);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);

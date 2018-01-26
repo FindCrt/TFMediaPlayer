@@ -18,6 +18,7 @@
 
 extern "C"{
 #include <libavformat/avformat.h>
+#include <libavutil/time.h>
 }
 
 #define TFMP_MAX_AUDIO_CHANNEL 8

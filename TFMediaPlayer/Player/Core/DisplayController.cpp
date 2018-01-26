@@ -55,6 +55,7 @@ void DisplayController::freeResources(){
     }
     
     while (isDispalyingVideo || isFillingAudio) {
+        av_usleep(10000); //0.01s
         TFMPDLOG_C("waiting video or audio displaying loop end\n");
     }
     

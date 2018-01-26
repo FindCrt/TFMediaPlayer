@@ -82,7 +82,8 @@ void Decoder::freeResources(){
     frameBuffer.signalAllBlock();
     pktBuffer.signalAllBlock();
     while (isDecoding) {
-        TFMPDLOG_C("wait one decode loop end.\n");
+        av_usleep(10000); //0.01s
+        TFMPDLOG_C("wait one decode loop end.[%d]\n",steamIndex);
     }
     frameBuffer.clear();
     pktBuffer.clear();
@@ -146,8 +147,6 @@ void *Decoder::decodeLoop(void *context){
             retval = avcodec_receive_frame(decoder->codecCtx, frame);
             if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
             
-            //TODO: frame本身要free
-            
             if (retval != 0) {
                 TFCheckRetval("avcodec receive frame");
                 continue;
@@ -159,9 +158,9 @@ void *Decoder::decodeLoop(void *context){
             }
         }
         av_packet_unref(pkt);
-        
-        decoder->isDecoding = false;
     }
+    
+    decoder->isDecoding = false;
     
     return 0;
 }

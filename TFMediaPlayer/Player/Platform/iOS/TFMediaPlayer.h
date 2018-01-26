@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 
 @property (nonatomic, assign) TFMPShareAudioBufferStruct shareAudioStruct;
 
-@property (nonatomic, assign) TFMediaPlayerState state;
+@property (nonatomic, assign, readonly) TFMediaPlayerState state;
 
 @property (nonatomic, assign) BOOL autoPlayWhenReady;
 

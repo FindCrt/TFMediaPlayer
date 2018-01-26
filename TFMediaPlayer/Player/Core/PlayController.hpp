@@ -60,6 +60,7 @@ namespace tfmpcore {
         TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
         
         void calculateRealDisplayMediaType();
+        void setupSyncClock();
         
         void freeResources();
         
@@ -82,7 +83,7 @@ namespace tfmpcore {
         
         /** properties **/
         
-        //only work before the call of connectAndOpenMedia.
+        //the real value is affect by realDisplayMediaType. For example, there is no audio stream, isAudioMajor couldn't be true.
         bool isAudioMajor = true;
         
         
