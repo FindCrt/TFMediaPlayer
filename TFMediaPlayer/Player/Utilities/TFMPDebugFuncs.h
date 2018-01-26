@@ -62,6 +62,13 @@ char *statusTex = (char*)&bigEndian;\
 NSLog(@"%@ error: %s",log,statusTex); return;\
 }
 
+#define TFCheckStatusToDo(status, log, code)    if(status != 0) {\
+int bigEndian = CFSwapInt32HostToBig(status);\
+char *statusTex = (char*)&bigEndian;\
+NSLog(@"%@ error: %s",log,statusTex); \
+code\
+}
+
 #define TFCheckStatusReturnStatus(status, log)    if(status != 0) {\
 int bigEndian = CFSwapInt32HostToBig(status);\
 char *statusTex = (char*)&bigEndian;\

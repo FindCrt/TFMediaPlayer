@@ -133,27 +133,27 @@ void PlayController::stop(){
     shouldRead = false;
     
     //displayer
-    displayer->stopDisplay();
-    
-    //decodes
-    if (videoDecoder) {
-        videoDecoder->stopDecode();
-    }
-    if (audioDecoder) {
-        audioDecoder->stopDecode();
-    }
-    if (subtitleDecoder) {
-        subtitleDecoder->stopDecode();
-    }
-    
-    freeResources();
-    
-    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
-    
-    videoStrem = -1;
-    audioStream = -1;
-    subTitleStream = -1;
+//    displayer->stopDisplay();
+//    
+//    //decodes
+//    if (videoDecoder) {
+//        videoDecoder->stopDecode();
+//    }
+//    if (audioDecoder) {
+//        audioDecoder->stopDecode();
+//    }
+//    if (subtitleDecoder) {
+//        subtitleDecoder->stopDecode();
+//    }
+//    
+//    freeResources();
+//    
+//    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+//    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+//    
+//    videoStrem = -1;
+//    audioStream = -1;
+//    subTitleStream = -1;
 
     TFMPDLOG_C("player stoped!\n");
 }
@@ -217,7 +217,12 @@ void PlayController::setupSyncClock(){
     if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && isAudioMajor) isAudioMajor = false;
     if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && !isAudioMajor) isAudioMajor = true;
     
-    displayer->syncClock = new SyncClock(isAudioMajor);
+    if (displayer->syncClock) {
+        displayer->syncClock->isAudioMajor = isAudioMajor;
+    }else{
+        displayer->syncClock = new SyncClock(isAudioMajor);
+    }
+    
 }
 
 TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
@@ -243,11 +248,6 @@ void PlayController::resolveAudioStreamFormat(){
     
     sourceDesc.channelsPerFrame = codecpar->channels;
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
-    
-    {
-        //audio queue player
-        sourceDesc.samples = 2304;
-    }
     
     //resample source audio to real-play audio format.
     auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);

@@ -18,9 +18,11 @@ namespace tfmpcore {
         //frame pts + correction = the real present time that come from av_gettime_relative.
         int64_t ptsCorrection = -1;
         
-        bool isAudioMajor = true;
+        
         
     public:
+        
+        bool isAudioMajor = true;
         
         SyncClock(bool isAudioMajor = true):isAudioMajor(isAudioMajor){};
         

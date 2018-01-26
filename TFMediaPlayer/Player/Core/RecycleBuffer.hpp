@@ -140,7 +140,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
-            RecycleBufferLog("insert: %s",name);
+            RecycleBufferLog("insert: %s[%ld]",name,usedSize);
             
             return true;
         }
@@ -156,7 +156,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-            RecycleBufferLog("getout: %s",name);
+            RecycleBufferLog("getout: %s[%ld]",name,usedSize);
             return true;
         }
         

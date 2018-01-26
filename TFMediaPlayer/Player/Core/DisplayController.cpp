@@ -82,12 +82,18 @@ void *DisplayController::displayLoop(void *context){
         controller->isDispalyingVideo = true;
         
         controller->shareVideoBuffer->blockGetOut(&videoFrame);
+        TFMPDLOG_C("get video frame\n");
+        av_usleep(10000);
+        av_frame_free(&videoFrame);continue;
+        
+        if (videoFrame == nullptr) continue;
         
         double remainTime = controller->syncClock->remainTimeForVideo(videoFrame->pts, controller->videoTimeBase);
-        
+        remainTime = 0.01;
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }else if (remainTime < -remainTime){
+            av_frame_free(&videoFrame);
             continue;
         }
         
@@ -115,12 +121,14 @@ void *DisplayController::displayLoop(void *context){
             interimBuffer->format = TFMP_VIDEO_PIX_FMT_RGB32;
         }
         
+        
         if (controller->shouldDisplay){
             controller->displayVideoFrame(interimBuffer, controller->displayContext);
             controller->syncClock->presentVideo(videoFrame->pts, controller->videoTimeBase);
         }
         
         av_frame_free(&videoFrame);
+        TFMPDLOG_C("free video frame\n");
         
         controller->isDispalyingVideo = false;
     }

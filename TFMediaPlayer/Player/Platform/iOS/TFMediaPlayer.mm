@@ -105,6 +105,17 @@
 -(void)setMediaType:(TFMPMediaType)mediaType{
     _mediaType = mediaType;
     _playController->setDesiredDisplayMediaType(mediaType);
+    
+    
+    if ((_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO)) {
+        if (_audioPlayer.state == TFAudioQueueStateUnplay) {
+            [_audioPlayer play];
+        }
+    }else{
+        if (_audioPlayer.state == TFAudioQueueStatePlaying) {
+            [_audioPlayer stop];
+        }
+    }
 }
 
 -(TFMPMediaType)mediaType{
@@ -148,7 +159,10 @@
     }else if (_state == TFMediaPlayerStateReady || _state == TFMediaPlayerStatePause){
         
         _playController->play();
-        [_audioPlayer play];
+        
+        if (_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO) {
+            [_audioPlayer play];
+        }
         
         _state = TFMediaPlayerStatePlaying;
     }

@@ -10,7 +10,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 #import "TFMPUtilities.h"
-
+#import "TFMPDebugFuncs.h"
 
 @interface TFAudioQueueController (){
     
@@ -32,19 +32,16 @@
         AudioStreamBasicDescription audioDesc;
         configAudioDescWithSpecifics(&audioDesc, &_resultSpecifics);
         
-        _resultSpecifics.samples = 1100;
-        _resultSpecifics.bufferSize = _resultSpecifics.bitsPerChannel/8 * _resultSpecifics.channelsPerFrame * _resultSpecifics.samples;
         
-        
-        AudioQueueNewOutput(&audioDesc, TFAudioQueueHasEmptyBufferCallBack, (__bridge void*)self, NULL, (__bridge CFStringRef)NSRunLoopCommonModes, 0, &(_audioQueue));
-        
-        OSStatus status = AudioQueueStart(_audioQueue, NULL);
-        if (status != noErr) {
-            NSLog(@"audio queue start error");
-            
-            self = nil;
+        OSStatus status = AudioQueueNewOutput(&audioDesc, TFAudioQueueHasEmptyBufferCallBack, (__bridge void*)self, NULL, (__bridge CFStringRef)NSRunLoopCommonModes, 0, &(_audioQueue));
+        TFCheckStatusToDo(status, @"new audioQueue failed!",{
             return nil;
-        }
+        })
+        
+        status = AudioQueueStart(_audioQueue, NULL);
+        TFCheckStatusToDo(status, @"audio queue start error", {
+            return nil;
+        })
         
         for (int i = 0; i<TFAudioQueueBufferCount; i++) {
             AudioQueueAllocateBuffer(_audioQueue, _resultSpecifics.bufferSize, &_audioBufferArray[i]);
@@ -62,7 +59,7 @@
 -(void)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
     //all return s16+44100(no planar),but don't change channel number.
-    _resultSpecifics.samples = sourceDesc.samples;
+    _resultSpecifics.samples = 1024;
     _resultSpecifics.sampleRate = 44100;
     setFormatFlagsWithFlags(&(_resultSpecifics.formatFlags),
                             true,
@@ -75,7 +72,7 @@
     
     _resultSpecifics.ffmpeg_channel_layout = channelLayoutForChannels(_resultSpecifics.channelsPerFrame);
     
-    //    tfmpResultDesc = sourceDesc
+    _resultSpecifics.bufferSize = _resultSpecifics.bitsPerChannel/8 * _resultSpecifics.channelsPerFrame * _resultSpecifics.samples;
 }
 
 static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc, TFMPAudioStreamDescription *specifics){
@@ -119,11 +116,10 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
     }
     
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
-    if (status != noErr) {
-        NSLog(@"audio queue start error");
+    TFCheckStatusToDo(status, @"AudioQueue start failed!", {
         [_lock unlock];
         return;
-    }
+    })
     
     _state = TFAudioQueueStatePlaying;
     
@@ -151,7 +147,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
         [_lock unlock];
         return;
     }
-    //TODO: not start, block
+    
     AudioQueueStop(_audioQueue, YES);
     _state = TFAudioQueueStateUnplay;
     
