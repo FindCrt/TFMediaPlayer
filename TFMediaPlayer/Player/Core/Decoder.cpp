@@ -157,7 +157,7 @@ void *Decoder::decodeLoop(void *context){
                 continue;
             }
         }
-        av_packet_unref(pkt);
+       if (pkt != nullptr)  av_packet_unref(pkt);
     }
     
     decoder->isDecoding = false;

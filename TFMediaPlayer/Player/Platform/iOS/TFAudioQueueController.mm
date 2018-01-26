@@ -17,8 +17,6 @@
     AudioQueueRef _audioQueue;
     AudioQueueBufferRef _audioBufferArray[TFAudioQueueBufferCount];
     
-    BOOL _isPaused;
-    BOOL _isStoped;
     NSLock *_lock;
 }
 
@@ -55,8 +53,6 @@
             AudioQueueEnqueueBuffer(_audioQueue, _audioBufferArray[i], 0, NULL);
         }
         
-        _isStoped = NO;
-        _isPaused = NO;
         _lock = [[NSLock alloc] init];
     }
     
@@ -109,7 +105,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
     
     [_lock lock];
     
-    if (!_isPaused && !_isStoped) {
+    if (_state == TFAudioQueueStatePlaying) {
         [_lock unlock];
         return;
     }
@@ -129,10 +125,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
         return;
     }
     
-    _isPaused = NO;
-    _isStoped = NO;
-    
-    
+    _state = TFAudioQueueStatePlaying;
     
     [_lock unlock];
 }
@@ -140,13 +133,13 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
 -(void)pause{
     [_lock lock];
     
-    if (!_isPaused) {
+    if (_state == TFAudioQueueStatePaused) {
         [_lock unlock];
         return;
     }
     
     AudioQueuePause(_audioQueue);
-    _isPaused = YES;
+    _state = TFAudioQueueStatePaused;
     
     [_lock unlock];
 }
@@ -154,13 +147,13 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
 -(void)stop{
     [_lock lock];
     
-    if (_isStoped) {
+    if (_state == TFAudioQueueStateUnplay) {
         [_lock unlock];
         return;
     }
-    
+    //TODO: not start, block
     AudioQueueStop(_audioQueue, YES);
-    _isStoped = YES;
+    _state = TFAudioQueueStateUnplay;
     
     [_lock unlock];
 }
@@ -171,7 +164,7 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
     if (!controller) {
         return;
     }
-    if (controller->_isStoped || controller->_isPaused) {
+    if (controller.state != TFAudioQueueStatePlaying) {
         return;
     }
     

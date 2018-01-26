@@ -13,9 +13,17 @@
 
 #define TFAudioQueueBufferCount     3
 
+typedef NS_ENUM(NSInteger, TFAudioQueueState) {
+    TFAudioQueueStateUnplay,
+    TFAudioQueueStatePlaying,
+    TFAudioQueueStatePaused,
+};
+
 @interface TFAudioQueueController : NSObject
 
 -(instancetype)initWithSpecifics:(const TFMPAudioStreamDescription)specifics;
+
+@property (nonatomic, assign, readonly) TFAudioQueueState state;
 
 @property (nonatomic, assign) TFMPFillAudioBufferStruct fillStruct;
 
