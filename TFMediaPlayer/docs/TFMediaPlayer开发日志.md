@@ -69,4 +69,42 @@
 9. 内存释放
  * 缓冲池里的视频frame数据无法释放。
  * 可以确定不是音频的问题；跟缓冲区的大小密切相关；跟播放部分无关。
- * 有一点可以确定，缓冲区留存的可用数据越多，内存泄漏越多。
+ * 有一点可以确定，缓冲区留存的可用数据越多，内存泄漏越多.
+ * 突破的一点是:数据存在frame的buf内，而buf通过`av_buffer_unref`释放，
+ 
+   ```
+  void av_buffer_unref(AVBufferRef **buf)
+{
+    if (!buf || !*buf)
+        return;
+
+    buffer_replace(buf, NULL);
+}
+
+ static void buffer_replace(AVBufferRef **dst, AVBufferRef **src)
+{
+    AVBuffer *b;
+
+    b = (*dst)->buffer;
+
+    if (src) {
+        **dst = **src;
+        av_freep(src);
+    } else
+        av_freep(dst);
+
+    if (atomic_fetch_add_explicit(&b->refcount, -1, memory_order_acq_rel) == 1) {
+        b->free(b->opaque, b->data);
+        av_freep(&b);
+    }
+}
+ ```
+ 
+ 关键在于：`atomic_fetch_add_explicit(&b->refcount, -1, memory_order_acq_rel) == 1`条件成立，才会释放资源。`std::atomic_uint refcount;`这个是refcount的类型，即`atomic<unsigned int>`，也就是模板类型是`unsigned int`，但是传入的值却是-1,是这里的有问题？**这里没有问题**虽然转义了，但本质上的值是没变的，变量类型只是用来识别的方式不同，在硬件上的二进制形式是没变的。
+ 
+ * 调用了`b->free`但却没有释放内存，这个函数本质是`pool_release_buffer`.
+ * 这里使用了`AVBufferPool`来管理内存,buffer的引用为0后不是立即销毁，而是回到pool里，重复使用。调用`av_buffer_pool_uninit`标记为可释放，然后到pool里所有的buffer都回归了，才倾倒pool.**为了避免频繁大量的内存分配和释放**
+ * 所以问题指向了pool为什么没有释放。
+ * 更奇怪的是pool的refcount为0，而且存储实际buffer的链表pool为空，也就是说buffer的pool是空的，但是它的free方法还是`pool_release_buffer`，也许构建的时候出错了？
+ * pool是对的，打印的地址和`video_get_buffer`时使用的一致，来源是`FramePool *pool = AVCodecContext->internal->pool;`
+ 

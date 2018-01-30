@@ -118,6 +118,8 @@
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
+		18547D292020478900FE24AB /* buffer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffer_internal.h; sourceTree = "<group>"; };
+		18547D2A202047C000FE24AB /* thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = thread.h; sourceTree = "<group>"; };
 		1856F0491FFB804D00B4F2A7 /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
 		1856F04A1FFB804D00B4F2A7 /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
 		1856F04C1FFB804D00B4F2A7 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
@@ -483,6 +485,8 @@
 				18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */,
 				184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */,
 				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */,
+				18547D292020478900FE24AB /* buffer_internal.h */,
+				18547D2A202047C000FE24AB /* thread.h */,
 				18C66DC21FF0F253002BFBBC /* Player */,
 				892C12962003B63A0081CF79 /* FFmpeg */,
 				1856F0471FFB804D00B4F2A7 /* x264 */,

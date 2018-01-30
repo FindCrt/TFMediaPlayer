@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "167D6553C426E526A897D9A4A5E98C26DB4B9345",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "167D6553C426E526A897D9A4A5E98C26DB4B9345" : 9223372036854775807,
+    "8CEE2920F82777E0800DD1AD4CACD1E31E585E07" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D72DDC4C-27A7-4AB4-896A-D2DBBD650CFA",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "167D6553C426E526A897D9A4A5E98C26DB4B9345" : "TFMediaPlayer\/",
+    "8CEE2920F82777E0800DD1AD4CACD1E31E585E07" : "..\/AVLibraries\/ffmpeg-3.4"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "TFMediaPlayer",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "TFMediaPlayer.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/ToFind1991\/TFMediaPlayer.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "167D6553C426E526A897D9A4A5E98C26DB4B9345"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/git.ffmpeg.org\/ffmpeg.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "8CEE2920F82777E0800DD1AD4CACD1E31E585E07"
+    }
+  ]
+}

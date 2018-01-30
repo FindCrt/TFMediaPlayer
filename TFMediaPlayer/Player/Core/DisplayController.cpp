@@ -82,9 +82,6 @@ void *DisplayController::displayLoop(void *context){
         controller->isDispalyingVideo = true;
         
         controller->shareVideoBuffer->blockGetOut(&videoFrame);
-        TFMPDLOG_C("get video frame\n");
-        av_usleep(10000);
-        av_frame_unref(videoFrame);continue;
         
         if (videoFrame == nullptr) continue;
         
