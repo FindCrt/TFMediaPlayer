@@ -107,4 +107,60 @@
  * 所以问题指向了pool为什么没有释放。
  * 更奇怪的是pool的refcount为0，而且存储实际buffer的链表pool为空，也就是说buffer的pool是空的，但是它的free方法还是`pool_release_buffer`，也许构建的时候出错了？
  * pool是对的，打印的地址和`video_get_buffer`时使用的一致，来源是`FramePool *pool = AVCodecContext->internal->pool;`
+ * 使用pool最初构建的frame不是最后取出来的frame，需要查frame从哪来的.需要检查receive_frame的路线：
  
+     ```
+     avcodec_receive_frame
+     av_frame_move_ref(frame, avci->buffer_frame);
+     ```
+     p来源于`AVCodecContext->internal->thread_ctx->threads[i];`
+     
+     codecContext获取frame的路线：
+     
+      ```
+      avcodec_send_packet
+      ret = decode_receive_frame_internal(avctx, avci->buffer_frame);
+      decode_simple_receive_frame
+      decode_simple_internal
+      ret = avctx->codec->decode(avctx, frame, &got_frame, pkt);
+      h264_decode_frame
+      ....
+     
+      decode_nal_units
+      ff_h264_queue_decode_slice
+      h264_field_start
+      h264_frame_start
+      alloc_picture
+     ff_thread_get_buffer
+     thread_get_buffer_internal
+     ff_get_buffer
+     get_buffer_internal
+     avctx->get_buffer2(avctx, frame, flags)
+     avcodec_default_get_buffer2
+     video_get_buffer
+     av_buffer_pool_get pool分配buf内存
+     ....
+     finalize_frame
+     ret = output_frame(h, dst, out);
+     ret = av_frame_ref(dst, src);
+     
+     ```
+     
+     AVFrame->buf[i]是不同的，但是AVBuffer是相同的，AVFrame->buf[i]是AVBufferRef.
+     ```
+     Printing description of dst->buf[0]->buffer:
+(AVBuffer *) buffer = 0x00000001013d2e40
+Printing description of srcp->f->buf[0]->buffer:
+(AVBuffer *) buffer = 0x00000001013d2e40
+     ```
+     内部的buf和外界取出来的buf一致，buf是指`AVFrame->buf[i]->buffer`
+     
+     **Xcode的bebug框可以使用View Value As->customType来使用新的类型查看数据，对于void*类型非常好**
+     
+     最后发现是tf_AVBufferPool类型错误，所以对pool的refcount读取错误以为是0，错误原因是`#define AVMutex pthread_mutex_t`，把`AVMutex`定义成了`char`，那是一个条件编译。
+     
+     然后pool的refcount就变得有规律了，从105降到了5，**所以是有些frame没有释放导致的。**
+     
+     有两个是解码失败，然后直接continue了，没有把frame释放。**这也是一个思维陷阱吧，内存管理上的概念**
+   * 糟糕的是第一次接收frame的时候，pool的refcount就已经是4了，不知道分配到哪里去了，而且也只有两次是reveive失败的。
+     

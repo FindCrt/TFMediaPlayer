@@ -229,7 +229,6 @@ static int mediaIndex = 0;
     
     NSError *error = nil;
     
-    
     [[AVAudioSession sharedInstance]setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:&error];
     if (error) {
         //        TFMPDLog(@"audio session set category error: %@",error);

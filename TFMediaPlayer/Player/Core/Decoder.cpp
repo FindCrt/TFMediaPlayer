@@ -56,7 +56,7 @@ typedef struct tf_BufferPoolEntry {
 } tf_BufferPoolEntry;
 
 
-#define AVMutex char
+#define AVMutex pthread_mutex_t
 struct tf_AVBufferPool {
     AVMutex mutex;
     BufferPoolEntry *pool;
@@ -81,7 +81,7 @@ struct tf_AVBufferPool {
 
 inline void logBufs(AVFrame *frame, char *tag){
     TFMPDLOG_C("\n---------%s-----------\n",tag);
-    TFMPDLOG_C("frame: %x buf:%x",frame,frame->buf);
+    TFMPDLOG_C("frame: %x[%ld] buf:%x \n",frame,frame->pts,frame->buf);
     for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
         
         tf_AVBuffer *ref = nullptr;
@@ -202,6 +202,7 @@ void *Decoder::decodeLoop(void *context){
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
+            av_packet_free(&pkt);
             continue;
         }
         
@@ -217,30 +218,46 @@ void *Decoder::decodeLoop(void *context){
                 
                 if (retval != 0 && retval != AVERROR_EOF) {
                     TFCheckRetval("avcodec receive frame");
+                    av_frame_free(&frame);
                     continue;
                 }
                 if (frame->extended_data == nullptr) {
                     printf("audio frame data is null\n");
+                    av_frame_free(&frame);
                     continue;
                 }
                 
                 if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
             }
         }else{
-            AVCodecContext *a;
-            a->internal
+            
             frame = av_frame_alloc();
             retval = avcodec_receive_frame(decoder->codecCtx, frame);
+            
+            TFMPDLOG_C("---------------receive\n");
+            if (frame->buf[0]) {
+                tf_AVBuffer *ref = (tf_AVBuffer*)frame->buf[0]->buffer;
+                
+                tf_BufferPoolEntry *buf = (tf_BufferPoolEntry*)ref->opaque;
+                tf_AVBufferPool *pool = buf->pool;
+                
+                std::cout<<"\n>>receive pool: "<<pool<<" ref: "<<pool->refcount<<std::endl;
+            }else{
+                TFMPDLOG_C("frame buf is empty\n");
+            }
+            
 //            logBufs(frame, "first out: ");
 //            if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
             
             if (retval != 0) {
                 TFCheckRetval("avcodec receive frame");
+                av_frame_free(&frame);
                 continue;
             }
             
             if (frame->extended_data == nullptr) {
-                printf("audio frame data is null\n");
+                printf("video frame data is null\n");
+                av_frame_free(&frame);
                 continue;
             }
             
