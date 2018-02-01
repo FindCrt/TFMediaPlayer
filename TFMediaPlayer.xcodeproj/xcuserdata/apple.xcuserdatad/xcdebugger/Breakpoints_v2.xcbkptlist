@@ -310,30 +310,6 @@
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "Yes"
-            filePath = "TFMediaPlayer/Player/Core/Decoder.cpp"
-            timestampString = "539140457.6000611"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "288"
-            endingLineNumber = "288"
-            landmarkName = "Decoder::decodeLoop(void *context)"
-            landmarkType = "7">
-            <Actions>
-               <BreakpointActionProxy
-                  ActionExtensionID = "Xcode.BreakpointAction.DebuggerCommand">
-                  <ActionContent
-                     consoleCommand = "po frame-&gt;pts">
-                  </ActionContent>
-               </BreakpointActionProxy>
-            </Actions>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
          <BreakpointContent
             shouldBeEnabled = "No"
@@ -425,19 +401,19 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "Yes"
-            filePath = "TFMediaPlayer/Player/Core/Decoder.cpp"
-            timestampString = "539140595.247895"
+            filePath = "../../AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
+            timestampString = "539172016.501628"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "213"
-            endingLineNumber = "213"
-            landmarkName = "Decoder::decodeLoop(void *context)"
-            landmarkType = "7">
+            startingLineNumber = "351"
+            endingLineNumber = "351"
+            landmarkName = "av_buffer_pool_get()"
+            landmarkType = "9">
             <Actions>
                <BreakpointActionProxy
                   ActionExtensionID = "Xcode.BreakpointAction.DebuggerCommand">
                   <ActionContent
-                     consoleCommand = "po internal-&gt;pool-&gt;pools[0]-&gt;refcount">
+                     consoleCommand = "po ret-&gt;buffer">
                   </ActionContent>
                </BreakpointActionProxy>
             </Actions>
