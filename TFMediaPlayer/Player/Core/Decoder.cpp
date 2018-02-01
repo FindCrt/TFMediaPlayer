@@ -95,6 +95,14 @@ inline void logBufs(AVFrame *frame, char *tag){
 }
 
 
+
+
+
+
+
+
+
+
 inline void freePacket(AVPacket **pkt){
     av_packet_free(pkt);
 }
@@ -199,6 +207,8 @@ void *Decoder::decodeLoop(void *context){
         
         decoder->pktBuffer.blockGetOut(&pkt);
         
+        AVCodecInternal *internal = decoder->codecCtx->internal;
+        
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
@@ -263,7 +273,7 @@ void *Decoder::decodeLoop(void *context){
             
             frameArr.push_back(frame);
             av_usleep(10000);
-            if (frameArr.size() > 100) {
+            if (frameArr.size() >= 10) {
                 break;
             }
         }
