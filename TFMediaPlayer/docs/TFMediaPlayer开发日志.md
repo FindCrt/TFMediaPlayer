@@ -165,3 +165,5 @@ Printing description of srcp->f->buf[0]->buffer:
    * 糟糕的是第一次接收frame的时候，pool的refcount就已经是4了，不知道分配到哪里去了，而且也只有两次是reveive失败的。
    * 第一次执行`avcodec_send_packet`就是2，应该是一个init和一个get_buffer，数组存了10个frame，然后有两次receive失败，buf没有释放，所以最后refcount到了13。在释放的时候10个buffer只有7个释放，所以最后多出了3个，结束pool的refcount变成6,因为pool存在，所以内部所有buffer都没释放。
    * 1. uninit没调用 2.失败的receive没有unref 3.有buffer在unref后没有free
+   * AVBuffer是循环使用的，而且他们都是通过`av_buffer_create`构建的。所以通过这个函数的断点查看内外的buffer的关系。
+   * 发现不管存几个frame，一定是最后一个和倒数第3个的buf没释放

@@ -273,7 +273,7 @@ void *Decoder::decodeLoop(void *context){
             
             frameArr.push_back(frame);
             av_usleep(10000);
-            if (frameArr.size() >= 10) {
+            if (frameArr.size() >= 5) {
                 break;
             }
         }
