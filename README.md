@@ -2,6 +2,6 @@
 
 A media player based on FFmpeg.
 
-###Updates
+### Updates
 
 * v1.1 memmory leak fixed
