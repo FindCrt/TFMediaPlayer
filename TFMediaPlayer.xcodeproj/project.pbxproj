@@ -129,6 +129,7 @@
 		185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187A8AD620036EC80054A9E4 /* TFAudioUnitPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioUnitPlayer.h; sourceTree = "<group>"; };
 		187A8AD720036EC80054A9E4 /* TFAudioUnitPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFAudioUnitPlayer.mm; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
@@ -414,6 +415,7 @@
 				184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */,
 				180FA5051FF4DBA100AFB5F9 /* ThreadConvience.h */,
 				185708392006342D008FB4CF /* TFMPUtilities.h */,
+				1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";

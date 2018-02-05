@@ -130,6 +130,8 @@ void *DisplayController::displayLoop(void *context){
         controller->isDispalyingVideo = false;
     }
     
+    controller->isDispalyingVideo = false;
+    
     return 0;
 }
 
@@ -137,12 +139,9 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     
     DisplayController *displayer = (DisplayController *)context;
     
-    TFMPDLOG_C("\n\nstart audio fill 1: %d\n",displayer->shouldDisplay);
     if (!displayer->shouldDisplay){
         return 0;
     }
-    
-    TFMPDLOG_C("start audio fill 2: %d\n",displayer->shouldDisplay);
     
     displayer->isFillingAudio = true;
     

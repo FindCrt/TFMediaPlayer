@@ -167,3 +167,20 @@ Printing description of srcp->f->buf[0]->buffer:
    * 1. uninit没调用 2.失败的receive没有unref 3.有buffer在unref后没有free
    * AVBuffer是循环使用的，而且他们都是通过`av_buffer_create`构建的。所以通过这个函数的断点查看内外的buffer的关系。
    * 发现不管存几个frame，一定是最后一个和倒数第3个的buf没释放
+   * unref frame的情况：
+     * `h264_frame_start->ff_h264_unref_picture[504]`
+     * `h264_field_start->h264_init_ps->av_buffer_unref`
+     * `release_unused_pictures->ff_h264_unref_picture`
+   * 然后`ff_h264_unref_picture`内部有：
+     * `ff_thread_release_buffer->av_frame_unref`这里有4个buffer，YUV分3层，加一个private_buf
+     * 其他6个`av_buffer_unref`
+     * 所以总共10个buf释放。
+   * frame取出来的时候里面buffer的refcount都是2，看来是之后才会释放。**问题可能出在直接的break而没有调用界面的环境销毁**。那些正常释放的确实是在之后的`release_unused_pictures`里释放的，但是这个函数只在下一帧解码的时候开始。
+   * 所以找到了`h264_decode_end`，这里调用了释放操作，和`release_unused_pictures`里几乎一致。
+   * 确认`h264_decode_end `在stop时候没调用，调用它的方式是`avctx->codec->close(avctx);`,对每个解码器是通用的，`close`指针指向了不同的函数。
+   * 对于用户应该调用`avcodec_close`和`avformat_free_context`来释放资源。`avcodec_close`对应上面的`h264_decode_end`，确认没调用。`avcodec_free_context`在`libavcodec/options.c里`
+   * 把freeResouces的一系列方法打开后，内存已经可以释放了，其实`avformat_free_context`内部回调用`avcodec_close`,**根本的问题实际是出在解码失败或frame没数据后直接continue,而没有调av_frame_free来释放，导致这些frame漏掉，而又实用了缓冲池，导致内存一个都没释放**。我改掉这个问题后，又没有把之前的freeResouces一系列方法再改回来，所以`avcodec_close `没调用，导致仍然有留存。
+   * **使用缓冲池结构的东西，一定是随时保持着一定使用数量的，所以必须要有整体倾倒的方法**
+   * 切换到自己设计的缓冲区还是有一些问题，停止播放的时候，把缓冲区的进出阻塞都解除，如果缓冲区满的，进入阻塞解除，那么就会有一个frame被新进来的覆盖，导致它丢失，在clear的时候没有把它free.
+   * 在开始释放的时候，`blockInsert和blockGetOut`的阻塞解除，但是不把node插入或取出，而且对于insert，还要释放这个多余的node,因为只要insert进来的node,缓冲区就已经接管了它的内存管理。
+   * `if (decoder->shouldDecode)`判断为NO时，也要释放frame.

@@ -12,96 +12,12 @@
 #include <vector>
 #include <atomic>
 #include <iostream>
-//#include "buffer_internal.h"
+
+#if DEBUG
+#include "FFmpegInternalDebug.h"
+#endif
 
 using namespace tfmpcore;
-
-struct tf_AVBuffer {
-    uint8_t *data; /**< data described by this buffer */
-    int      size; /**< size of data in bytes */
-    
-    /**
-     *  number of existing AVBufferRef instances referring to this buffer
-     */
-    std::atomic_uint refcount;
-    
-    /**
-     * a callback for freeing the data
-     */
-    void (*free)(void *opaque, uint8_t *data);
-    
-    /**
-     * an opaque pointer, to be used by the freeing callback
-     */
-    void *opaque;
-    
-    /**
-     * A combination of BUFFER_FLAG_*
-     */
-    int flags;
-};
-struct tf_AVBufferPool;
-typedef struct tf_BufferPoolEntry {
-    uint8_t *data;
-    
-    /*
-     * Backups of the original opaque/free of the AVBuffer corresponding to
-     * data. They will be used to free the buffer when the pool is freed.
-     */
-    void *opaque;
-    void (*free)(void *opaque, uint8_t *data);
-    
-    tf_AVBufferPool *pool;
-    struct BufferPoolEntry *next;
-} tf_BufferPoolEntry;
-
-
-#define AVMutex pthread_mutex_t
-struct tf_AVBufferPool {
-    AVMutex mutex;
-    BufferPoolEntry *pool;
-    
-    /*
-     * This is used to track when the pool is to be freed.
-     * The pointer to the pool itself held by the caller is considered to
-     * be one reference. Each buffer requested by the caller increases refcount
-     * by one, returning the buffer to the pool decreases it by one.
-     * refcount reaches zero when the buffer has been uninited AND all the
-     * buffers have been released, then it's safe to free the pool and all
-     * the buffers in it.
-     */
-    std::atomic_uint refcount;
-    
-    int size;
-    void *opaque;
-    AVBufferRef* (*alloc)(int size);
-    AVBufferRef* (*alloc2)(void *opaque, int size);
-    void         (*pool_free)(void *opaque);
-};
-
-inline void logBufs(AVFrame *frame, char *tag){
-    TFMPDLOG_C("\n---------%s-----------\n",tag);
-    TFMPDLOG_C("frame: %x[%ld] buf:%x \n",frame,frame->pts,frame->buf);
-    for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
-        
-        tf_AVBuffer *ref = nullptr;
-        if (frame->buf[i]) {
-            ref = (tf_AVBuffer*)frame->buf[i]->buffer;
-            
-            if (ref) std::cout<<"buf "<<ref<<" ref: "<<ref->refcount<<std::endl;
-        }
-    }
-    TFMPDLOG_C("\n---------%s-----------\n",tag);
-}
-
-
-
-
-
-
-
-
-
 
 inline void freePacket(AVPacket **pkt){
     av_packet_free(pkt);
@@ -170,16 +86,18 @@ void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
-    frameBuffer.signalAllBlock();
-    pktBuffer.signalAllBlock();
+    frameBuffer.prepareClear();
+    pktBuffer.prepareClear();
     while (isDecoding) {
         av_usleep(10000); //0.01s
         TFMPDLOG_C("wait one decode loop end.[%d]\n",steamIndex);
     }
+    
+    if (codecCtx) avcodec_free_context(&codecCtx);
+    
     frameBuffer.clear();
     pktBuffer.clear();
     
-    if (codecCtx) avcodec_free_context(&codecCtx);
     fmtCtx = nullptr;
 }
 
@@ -207,8 +125,6 @@ void *Decoder::decodeLoop(void *context){
         
         decoder->pktBuffer.blockGetOut(&pkt);
         
-        AVCodecInternal *internal = decoder->codecCtx->internal;
-        
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
@@ -216,8 +132,9 @@ void *Decoder::decodeLoop(void *context){
             continue;
         }
         
-        if (decoder->type == AVMEDIA_TYPE_AUDIO) { //may many frames in one packet.
+        if (decoder->type == AVMEDIA_TYPE_AUDIO) {
             
+            //may many frames in one packet.
             while (retval == 0) {
                 
                 frame = av_frame_alloc();
@@ -244,21 +161,6 @@ void *Decoder::decodeLoop(void *context){
             frame = av_frame_alloc();
             retval = avcodec_receive_frame(decoder->codecCtx, frame);
             
-            TFMPDLOG_C("---------------receive\n");
-            if (frame->buf[0]) {
-                tf_AVBuffer *ref = (tf_AVBuffer*)frame->buf[0]->buffer;
-                
-                tf_BufferPoolEntry *buf = (tf_BufferPoolEntry*)ref->opaque;
-                tf_AVBufferPool *pool = buf->pool;
-                
-                std::cout<<"\n>>receive pool: "<<pool<<" ref: "<<pool->refcount<<std::endl;
-            }else{
-                TFMPDLOG_C("frame buf is empty\n");
-            }
-            
-//            logBufs(frame, "first out: ");
-//            if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
-            
             if (retval != 0) {
                 TFCheckRetval("avcodec receive frame");
                 av_frame_free(&frame);
@@ -271,61 +173,27 @@ void *Decoder::decodeLoop(void *context){
                 continue;
             }
             
-            frameArr.push_back(frame);
-            av_usleep(10000);
-            if (frameArr.size() >= 5) {
-                break;
+            if (decoder->shouldDecode) {
+                decoder->frameBuffer.blockInsert(frame);
+            }else{
+                av_frame_free(&frame);
             }
+            
+//            frameArr.push_back(frame);
         }
        if (pkt != nullptr)  av_packet_unref(pkt);
     }
     
     
     
-    TFMPDLOG_C("start free!------------\n");
-    for (auto iter = frameArr.begin(); iter != frameArr.end(); iter++) {
-        AVFrame *frame = *iter;
-        logBufs(frame, "TWO");
-        for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
-            
-            tf_AVBuffer *ref = nullptr;
-            if (frame->buf[i]) {
-                ref = (tf_AVBuffer*)frame->buf[i]->buffer;
-                
-//                if (ref) std::cout<<"1:buf "<<ref<<" ref: "<<ref->refcount<<std::endl;
-            }
-//            av_buffer_unref(&frame->buf[i]);
-//            if (ref) atomic_fetch_add_explicit(&ref->refcount, (unsigned int)-1, std::memory_order_acq_rel);
-            
-            if (ref) {
-
-                //                av_free(ref->data);
-
-                auto fetch = atomic_fetch_add_explicit(&ref->refcount, (unsigned int)-1, std::memory_order_acq_rel);
-//                if (ref) std::cout<<"2:buf "<<ref<<" ref: "<<ref->refcount<<" fetch: "<<fetch<<std::endl;
-
-                tf_BufferPoolEntry *buf = (tf_BufferPoolEntry*)ref->opaque;
-                tf_AVBufferPool *pool = buf->pool;
-
-               // atomic_fetch_add_explicit(&pool->refcount, (unsigned int)1, std::memory_order_acq_rel);
-                std::cout<<"pool: "<<pool<<" ref1: "<<pool->refcount<<std::endl;
-
-                if (fetch == 1) {
-                    ref->free(ref->opaque, ref->data);
-                    av_freep(&ref);
-//                    av_free(ref->data);
-                    TFMPDLOG_C("free buf\n");
-                }
-//                if (atomic_fetch_add_explicit(&pool->refcount, (unsigned int)-1, std::memory_order_acq_rel) == 1){
-//                    TFMPDLOG_C("pool free\n");
-//                }
-                std::cout<<"pool: "<<pool<<" ref2: "<<pool->refcount<<std::endl;
-                
-                
-            }
-        }
-        
-    }
+//    TFMPDLOG_C("start free!------------\n");
+//    for (auto iter = frameArr.begin(); iter != frameArr.end(); iter++) {
+//        AVFrame *frame = *iter;
+//        logBufs(frame, "TWO");
+//        for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
+//            logAVBufferPool(frame->buf[i], true);
+//        }
+//    }
     
     decoder->isDecoding = false;
     

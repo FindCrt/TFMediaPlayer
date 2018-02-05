@@ -41,7 +41,7 @@ namespace tfmpcore {
         pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
-        bool noBlock = false;
+        bool clearing = false;
         
         bool expand(){
             if (allocedSize >= limitSize) {
@@ -160,9 +160,14 @@ namespace tfmpcore {
             return true;
         }
         
+        /** When it's clearing, unblocking thread and freeing node instead inserting it. 
+          * Because RecycleBuffer doesn't need or has any node,
+          * but blocking may lead to deadlock.
+          * For every inserted node, RecycleBuffer take over it's memory management.
+         */
         void blockInsert(T val){
             
-            if (!noBlock && usedSize >= limitSize) {
+            if (!clearing && usedSize >= limitSize) {
                 RecycleBufferLog(">>>>lock full %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
@@ -170,13 +175,17 @@ namespace tfmpcore {
                 RecycleBufferLog("<<<<unlock full %s\n",name);
             }
             
-            insert(val);
-            pthread_cond_signal(&cond);
+            if (clearing) {
+                if (valueFreeFunc) valueFreeFunc(&val);
+            }else{
+                insert(val);
+                pthread_cond_signal(&cond);
+            }
         }
         
         void blockGetOut(T *valP){
 
-            if (!noBlock && usedSize == 0) {
+            if (!clearing && usedSize == 0) {
                 RecycleBufferLog(">>>>lock empty %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
@@ -184,8 +193,10 @@ namespace tfmpcore {
                 RecycleBufferLog("<<<<unlock empty %s\n",name);
             }
             
-            getOut(valP);
-            pthread_cond_signal(&cond);
+            if (!clearing) {
+                getOut(valP);
+                pthread_cond_signal(&cond);
+            }
         }
         
         bool back(T *valP){
@@ -206,9 +217,9 @@ namespace tfmpcore {
             return true;
         }
         
-        void signalAllBlock(){
+        void prepareClear(){
             RecycleBufferLog("signalAllBlock\n");
-            noBlock = true;
+            clearing = true;
             pthread_cond_broadcast(&cond);
         }
         
@@ -238,6 +249,8 @@ namespace tfmpcore {
             //don't change limitsize.
             allocedSize = 0;
             usedSize = 0;
+            
+            clearing = false;
             
             pthread_mutex_unlock(&mutex);
         }

@@ -133,27 +133,27 @@ void PlayController::stop(){
     shouldRead = false;
     
     //displayer
-//    displayer->stopDisplay();
-//    
-//    //decodes
-//    if (videoDecoder) {
-//        videoDecoder->stopDecode();
-//    }
-//    if (audioDecoder) {
-//        audioDecoder->stopDecode();
-//    }
-//    if (subtitleDecoder) {
-//        subtitleDecoder->stopDecode();
-//    }
-//    
-//    freeResources();
-//    
-//    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-//    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
-//    
-//    videoStrem = -1;
-//    audioStream = -1;
-//    subTitleStream = -1;
+    displayer->stopDisplay();
+    
+    //decodes
+    if (videoDecoder) {
+        videoDecoder->stopDecode();
+    }
+    if (audioDecoder) {
+        audioDecoder->stopDecode();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->stopDecode();
+    }
+    
+    freeResources();
+    
+    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+    
+    videoStrem = -1;
+    audioStream = -1;
+    subTitleStream = -1;
 
     TFMPDLOG_C("player stoped!\n");
 }

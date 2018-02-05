@@ -14,6 +14,12 @@
 #define TFMPLOG 1
 #define TFMPErrorLog 1
 
+#if DEBUG
+#define TFMPDebugRun(code) code
+#else
+#define TFMPDebugRun(code)
+#endif
+
 #if DEBUG & TFMPLOG
 #define TFMPDLog(format,...) NSLog(format, ##__VA_ARGS__)
 #else

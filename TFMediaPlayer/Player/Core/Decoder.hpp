@@ -19,6 +19,7 @@ extern "C"{
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
+#include <vector>
 
 namespace tfmpcore {
     
@@ -29,9 +30,11 @@ namespace tfmpcore {
         
         AVCodecContext *codecCtx;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(10, true);
+//        std::vector<AVFrame *> savedFrame
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(10, true);
+        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(100, true);
+        
+        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(100, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
