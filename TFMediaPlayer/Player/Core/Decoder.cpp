@@ -117,8 +117,6 @@ void *Decoder::decodeLoop(void *context){
     AVPacket *pkt = nullptr;
     AVFrame *frame = nullptr;
     
-    std::vector<AVFrame *> frameArr;
-    
     while (decoder->shouldDecode) {
         
         decoder->isDecoding = true;
@@ -178,22 +176,10 @@ void *Decoder::decodeLoop(void *context){
             }else{
                 av_frame_free(&frame);
             }
-            
-//            frameArr.push_back(frame);
         }
+        
        if (pkt != nullptr)  av_packet_unref(pkt);
     }
-    
-    
-    
-//    TFMPDLOG_C("start free!------------\n");
-//    for (auto iter = frameArr.begin(); iter != frameArr.end(); iter++) {
-//        AVFrame *frame = *iter;
-//        logBufs(frame, "TWO");
-//        for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
-//            logAVBufferPool(frame->buf[i], true);
-//        }
-//    }
     
     decoder->isDecoding = false;
     
