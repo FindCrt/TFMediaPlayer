@@ -52,6 +52,7 @@
 		18C66DC91FF0F5A2002BFBBC /* PlayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DC71FF0F5A2002BFBBC /* PlayController.cpp */; };
 		18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */; };
 		18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */; };
+		8927030E202A082B00E5F4AB /* OverWatch-TwoDragons.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 8927030D202A078E00E5F4AB /* OverWatch-TwoDragons.mp4 */; };
 		892C12941FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 892C12931FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m */; };
 		892C13202003B63B0081CF79 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13122003B63A0081CF79 /* libavutil.a */; };
 		892C13222003B63B0081CF79 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13142003B63A0081CF79 /* libavcodec.a */; };
@@ -147,6 +148,7 @@
 		18C66DCE1FF0F84B002BFBBC /* ExampleMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleMenuViewController.m; sourceTree = "<group>"; };
 		18C66DD01FF0F96F002BFBBC /* TFNetMp4PlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFNetMp4PlayViewController.h; sourceTree = "<group>"; };
 		18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFNetMp4PlayViewController.m; sourceTree = "<group>"; };
+		8927030D202A078E00E5F4AB /* OverWatch-TwoDragons.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OverWatch-TwoDragons.mp4"; path = "../../../../视频/OverWatch-TwoDragons.mp4"; sourceTree = "<group>"; };
 		892C12921FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFAudioUnitStreamPlayer.h; sourceTree = "<group>"; };
 		892C12931FF8B99F0081CF79 /* TFAudioUnitStreamPlayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFAudioUnitStreamPlayer.m; sourceTree = "<group>"; };
 		892C12992003B63A0081CF79 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
@@ -400,6 +402,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8927030D202A078E00E5F4AB /* OverWatch-TwoDragons.mp4 */,
 				184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */,
 				184C8E11200B481D0063EAC3 /* pure1.caf */,
 				183434172008AB3B00ED9B05 /* LuckyDay.mp3 */,
@@ -871,6 +874,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8927030E202A082B00E5F4AB /* OverWatch-TwoDragons.mp4 in Resources */,
 				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
 				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
 				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,

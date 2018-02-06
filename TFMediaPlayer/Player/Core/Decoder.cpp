@@ -20,6 +20,7 @@
 using namespace tfmpcore;
 
 inline void freePacket(AVPacket **pkt){
+    logPacketBuffer(*pkt,"free pkt");
     av_packet_free(pkt);
 }
 
@@ -101,7 +102,12 @@ void Decoder::freeResources(){
 
 void Decoder::decodePacket(AVPacket *packet){
     
-//    pktBuffer.blockInsert(packet);
+    AVPacket *refPkt = av_packet_alloc();
+    av_packet_ref(refPkt, packet);
+    
+    logPacketBuffer(packet, "blockInsert");
+    
+    pktBuffer.blockInsert(refPkt);
 }
 
 void *Decoder::decodeLoop(void *context){

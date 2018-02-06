@@ -8,7 +8,7 @@
 
 #import "TFAudioQueueController.h"
 #import <AudioToolbox/AudioToolbox.h>
-#import <AVFoundation/AVFoundation.h>
+//#import <AVFoundation/AVFoundation.h>
 #import "TFMPUtilities.h"
 #import "TFMPDebugFuncs.h"
 
@@ -109,11 +109,11 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
     
     NSError *error;
     
-    if ([[AVAudioSession sharedInstance] setActive:YES error:&error]) {
-        NSLog(@"audio session active error: %@",error);
-        [_lock unlock];
-        return;
-    }
+//    if ([[AVAudioSession sharedInstance] setActive:YES error:&error]) {
+//        NSLog(@"audio session active error: %@",error);
+//        [_lock unlock];
+//        return;
+//    }
     
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
     TFCheckStatusToDo(status, @"AudioQueue start failed!", {

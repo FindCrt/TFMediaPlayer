@@ -72,7 +72,7 @@
     }
     
     _player = [[TFMediaPlayer alloc] init];
-    _player.mediaType = TFMP_MEDIA_TYPE_VIDEO;
+    _player.mediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
     _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, [UIScreen mainScreen].bounds.size.width, 300);
     _player.displayView.contentMode = UIViewContentModeScaleToFill;
     if (_showGraph) {
@@ -202,7 +202,7 @@ static int mediaIndex = 0;
 -(void)startPlay{
     
     if (!_currentMediaURL) {
-        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"OverWatch-TwoDragons" withExtension:@"mp4"];
 //        _currentMediaURL = [NSURL URLWithString:@"http://oys9374yl.bkt.clouddn.com/voice/278/15d8a04d-15eb-4d12-809b-c9be924ad92f.mp3"];
     }
     
