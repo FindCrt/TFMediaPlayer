@@ -28,6 +28,7 @@
 5. 缓冲区
  * 一个隐患是不同流使用的是同一个获取线程，如果某个流满了，难么所有流的获取都要停滞。比如音频packet缓冲区满了，但是视频缓冲区还缺少，这时不解析packet了，视频获取不了，播不下去，那么音频就不会减少，然后又返回来继续阻塞，然后整个流程就死了。
  * 核心问题是音频packet和视频packet的数量对比，还有frame。他们可能不是1：1的。
+ * 释放资源逻辑：先把阻塞的释放，但是不做任何的node插入和取出，不改变已有的数据，对于输入，还会把插入的这一个node释放掉。从这开始，内部的数据不会发生任何改变，而且也不会阻塞外界的操作。这样就把内外
 
 6. 音频的重采样
  * resample的参数是channel_layout，而不是channels，修改channels而没有修改channel_layout，导致不匹配错误。
@@ -184,3 +185,5 @@ Printing description of srcp->f->buf[0]->buffer:
    * 切换到自己设计的缓冲区还是有一些问题，停止播放的时候，把缓冲区的进出阻塞都解除，如果缓冲区满的，进入阻塞解除，那么就会有一个frame被新进来的覆盖，导致它丢失，在clear的时候没有把它free.
    * 在开始释放的时候，`blockInsert和blockGetOut`的阻塞解除，但是不把node插入或取出，而且对于insert，还要释放这个多余的node,因为只要insert进来的node,缓冲区就已经接管了它的内存管理。
    * `if (decoder->shouldDecode)`判断为NO时，也要释放frame.
+   * **3个核心函数里只有`avcodec_receive_frame`是会自动调用unref的，`av_read_frame`并不会unref packet**
+   * 所以可以改为`av_read_frame`之后不释放，在进入packet缓冲区之前也不使用另一个packet来做ref,直接把原packet放进去，然后在最后使用完unref。

@@ -10,6 +10,9 @@
 #include "TFMPDebugFuncs.h"
 #include "ThreadConvience.h"
 #include "TFMPUtilities.h"
+#if DEBUG
+#include "FFmpegInternalDebug.h"
+#endif
 
 using namespace tfmpcore;
 
@@ -268,12 +271,18 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = av_packet_alloc();
     
+    std::vector<AVPacket *> packetArr;
+    
     while (controller->shouldRead && av_read_frame(controller->fmtCtx, packet) == 0) {
+        
+        logPacketBuffer(packet, "read");
+        
+        packetArr.push_back(packet);
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
             
-            controller->videoDecoder->decodePacket(packet);
+//            controller->videoDecoder->decodePacket(packet);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
@@ -285,7 +294,25 @@ void * PlayController::readFrame(void *context){
             
             controller->subtitleDecoder->decodePacket(packet);
         }
+        
+//        av_packet_unref(packet);
     }
+    
+    for (auto iter = packetArr.begin(); iter != packetArr.end(); iter++) {
+        AVPacket *packet = *iter;
+
+        if (packet->buf) {
+            tf_AVBuffer *tf_buf = (tf_AVBuffer *)packet->buf->buffer;
+            if (tf_buf) {
+                std::cout<<"tf_buf: "<<tf_buf<<" "<<tf_buf->refcount<<std::endl;
+            }
+            
+            av_packet_free(&packet);
+        }else{
+            TFMPDLOG_C("packet freed!");
+        }
+    }
+    
     
     TFMPDLOG_C("readFrame thread end!");
     

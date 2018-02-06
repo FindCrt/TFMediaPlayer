@@ -36,10 +36,10 @@ void DisplayController::startDisplay(){
     
     bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
     
-    if (showVideo) {
-        pthread_create(&dispalyThread, nullptr, displayLoop, this);
-        pthread_detach(dispalyThread);
-    }
+//    if (showVideo) {
+//        pthread_create(&dispalyThread, nullptr, displayLoop, this);
+//        pthread_detach(dispalyThread);
+//    }
 }
 
 void DisplayController::stopDisplay(){

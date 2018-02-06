@@ -10,6 +10,7 @@
 #define FFmpegInternalDebug_h
 
 #include "TFMPDebugFuncs.h"
+#include <iostream>
 
 /*** There are some internal structs of FFmpeg such as AVBuffer, and some function for tracing the change of internal status such as AVBuffer.refcount. Those are useful for debuging memory leak. ***/
 
@@ -90,10 +91,13 @@ inline void logBufs(AVFrame *frame, char *tag){
             if (ref) std::cout<<"buf "<<ref<<" ref: "<<ref->refcount<<std::endl;
         }
     }
-    TFMPDLOG_C("\n---------%s-----------\n",tag);
+    TFMPDLOG_C("\n***%s***\n",tag);
 }
 
-inline void logAVBufferPool(AVBufferRef *ref, bool unref){
+inline void logAVBufferPool(AVBufferRef *ref, bool unref, const char *tag = nullptr){
+    
+    TFMPDLOG_C("\n---------%s-----------\n",tag);
+    
     tf_AVBuffer *buf = nullptr;
     if (ref) {
         buf = (tf_AVBuffer*)ref->buffer;
@@ -118,7 +122,23 @@ inline void logAVBufferPool(AVBufferRef *ref, bool unref){
         }
     }
     
+    TFMPDLOG_C("\n***%s***\n",tag);
+}
+
+inline void logPacketBuffer(AVPacket *packet, const char *tag = nullptr){
     
+    TFMPDLOG_C("\n---------%s-----------\n",tag);
+    
+    tf_AVBuffer *buf = nullptr;
+    if (packet->buf) {
+        buf = (tf_AVBuffer*)packet->buf->buffer;
+        
+        std::cout<<"buf: "<<buf<<" ref: "<<buf->refcount<<std::endl;
+    }else{
+        TFMPDLOG_C("packet->buf has freed!\n");
+    }
+    
+    TFMPDLOG_C("\n***%s***\n",tag);
 }
 
 

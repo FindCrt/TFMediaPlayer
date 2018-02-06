@@ -217,14 +217,12 @@ namespace tfmpcore {
             return true;
         }
         
-        void prepareClear(){
-            RecycleBufferLog("signalAllBlock\n");
+        void clear(){
+            
+            RecycleBufferLog("signalAllBlock 1\n");
             clearing = true;
             pthread_cond_broadcast(&cond);
-        }
-        
-        void clear(){
-            pthread_mutex_lock(&mutex);
+            RecycleBufferLog("signalAllBlock 2\n");
             
             //free valid datas
             if (usedSize > 0 && valueFreeFunc != nullptr) {
@@ -250,9 +248,7 @@ namespace tfmpcore {
             allocedSize = 0;
             usedSize = 0;
             
-            clearing = false;
-            
-            pthread_mutex_unlock(&mutex);
+            RecycleBufferLog("clearing end\n");
         }
     };
 }

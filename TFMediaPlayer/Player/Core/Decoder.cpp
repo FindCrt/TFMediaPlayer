@@ -86,8 +86,9 @@ void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
-    frameBuffer.prepareClear();
-    pktBuffer.prepareClear();
+    frameBuffer.clear();
+    pktBuffer.clear();
+    
     while (isDecoding) {
         av_usleep(10000); //0.01s
         TFMPDLOG_C("wait one decode loop end.[%d]\n",steamIndex);
@@ -95,19 +96,12 @@ void Decoder::freeResources(){
     
     if (codecCtx) avcodec_free_context(&codecCtx);
     
-    frameBuffer.clear();
-    pktBuffer.clear();
-    
     fmtCtx = nullptr;
 }
 
 void Decoder::decodePacket(AVPacket *packet){
     
-    AVPacket *refPacket = av_packet_alloc();
-    int retval = av_packet_ref(refPacket, packet);
-    TFCheckRetval("av_packet_ref")
-    
-    pktBuffer.blockInsert(refPacket);
+//    pktBuffer.blockInsert(packet);
 }
 
 void *Decoder::decodeLoop(void *context){

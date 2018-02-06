@@ -32,15 +32,15 @@ namespace tfmpcore {
         
 //        std::vector<AVFrame *> savedFrame
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(100, true);
+        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(200, true);
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(100, true);
+        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(30, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
         
-        bool shouldDecode;
-        bool isDecoding;
+        bool shouldDecode = false;
+        bool isDecoding = false;
         
     public:
         AVMediaType type;
