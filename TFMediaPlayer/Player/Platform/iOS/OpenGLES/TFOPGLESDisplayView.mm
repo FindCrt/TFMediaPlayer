@@ -132,10 +132,6 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         1.0f, 1.0f, 0.0f, 1.0f, 0.0f,   //right top
         1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  //right bottom
     };
-    
-//    NSString *vertexPath = [[NSBundle mainBundle] pathForResource:@"frameDisplay" ofType:@"vs"];
-//    NSString *fragmentPath = [[NSBundle mainBundle] pathForResource:@"frameDisplay" ofType:@"fs"];
-    //_frameProgram = new TFOPGLProgram(std::string([vertexPath UTF8String]), std::string([fragmentPath UTF8String]));
     _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_yuv420_fs);
     
     glGenVertexArrays(1, &VAO);
@@ -274,21 +270,18 @@ inline void genTextures_YUV420P(TFMPVideoFrameBuffer *frameBuf, GLuint *textures
     
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
-    glGenerateMipmap(GL_TEXTURE_2D);
     
     
     glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[1]);
     
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2.0, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
-    glGenerateMipmap(GL_TEXTURE_2D);
     
     
     glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[2]);
     
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2.0, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[2]);
-    glGenerateMipmap(GL_TEXTURE_2D);
     
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 }
