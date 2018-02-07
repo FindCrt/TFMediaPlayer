@@ -134,7 +134,8 @@
     //local file or bundle file need a file reader which is different on different platform.
     bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
     if (!succeed) {
-        NSLog(@"play media open error");
+        TFMPDLog(@"play media open error");
+        _state = TFMediaPlayerStateNone;
     }
 }
 

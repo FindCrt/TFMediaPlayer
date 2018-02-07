@@ -8,7 +8,7 @@
 
 #import "TFAudioUnitPlayer.h"
 #import <AudioUnit/AudioUnit.h>
-#include <AVFoundation/AVFoundation.h>
+//#include <AVFoundation/AVFoundation.h>
 #import "TFMPDebugFuncs.h"
 #import "TFMPUtilities.h"
 

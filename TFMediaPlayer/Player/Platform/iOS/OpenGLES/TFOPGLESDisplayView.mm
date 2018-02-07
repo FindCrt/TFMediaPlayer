@@ -221,6 +221,7 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     float width = frameBuf->width;
     float height = frameBuf->height;
     
+    //TODO: view mode must be runed on main thread
     if (width != _lastFrameSize.width || height != _lastFrameSize.height) {
         [self calculateContentFrame:CGSizeMake(width, height)];
         _lastFrameSize = CGSizeMake(width, height);

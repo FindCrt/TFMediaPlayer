@@ -186,4 +186,4 @@ Printing description of srcp->f->buf[0]->buffer:
    * 在开始释放的时候，`blockInsert和blockGetOut`的阻塞解除，但是不把node插入或取出，而且对于insert，还要释放这个多余的node,因为只要insert进来的node,缓冲区就已经接管了它的内存管理。
    * `if (decoder->shouldDecode)`判断为NO时，也要释放frame.
    * **3个核心函数里只有`avcodec_receive_frame`是会自动调用unref的，`av_read_frame`并不会unref packet**
-   * 所以可以改为`av_read_frame`之后不释放，在进入packet缓冲区之前也不使用另一个packet来做ref,直接把原packet放进去，然后在最后使用完unref。
+   * <<所以可以改为`av_read_frame`之后不释放，在进入packet缓冲区之前也不使用另一个packet来做ref,直接把原packet放进去，然后在最后使用完unref。>>**这样做是错的**，因为`av_read_frame`内部调用`read_frame_internal`到`av_init_packet`,会把buf设为null,导致之后的packet丢失了buf信息，没法释放。所以还是要自己引用ref到一个新的packet里，用来管理内存。

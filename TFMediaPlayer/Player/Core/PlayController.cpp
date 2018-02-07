@@ -271,18 +271,18 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = av_packet_alloc();
     
-    std::vector<AVPacket *> packetArr;
+    std::vector<AVBuffer *> packetArr;
     
     while (controller->shouldRead && av_read_frame(controller->fmtCtx, packet) == 0) {
         
         logPacketBuffer(packet, "read");
         
-        packetArr.push_back(packet);
+        packetArr.push_back(packet->buf->buffer);
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
             
-//            controller->videoDecoder->decodePacket(packet);
+            controller->videoDecoder->decodePacket(packet);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
@@ -295,21 +295,17 @@ void * PlayController::readFrame(void *context){
             controller->subtitleDecoder->decodePacket(packet);
         }
         
-//        av_packet_unref(packet);
+        av_packet_unref(packet);
     }
     
     for (auto iter = packetArr.begin(); iter != packetArr.end(); iter++) {
-        AVPacket *packet = *iter;
+        AVBuffer *buf = *iter;
 
-        if (packet->buf) {
-            tf_AVBuffer *tf_buf = (tf_AVBuffer *)packet->buf->buffer;
-            if (tf_buf) {
-                std::cout<<"tf_buf: "<<tf_buf<<" "<<tf_buf->refcount<<std::endl;
-            }
-            
-            av_packet_free(&packet);
+        tf_AVBuffer *tf_buf = (tf_AVBuffer *)buf;
+        if (buf) {
+            std::cout<<"tf_buf: "<<tf_buf<<" "<<tf_buf->refcount<<std::endl;
         }else{
-            TFMPDLOG_C("packet freed!");
+            TFMPDLOG_C("AVBuffer freed!\n");
         }
     }
     
