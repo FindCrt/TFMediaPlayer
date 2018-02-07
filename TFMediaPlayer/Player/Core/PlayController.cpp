@@ -271,13 +271,7 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = av_packet_alloc();
     
-    std::vector<AVBuffer *> packetArr;
-    
     while (controller->shouldRead && av_read_frame(controller->fmtCtx, packet) == 0) {
-        
-        logPacketBuffer(packet, "read");
-        
-        packetArr.push_back(packet->buf->buffer);
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -296,17 +290,6 @@ void * PlayController::readFrame(void *context){
         }
         
         av_packet_unref(packet);
-    }
-    
-    for (auto iter = packetArr.begin(); iter != packetArr.end(); iter++) {
-        AVBuffer *buf = *iter;
-
-        tf_AVBuffer *tf_buf = (tf_AVBuffer *)buf;
-        if (buf) {
-            std::cout<<"tf_buf: "<<tf_buf<<" "<<tf_buf->refcount<<std::endl;
-        }else{
-            TFMPDLOG_C("AVBuffer freed!\n");
-        }
     }
     
     

@@ -30,9 +30,9 @@ namespace tfmpcore {
         
         AVCodecContext *codecCtx;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(4000, true);
+        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(30, true);
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(100, true);
+        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(30, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);

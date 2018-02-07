@@ -73,8 +73,8 @@
     
     _player = [[TFMediaPlayer alloc] init];
     _player.mediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, [UIScreen mainScreen].bounds.size.width, 300);
-    _player.displayView.contentMode = UIViewContentModeScaleToFill;
+    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 550, 60, 40);
+    _player.displayView.contentMode = UIViewContentModeScaleAspectFit;
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
     }
@@ -204,7 +204,8 @@ static int mediaIndex = 0;
     if (!_currentMediaURL) {
 //        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
 //        _currentMediaURL = [NSURL URLWithString:@"http://oys9374yl.bkt.clouddn.com/voice/278/15d8a04d-15eb-4d12-809b-c9be924ad92f.mp3"];
-        _currentMediaURL = [NSURL URLWithString:@"http://flv2.bn.netease.com/videolib3/1711/04/aMSoJ8166/HD/aMSoJ8166-mobile.mp4"];
+//        _currentMediaURL = [NSURL URLWithString:@"http://flv2.bn.netease.com/videolib3/1711/04/aMSoJ8166/HD/aMSoJ8166-mobile.mp4"];
+        _currentMediaURL = [NSURL URLWithString:@"http://flv.bn.netease.com/videolib3/1605/16/nTaMi2329/HD/nTaMi2329-mobile.mp4"];
     }
     
     _player.mediaURL = _currentMediaURL;

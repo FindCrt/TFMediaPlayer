@@ -105,8 +105,6 @@ void Decoder::decodePacket(AVPacket *packet){
     AVPacket *refPkt = av_packet_alloc();
     av_packet_ref(refPkt, packet);
     
-    logPacketBuffer(packet, "blockInsert");
-    
     pktBuffer.blockInsert(refPkt);
 }
 

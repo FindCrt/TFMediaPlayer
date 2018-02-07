@@ -86,7 +86,6 @@ void *DisplayController::displayLoop(void *context){
         if (videoFrame == nullptr) continue;
         
         double remainTime = controller->syncClock->remainTimeForVideo(videoFrame->pts, controller->videoTimeBase);
-        remainTime = 0.01;
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }else if (remainTime < -remainTime){
