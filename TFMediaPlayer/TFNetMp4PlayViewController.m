@@ -9,12 +9,16 @@
 #import "TFNetMp4PlayViewController.h"
 #import "TFMediaPlayer.h"
 
+
+
 @interface TFNetMp4PlayViewController ()<UITextFieldDelegate>{
     UITextField *_urlInputView;
     
     TFMediaPlayer *_player;
     
-    NSString *_videoUrl;
+    NSMutableArray *_medias;
+    
+    NSURL *_curURL;
 }
 
 @end
@@ -23,6 +27,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     
     _player = [[TFMediaPlayer alloc] init];
     
@@ -32,10 +37,17 @@
     _urlInputView.returnKeyType = UIReturnKeyGo;
     _urlInputView.delegate = self;
     [self.view addSubview:_urlInputView];
+    
+    NSString *mediaConfig = [[NSBundle mainBundle] pathForResource:@"netMedias" ofType:@"plist"];
+    _medias = [[NSArray alloc] initWithContentsOfFile:mediaConfig];
+    
+    NSLog(@"_medias: %@",_medias);
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
-    _videoUrl = textField.text;
+    _curURL = [NSURL URLWithString:textField.text];
+    
+    
     
     [self startPlay];
     
@@ -43,7 +55,7 @@
 }
 
 -(void)startPlay{
-    _player.mediaURL = [NSURL URLWithString:_videoUrl];
+    _player.mediaURL = [NSURL URLWithString:_curURL];
     
     [_player play];
 }
