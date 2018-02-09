@@ -113,7 +113,7 @@ void *Decoder::decodeLoop(void *context){
     Decoder *decoder = (Decoder *)context;
     
     AVPacket *pkt = nullptr;
-    AVFrame *frame = nullptr;
+    AVFrame *frame = av_frame_alloc();
     
     while (decoder->shouldDecode) {
         
@@ -133,7 +133,6 @@ void *Decoder::decodeLoop(void *context){
             //may many frames in one packet.
             while (retval == 0) {
                 
-                frame = av_frame_alloc();
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 if (retval == AVERROR(EAGAIN)) {
                     break;
@@ -141,44 +140,52 @@ void *Decoder::decodeLoop(void *context){
                 
                 if (retval != 0 && retval != AVERROR_EOF) {
                     TFCheckRetval("avcodec receive frame");
-                    av_frame_free(&frame);
+                    av_frame_unref(frame);
                     continue;
                 }
                 if (frame->extended_data == nullptr) {
                     printf("audio frame data is null\n");
-                    av_frame_free(&frame);
+                    av_frame_unref(frame);
                     continue;
                 }
                 
-                if (decoder->shouldDecode) decoder->frameBuffer.blockInsert(frame);
+                if (decoder->shouldDecode) {
+                    AVFrame *refFrame = av_frame_alloc();
+                    av_frame_ref(refFrame, frame);
+                    decoder->frameBuffer.blockInsert(refFrame);
+                }else{
+                    av_frame_unref(frame);
+                }
             }
         }else{
             
-            frame = av_frame_alloc();
             retval = avcodec_receive_frame(decoder->codecCtx, frame);
             
             if (retval != 0) {
                 TFCheckRetval("avcodec receive frame");
-                av_frame_free(&frame);
+                av_frame_unref(frame);
                 continue;
             }
             
             if (frame->extended_data == nullptr) {
                 printf("video frame data is null\n");
-                av_frame_free(&frame);
+                av_frame_unref(frame);
                 continue;
             }
             
             if (decoder->shouldDecode) {
-                decoder->frameBuffer.blockInsert(frame);
+                AVFrame *refFrame = av_frame_alloc();
+                av_frame_ref(refFrame, frame);
+                decoder->frameBuffer.blockInsert(refFrame);
             }else{
-                av_frame_free(&frame);
+                av_frame_unref(frame);
             }
         }
         
        if (pkt != nullptr)  av_packet_unref(pkt);
     }
     
+    av_frame_free(&frame);
     decoder->isDecoding = false;
     
     return 0;
