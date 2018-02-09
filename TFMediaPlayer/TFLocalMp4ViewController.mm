@@ -73,7 +73,7 @@
     
     _player = [[TFMediaPlayer alloc] init];
     _player.mediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 550, 60, 40);
+    _player.displayView.frame = CGRectMake(0, _showGraph ? CGRectGetMaxY(_graphView.frame) : 100, [UIScreen mainScreen].bounds.size.width, 300);
     _player.displayView.contentMode = UIViewContentModeScaleAspectFit;
     if (_showGraph) {
         _player.shareAudioStruct = {shareAudioBuffer, (__bridge void*)self};
