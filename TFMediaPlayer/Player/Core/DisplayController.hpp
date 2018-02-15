@@ -51,6 +51,9 @@ namespace tfmpcore {
         
         AudioResampler *audioResampler = nullptr;
         
+        int64_t lastPresentTime;
+        double lastPts;
+        
     public:
         
         ~DisplayController(){
@@ -78,7 +81,7 @@ namespace tfmpcore {
         AVRational audioTimeBase;
         
         SyncClock *syncClock = nullptr;
-        
+        double getCurrentPlayTime();
 
         void startDisplay();
         void stopDisplay();

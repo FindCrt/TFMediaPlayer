@@ -11,7 +11,9 @@
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"
 #import "TFOPGLESDisplayView.h"
-#import "TFMPDebugFuncs.h"
+#import "UIDevice+ForceChangeOrientation.h"
+#import "TFMPPlayControlView.h"
+#import "TFMPPlayCmdResolver.h"
 
 #if TFMPUseAudioUnitPlayer
 #import "TFAudioUnitPlayer.h"
@@ -19,6 +21,7 @@
 #import "TFAudioQueueController.h"
 #endif
 
+#import "TFMPDebugFuncs.h"
 
 
 @interface TFMediaPlayer (){
@@ -28,13 +31,16 @@
     
     BOOL _innerPlayWhenReady;
     
-    TFOPGLESDisplayView *_displayView;
-    
 #if TFMPUseAudioUnitPlayer
     TFAudioUnitPlayer *_audioPlayer;
 #else
     TFAudioQueueController *_audioPlayer;
 #endif
+    
+    TFOPGLESDisplayView *_displayView;
+    
+    TFMPPlayControlView *_defaultControlView;
+    TFMPPlayCmdResolver *_playResolver;
 }
 
 @end
@@ -82,9 +88,37 @@
             return _audioPlayer.resultSpecifics;
 #endif
         };
+        
+        [self setupPlayControlView];
     }
     
     return self;
+}
+
+-(void)setupPlayControlView{
+    _defaultControlView = [[TFMPPlayControlView alloc] init];
+    _defaultControlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    _playResolver = [[TFMPPlayCmdResolver alloc] init];
+    _playResolver.player = self;
+    _defaultControlView.delegate = _playResolver;
+    
+    self.controlView = _defaultControlView;
+}
+
+-(void)setControlView:(UIView *)controlView{
+    if (_controlView == controlView) {
+        return;
+    }
+    
+    if (_controlView) {
+        [_controlView removeFromSuperview];
+    }
+    
+    _controlView = controlView;
+    _controlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    [self.displayView addSubview:_controlView];
 }
 
 -(UIView *)displayView{
@@ -249,5 +283,30 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 }
 
 
+#pragma mark - controls
+
+-(void)seekToPlayTime:(NSTimeInterval)playTime{
+    _playController->seekTo(playTime);
+}
+
+-(void)seekByForward:(NSTimeInterval)interval{
+    _playController->seekByForward(interval);
+}
+
+-(void)changeFullScreenState{
+    if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortrait || [UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
+        [UIDevice changeOrientationTo:(UIDeviceOrientationLandscapeRight)];
+    }else{
+        [UIDevice changeOrientationTo:(UIDeviceOrientationPortrait)];
+    }
+}
+
+-(double)currentTime{
+    if (_state == TFMediaPlayerStatePlaying || _state == TFMediaPlayerStatePause) {
+        return _playController->getDisplayer()->getCurrentPlayTime();
+    }else{
+        return 0;
+    }
+}
 
 @end

@@ -80,11 +80,15 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     if (videoStrem >= 0) displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
     if (audioStream >= 0) displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
-
-    prapareOK = true;
     
     calculateRealDisplayMediaType();
     setupSyncClock();
+    
+    if (audioStream) {
+        duration = fmtCtx->streams[audioStream]->duration* av_q2d(fmtCtx->streams[audioStream]->time_base);
+    }
+    
+    prapareOK = true;
     
     if (connectCompleted != nullptr) {
         connectCompleted(this);
@@ -161,6 +165,27 @@ void PlayController::stop(){
     TFMPDLOG_C("player stoped!\n");
 }
 
+void PlayController::seekTo(double time){
+    
+    
+}
+
+void PlayController::seekByForward(double interval){
+    double currentTime = displayer->getCurrentPlayTime();
+    
+    double seekedTime = currentTime + interval;
+    if (seekedTime > duration) {
+        seekedTime = duration-0.1;
+    }
+    
+    if (videoStrem) {
+        av_seek_frame(fmtCtx, videoStrem, seekedTime/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_ANY);
+    }
+    if (audioStream) {
+        av_seek_frame(fmtCtx, audioStream, seekedTime/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_ANY);
+    }
+}
+
 void PlayController::freeResources(){
     
     //decodes
@@ -233,6 +258,10 @@ TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
 }
 DisplayController *PlayController::getDisplayer(){
     return displayer;
+}
+
+double PlayController::getDuration(){
+    return duration;
 }
 
 /***** private ******/

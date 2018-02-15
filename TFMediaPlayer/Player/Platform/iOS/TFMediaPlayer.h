@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "TFAudioUnitPlayer.h"
 
+
 typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
     TFMediaPlayerStateNone,
     TFMediaPlayerStateConnecting,
@@ -26,6 +27,8 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 
 @property (nonatomic, strong, readonly) UIView *displayView;
 
+@property (nonatomic, strong) UIView *controlView;
+
 -(void)preparePlay;
 
 -(void)play;
@@ -37,5 +40,13 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 @property (nonatomic, assign, readonly) TFMediaPlayerState state;
 
 @property (nonatomic, assign) BOOL autoPlayWhenReady;
+
+@property (nonatomic, assign) double currentTime;
+
+-(void)seekToPlayTime:(NSTimeInterval)playTime;
+
+-(void)seekByForward:(NSTimeInterval)interval;
+
+-(void)changeFullScreenState;
 
 @end

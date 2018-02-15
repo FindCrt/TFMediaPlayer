@@ -74,6 +74,23 @@
     _tableView.frame = self.view.bounds;
     _tableView.hidden = YES;
     [self.view addSubview:_tableView];
+    
+    static int count = 0;
+    [NSTimer scheduledTimerWithTimeInterval:0.1 repeats:YES block:^(NSTimer * _Nonnull timer) {
+        
+        count++;
+        NSLog(@"currentTime: %.2f --- %.2f",_player.currentTime,count*0.1);
+    }];
+}
+
+-(void)viewDidLayoutSubviews{
+    [super viewDidLayoutSubviews];
+    
+    if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortrait || [UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
+        _player.displayView.frame = CGRectMake(0, 100, [UIScreen mainScreen].bounds.size.width, 240);
+    }else{
+        _player.displayView.frame = self.view.bounds;
+    }
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{

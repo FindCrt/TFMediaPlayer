@@ -47,6 +47,15 @@ void DisplayController::stopDisplay(){
     printf("shouldDisplay to false\n");
 }
 
+double DisplayController::getCurrentPlayTime(){
+    if (videoTimeBase.den == 0 || videoTimeBase.num == 0) {
+        return 0;
+    }
+    
+    double presentTime = lastPts * av_q2d(syncClock->isAudioMajor?audioTimeBase:videoTimeBase);
+    return (av_gettime_relative() - lastPresentTime)/1000000.0 + presentTime;
+}
+
 void DisplayController::freeResources(){
     
     if (shouldDisplay){
@@ -73,19 +82,19 @@ void DisplayController::freeResources(){
 
 void *DisplayController::displayLoop(void *context){
     
-    DisplayController *controller = (DisplayController *)context;
+    DisplayController *displayer = (DisplayController *)context;
     
     AVFrame *videoFrame = nullptr;
     
-    while (controller->shouldDisplay) {
+    while (displayer->shouldDisplay) {
         
-        controller->isDispalyingVideo = true;
+        displayer->isDispalyingVideo = true;
         
-        controller->shareVideoBuffer->blockGetOut(&videoFrame);
+        displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         
         if (videoFrame == nullptr) continue;
         
-        double remainTime = controller->syncClock->remainTimeForVideo(videoFrame->pts, controller->videoTimeBase);
+        double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }else if (remainTime < -remainTime){
@@ -118,18 +127,24 @@ void *DisplayController::displayLoop(void *context){
         }
         
         
-        if (controller->shouldDisplay){
-            controller->displayVideoFrame(interimBuffer, controller->displayContext);
-            controller->syncClock->presentVideo(videoFrame->pts, controller->videoTimeBase);
+        if (displayer->shouldDisplay){
+            displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
+            
+            if (!displayer->syncClock->isAudioMajor) {
+                displayer->lastPresentTime = av_gettime_relative();
+                displayer->lastPts = videoFrame->pts;
+            }
+            
+            displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
         }
         
         av_frame_free(&videoFrame);
         TFMPDLOG_C("free video frame\n");
         
-        controller->isDispalyingVideo = false;
+        displayer->isDispalyingVideo = false;
     }
     
-    controller->isDispalyingVideo = false;
+    displayer->isDispalyingVideo = false;
     
     return 0;
 }
@@ -204,6 +219,11 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             int destSampleRate = displayer->audioResampler->adoptedAudioDesc.sampleRate;
             int destBytesPerChannel =  displayer->audioResampler->adoptedAudioDesc.bitsPerChannel/8;
             double preBufferDuration = (filledSize/destBytesPerChannel)/destSampleRate;
+            
+            if (displayer->syncClock->isAudioMajor) {
+                displayer->lastPresentTime = av_gettime_relative();
+                displayer->lastPts = frame->pts;
+            }
             displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
             
             

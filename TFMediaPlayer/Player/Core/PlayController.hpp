@@ -46,6 +46,8 @@ namespace tfmpcore {
         
         bool prapareOK;
         
+        double duration;
+        
         //read frames
         bool shouldRead = false;
         void startReadingFrames();
@@ -80,17 +82,21 @@ namespace tfmpcore {
         void pause();
         void stop();
         
+        void seekTo(double time);
+        void seekByForward(double interval);
         
         /** properties **/
         
+        double getDuration();
+        
         //the real value is affect by realDisplayMediaType. For example, there is no audio stream, isAudioMajor couldn't be true.
         bool isAudioMajor = true;
-        
         
         void setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType);
         TFMPMediaType getRealDisplayMediaType(){
             return realDisplayMediaType;
         }
+        
         
         void *displayContext = nullptr;
         TFMPVideoFrameDisplayFunc displayVideoFrame = nullptr;

@@ -54,6 +54,9 @@
 		892C13202003B63B0081CF79 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13122003B63A0081CF79 /* libavutil.a */; };
 		892C13222003B63B0081CF79 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13142003B63A0081CF79 /* libavcodec.a */; };
 		892C13232003B63B0081CF79 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13152003B63A0081CF79 /* libavformat.a */; };
+		899A4D5220359F2C00E26AF6 /* TFMPPlayControlView.m in Sources */ = {isa = PBXBuildFile; fileRef = 899A4D5120359F2C00E26AF6 /* TFMPPlayControlView.m */; };
+		899A4D562035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 899A4D552035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.m */; };
+		899A4D592035AD7F00E26AF6 /* TFMPPlayCmdResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 899A4D582035AD7F00E26AF6 /* TFMPPlayCmdResolver.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -277,6 +280,13 @@
 		897ABF121FF7C4F700115779 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
 		897ABF141FF7C4F700115779 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
 		897ABF151FF7C4F700115779 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		899A4D5020359F2C00E26AF6 /* TFMPPlayControlView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPPlayControlView.h; sourceTree = "<group>"; };
+		899A4D5120359F2C00E26AF6 /* TFMPPlayControlView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFMPPlayControlView.m; sourceTree = "<group>"; };
+		899A4D5320359FC100E26AF6 /* TFMPControlProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPControlProtocol.h; sourceTree = "<group>"; };
+		899A4D542035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIDevice+ForceChangeOrientation.h"; sourceTree = "<group>"; };
+		899A4D552035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIDevice+ForceChangeOrientation.m"; sourceTree = "<group>"; };
+		899A4D572035AD7F00E26AF6 /* TFMPPlayCmdResolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPPlayCmdResolver.h; sourceTree = "<group>"; };
+		899A4D582035AD7F00E26AF6 /* TFMPPlayCmdResolver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFMPPlayCmdResolver.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -366,6 +376,7 @@
 			children = (
 				18415A361FF64126007095AC /* TFMediaPlayer.h */,
 				18415A371FF64126007095AC /* TFMediaPlayer.mm */,
+				899A4D4F20359DC100E26AF6 /* playControl */,
 				892C128E1FF8A74B0081CF79 /* audioPlay */,
 				18415A211FF6130D007095AC /* OpenGLES */,
 			);
@@ -772,6 +783,20 @@
 			path = pkgconfig;
 			sourceTree = "<group>";
 		};
+		899A4D4F20359DC100E26AF6 /* playControl */ = {
+			isa = PBXGroup;
+			children = (
+				899A4D5320359FC100E26AF6 /* TFMPControlProtocol.h */,
+				899A4D5020359F2C00E26AF6 /* TFMPPlayControlView.h */,
+				899A4D5120359F2C00E26AF6 /* TFMPPlayControlView.m */,
+				899A4D572035AD7F00E26AF6 /* TFMPPlayCmdResolver.h */,
+				899A4D582035AD7F00E26AF6 /* TFMPPlayCmdResolver.m */,
+				899A4D542035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.h */,
+				899A4D552035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.m */,
+			);
+			path = playControl;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -890,6 +915,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				899A4D562035AC3D00E26AF6 /* UIDevice+ForceChangeOrientation.m in Sources */,
 				185B7EDD2007694600ACB32D /* AudioResampler.cpp in Sources */,
 				18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */,
 				18415A351FF62648007095AC /* SyncClock.cpp in Sources */,
@@ -897,6 +923,7 @@
 				18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */,
 				180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */,
 				18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */,
+				899A4D5220359F2C00E26AF6 /* TFMPPlayControlView.m in Sources */,
 				184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */,
 				18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */,
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
@@ -906,6 +933,7 @@
 				18554537202A9B1B0014D7CE /* TFAudioUnitPlayer.mm in Sources */,
 				18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */,
 				18415A2E1FF6130D007095AC /* TFOPGLProgram.cpp in Sources */,
+				899A4D592035AD7F00E26AF6 /* TFMPPlayCmdResolver.m in Sources */,
 				183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */,
 				18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */,
 				18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */,
