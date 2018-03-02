@@ -116,6 +116,8 @@ void Decoder::freeResources(){
 
 void Decoder::decodePacket(AVPacket *packet){
     
+    TFMPDLOG_C("in packet\n");
+    
     AVPacket *refPkt = av_packet_alloc();
     av_packet_ref(refPkt, packet);
     

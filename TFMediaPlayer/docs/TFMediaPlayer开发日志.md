@@ -187,3 +187,10 @@ Printing description of srcp->f->buf[0]->buffer:
    * `if (decoder->shouldDecode)`判断为NO时，也要释放frame.
    * **3个核心函数里只有`avcodec_receive_frame`是会自动调用unref的，`av_read_frame`并不会unref packet**
    * <<所以可以改为`av_read_frame`之后不释放，在进入packet缓冲区之前也不使用另一个packet来做ref,直接把原packet放进去，然后在最后使用完unref。>>**这样做是错的**，因为`av_read_frame`内部调用`read_frame_internal`到`av_init_packet`,会把buf设为null,导致之后的packet丢失了buf信息，没法释放。所以还是要自己引用ref到一个新的packet里，用来管理内存。
+
+   
+10. seek跳转播放
+
+ * 第一步，seek之后清空缓冲区
+ * seek之后花屏，[花屏问题参考](http://blog.csdn.net/matrix_laboratory/article/details/71757493).应该是需要seek到关键帧才行，否则当前帧会因为缺失关键帧而解码成奇怪的图像，形成花屏。
+ * 修改`av_seek_frame`的最后一个参数，使得总是获取到关键帧。花屏问题没有了。

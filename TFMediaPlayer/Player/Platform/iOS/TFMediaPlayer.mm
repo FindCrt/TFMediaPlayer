@@ -39,8 +39,9 @@
     
     TFOPGLESDisplayView *_displayView;
     
-    TFMPPlayControlView *_defaultControlView;
-    TFMPPlayCmdResolver *_playResolver;
+    TFMPPlayCmdResolver *_defaultPlayResolver;
+    
+    bool seeked;
 }
 
 @end
@@ -99,9 +100,11 @@
     _defaultControlView = [[TFMPPlayControlView alloc] init];
     _defaultControlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    _playResolver = [[TFMPPlayCmdResolver alloc] init];
-    _playResolver.player = self;
-    _defaultControlView.delegate = _playResolver;
+    _defaultPlayResolver = [[TFMPPlayCmdResolver alloc] init];
+    _defaultPlayResolver.player = self;
+    _defaultControlView.delegate = _defaultPlayResolver;
+    
+    _defaultControlView.swipeSeekDuration = 5;
     
     self.controlView = _defaultControlView;
 }
@@ -287,10 +290,12 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 
 -(void)seekToPlayTime:(NSTimeInterval)playTime{
     _playController->seekTo(playTime);
+    seeked = YES;
 }
 
 -(void)seekByForward:(NSTimeInterval)interval{
     _playController->seekByForward(interval);
+    seeked = YES;
 }
 
 -(void)changeFullScreenState{

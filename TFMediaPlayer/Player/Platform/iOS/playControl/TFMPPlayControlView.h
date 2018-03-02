@@ -13,6 +13,7 @@
 
 @property (nonatomic, weak) id<TFMPControlProtocol> delegate;
 
+@property (nonatomic, assign) float swipeSeekDuration;
 
 
 @end

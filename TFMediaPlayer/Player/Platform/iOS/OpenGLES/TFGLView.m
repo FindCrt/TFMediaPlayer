@@ -47,6 +47,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchAppResignActive) name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchAppBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
     
+    
+    
     return true;
 }
 

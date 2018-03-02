@@ -193,11 +193,13 @@ void PlayController::seekByForward(double interval){
     TFMPDLOG_C("flush all end!\n");
     
     if (videoStrem) {
-        av_seek_frame(fmtCtx, videoStrem, seekedTime/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_ANY);
+        av_seek_frame(fmtCtx, videoStrem, seekedTime/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
     }
     if (audioStream) {
-        av_seek_frame(fmtCtx, audioStream, seekedTime/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_ANY);
+        av_seek_frame(fmtCtx, audioStream, seekedTime/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
     }
+    
+    TFMPDLOG_C("seek end! %.3f\n",seekedTime);
 }
 
 void PlayController::freeResources(){
@@ -314,7 +316,17 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = av_packet_alloc();
     
-    while (controller->shouldRead && av_read_frame(controller->fmtCtx, packet) == 0) {
+    while (controller->shouldRead) {
+        
+        int retval = av_read_frame(controller->fmtCtx, packet);
+        
+        if(retval < 0){
+            if (retval == AVERROR_EOF) {
+                break;
+            }else{
+                continue;
+            }
+        }
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {

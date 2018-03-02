@@ -103,7 +103,7 @@ void *DisplayController::displayLoop(void *context){
             continue;
         }
         
-        TFMPDLOG_C("remainTime: %.6f\n",remainTime);
+        
         
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
         interimBuffer->width = videoFrame->width;
@@ -140,7 +140,6 @@ void *DisplayController::displayLoop(void *context){
         }
         
         av_frame_free(&videoFrame);
-        TFMPDLOG_C("free video frame\n");
         
         displayer->isDispalyingVideo = false;
     }
@@ -192,8 +191,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         while (needReadSize > 0) {
             //TODO: do more thing for planar audio.
             frame = nullptr;
-//            TFMPDLOG_C("blockGetOut audio_frame\n");
             displayer->shareAudioBuffer->blockGetOut(&frame);
+            
+            //TODO: need more calm way to wait
+            if (frame == nullptr) continue;
             
             TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);
             

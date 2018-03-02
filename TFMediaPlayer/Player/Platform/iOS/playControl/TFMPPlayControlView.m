@@ -29,6 +29,9 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 
 -(instancetype)initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
+        
+        _swipeSeekDuration = 10;
+        
         [self setupSubViews];
     }
     
@@ -69,10 +72,10 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 -(void)swipeScreen:(UISwipeGestureRecognizer *)swipe{
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         TFMPDLog(@"forward 10s");
-        [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(10)}];
+        [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(_swipeSeekDuration)}];
     }else if (swipe.direction == UISwipeGestureRecognizerDirectionLeft){
         TFMPDLog(@"back 10s");
-        [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(-10)}];
+        [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(-_swipeSeekDuration)}];
     }
 }
 
