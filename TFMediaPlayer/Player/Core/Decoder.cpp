@@ -19,6 +19,8 @@
 
 using namespace tfmpcore;
 
+static int TFMPDecodePauseInterval = 10000;
+
 inline void freePacket(AVPacket **pkt){
     logPacketBuffer(*pkt,"free pkt");
     av_packet_free(pkt);
@@ -83,12 +85,24 @@ void Decoder::stopDecode(){
     shouldDecode = false;
 }
 
+void Decoder::flush(){
+    
+    pause = true;
+    
+    frameBuffer.flush();
+    pktBuffer.flush();
+    
+    pause = false;
+    
+    TFMPDLOG_C("flush end %s\n",frameBuffer.name);
+}
+
 void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
     
-    frameBuffer.clear();
-    pktBuffer.clear();
+    frameBuffer.flushAndFree();
+    pktBuffer.flushAndFree();
     
     while (isDecoding) {
         av_usleep(10000); //0.01s
@@ -117,13 +131,20 @@ void *Decoder::decodeLoop(void *context){
     
     while (decoder->shouldDecode) {
         
+        while (decoder->pause) {
+            av_usleep(TFMPDecodePauseInterval);
+        }
+        
         decoder->isDecoding = true;
         
+        pkt = nullptr;
         decoder->pktBuffer.blockGetOut(&pkt);
+        if (pkt == nullptr) continue;
         
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
+            TFMPDLOG_C("pkt: %x\n",pkt);
             av_packet_free(&pkt);
             continue;
         }
@@ -182,7 +203,7 @@ void *Decoder::decodeLoop(void *context){
             }
         }
         
-       if (pkt != nullptr)  av_packet_unref(pkt);
+       if (pkt != nullptr)  av_packet_free(&pkt);
     }
     
     av_frame_free(&frame);

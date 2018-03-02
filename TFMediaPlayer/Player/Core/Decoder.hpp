@@ -40,6 +40,8 @@ namespace tfmpcore {
         bool shouldDecode = false;
         bool isDecoding = false;
         
+        bool pause = false;
+        
     public:
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
@@ -56,6 +58,8 @@ namespace tfmpcore {
         
         void startDecode();
         void stopDecode();
+        
+        void flush();
         void freeResources();
         
         void decodePacket(AVPacket *packet);

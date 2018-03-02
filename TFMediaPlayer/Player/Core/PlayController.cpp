@@ -178,6 +178,20 @@ void PlayController::seekByForward(double interval){
         seekedTime = duration-0.1;
     }
     
+    if (videoDecoder) {
+        videoDecoder->flush();
+    }
+    if (audioDecoder) {
+        audioDecoder->flush();
+    }
+    if (subtitleDecoder) {
+        subtitleDecoder->flush();
+    }
+    
+    displayer->syncClock->reset();
+    
+    TFMPDLOG_C("flush all end!\n");
+    
     if (videoStrem) {
         av_seek_frame(fmtCtx, videoStrem, seekedTime/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_ANY);
     }

@@ -79,7 +79,7 @@
     [NSTimer scheduledTimerWithTimeInterval:0.1 repeats:YES block:^(NSTimer * _Nonnull timer) {
         
         count++;
-        NSLog(@"currentTime: %.2f --- %.2f",_player.currentTime,count*0.1);
+        
     }];
 }
 

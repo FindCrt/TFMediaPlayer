@@ -89,6 +89,7 @@ void *DisplayController::displayLoop(void *context){
     while (displayer->shouldDisplay) {
         
         displayer->isDispalyingVideo = true;
+        videoFrame = nullptr; //reset it
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         
@@ -190,8 +191,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         
         while (needReadSize > 0) {
             //TODO: do more thing for planar audio.
-            frame = av_frame_alloc();
-            TFMPDLOG_C("blockGetOut audio_frame\n");
+            frame = nullptr;
+//            TFMPDLOG_C("blockGetOut audio_frame\n");
             displayer->shareAudioBuffer->blockGetOut(&frame);
             
             TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);

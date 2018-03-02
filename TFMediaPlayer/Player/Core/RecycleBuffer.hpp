@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <limits.h>
 
-#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>| */
 
@@ -41,7 +41,7 @@ namespace tfmpcore {
         pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
-        bool clearing = false;
+        bool ioDisable = false;
         
         bool expand(){
             if (allocedSize >= limitSize) {
@@ -160,14 +160,14 @@ namespace tfmpcore {
             return true;
         }
         
-        /** When it's clearing, unblocking thread and freeing node instead inserting it. 
+        /** When it's ioDisable, unblocking thread and freeing node instead inserting it. 
           * Because RecycleBuffer doesn't need or has any node,
           * but blocking may lead to deadlock.
           * For every inserted node, RecycleBuffer take over it's memory management.
          */
         void blockInsert(T val){
             
-            if (!clearing && usedSize >= limitSize) {
+            if (!ioDisable && usedSize >= limitSize) {
                 RecycleBufferLog(">>>>lock full %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
@@ -175,7 +175,7 @@ namespace tfmpcore {
                 RecycleBufferLog("<<<<unlock full %s\n",name);
             }
             
-            if (clearing) {
+            if (ioDisable) {
                 if (valueFreeFunc) valueFreeFunc(&val);
             }else{
                 insert(val);
@@ -185,7 +185,7 @@ namespace tfmpcore {
         
         void blockGetOut(T *valP){
 
-            if (!clearing && usedSize == 0) {
+            if (!ioDisable && usedSize == 0) {
                 RecycleBufferLog(">>>>lock empty %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&cond, &mutex);
@@ -193,7 +193,7 @@ namespace tfmpcore {
                 RecycleBufferLog("<<<<unlock empty %s\n",name);
             }
             
-            if (!clearing) {
+            if (!ioDisable) {
                 getOut(valP);
                 pthread_cond_signal(&cond);
             }
@@ -217,10 +217,10 @@ namespace tfmpcore {
             return true;
         }
         
-        void clear(){
-            
+        /** remove all inserted data */
+        void flush(){
             RecycleBufferLog("signalAllBlock 1\n");
-            clearing = true;
+            ioDisable = true;
             pthread_cond_broadcast(&cond);
             RecycleBufferLog("signalAllBlock 2\n");
             
@@ -233,6 +233,18 @@ namespace tfmpcore {
                 } while (curNode != backNode->next);
             }
             
+            usedSize = 0;
+            backNode = frontNode->pre;
+            
+            ioDisable = false;
+        }
+        
+        /** remove all inserted data and free all alloced nodes. */
+        void flushAndFree(){
+            
+            flush();
+            ioDisable = false;
+            
             //free all nodes
             RecycleNode *curNode = frontNode;
             do {
@@ -244,11 +256,11 @@ namespace tfmpcore {
             frontNode = nullptr;
             backNode = nullptr;
             
-            //don't change limitsize.
             allocedSize = 0;
-            usedSize = 0;
             
-            RecycleBufferLog("clearing end\n");
+            ioDisable = true;
+            
+            RecycleBufferLog("ioDisable end\n");
         }
     };
 }

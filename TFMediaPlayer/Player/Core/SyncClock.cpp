@@ -16,12 +16,14 @@ using namespace tfmpcore;
 
 static double timeDen = 1000000;
 
+void SyncClock::reset(){
+    ptsCorrection = -1;
+}
+
 double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
     if (ptsCorrection < 0) {
         return av_gettime_relative()/timeDen;
     }
-    
-    
     
     int64_t sourcePts = videoPts *av_q2d(timeBase)*timeDen;
     

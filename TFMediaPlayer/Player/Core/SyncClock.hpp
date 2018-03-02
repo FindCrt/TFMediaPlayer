@@ -37,6 +37,8 @@ namespace tfmpcore {
         
         void presentVideo(int64_t videoPts, AVRational timeBase);
         void presentAudio(int64_t audioPts, AVRational timeBase, double delay);
+        
+        void reset();
     };
 }
 
