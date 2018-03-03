@@ -62,7 +62,10 @@ namespace tfmpcore {
         void flush();
         void freeResources();
         
+        bool bufferIsEmpty();
+        
         void decodePacket(AVPacket *packet);
+        
     };
 }
 

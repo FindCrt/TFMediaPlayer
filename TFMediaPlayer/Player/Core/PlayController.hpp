@@ -66,6 +66,8 @@ namespace tfmpcore {
         
         void freeResources();
         
+        void startCheckPlayFinish();
+        
     public:
         
         ~PlayController(){
@@ -73,10 +75,15 @@ namespace tfmpcore {
             delete displayer;
         }
         
+        friend void frameEmpty(Decoder *decoder, void* context);
+        
         /** controls **/
         
         bool connectAndOpenMedia(std::string mediaPath);
         std::function<void(PlayController*)> connectCompleted;
+        
+        /** callback which call when playing stoped. The second param is error code of the reason to stop. It's 0 when reason is reaching end of file.*/
+        std::function<void(PlayController*, int)> playStoped;
         
         void play();
         void pause();
@@ -109,5 +116,7 @@ namespace tfmpcore {
         FillAudioBufferFunc getFillAudioBufferFunc();
     };
 }
+
+
 
 #endif /* PlayController_hpp */

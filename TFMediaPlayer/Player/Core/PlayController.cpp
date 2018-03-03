@@ -8,7 +8,6 @@
 
 #include "PlayController.hpp"
 #include "TFMPDebugFuncs.h"
-#include "ThreadConvience.h"
 #include "TFMPUtilities.h"
 #if DEBUG
 #include "FFmpegInternalDebug.h"
@@ -84,8 +83,12 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     calculateRealDisplayMediaType();
     setupSyncClock();
     
+    
+    
     if (audioStream) {
         duration = fmtCtx->streams[audioStream]->duration* av_q2d(fmtCtx->streams[audioStream]->time_base);
+    }else if (videoStrem){
+        duration = fmtCtx->streams[videoStrem]->duration* av_q2d(fmtCtx->streams[videoStrem]->time_base);
     }
     
     prapareOK = true;
@@ -167,15 +170,8 @@ void PlayController::stop(){
 
 void PlayController::seekTo(double time){
     
-    
-}
-
-void PlayController::seekByForward(double interval){
-    double currentTime = displayer->getCurrentPlayTime();
-    
-    double seekedTime = currentTime + interval;
-    if (seekedTime > duration) {
-        seekedTime = duration-0.1;
+    if (time > duration) {
+        time = duration-0.1;
     }
     
     if (videoDecoder) {
@@ -193,13 +189,20 @@ void PlayController::seekByForward(double interval){
     TFMPDLOG_C("flush all end!\n");
     
     if (videoStrem) {
-        av_seek_frame(fmtCtx, videoStrem, seekedTime/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
+        av_seek_frame(fmtCtx, videoStrem, time/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
     }
     if (audioStream) {
-        av_seek_frame(fmtCtx, audioStream, seekedTime/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
+        av_seek_frame(fmtCtx, audioStream, time/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
     }
     
-    TFMPDLOG_C("seek end! %.3f\n",seekedTime);
+    TFMPDLOG_C("seek end! %.3f\n",time);
+}
+
+void PlayController::seekByForward(double interval){
+    double currentTime = displayer->getCurrentPlayTime();
+    
+    double seekTime = currentTime + interval;
+    seekTo(seekTime);
 }
 
 void PlayController::freeResources(){
@@ -310,18 +313,24 @@ void PlayController::startReadingFrames(){
     pthread_detach(readThread);
 }
 
+static int inframeCount = 0;
 void * PlayController::readFrame(void *context){
     
     PlayController *controller = (PlayController *)context;
     
     AVPacket *packet = av_packet_alloc();
     
+    bool endFile = false;
+    
     while (controller->shouldRead) {
         
         int retval = av_read_frame(controller->fmtCtx, packet);
         
+        TFMPDLOG_C("read frame: %d\n",inframeCount++);
+        
         if(retval < 0){
             if (retval == AVERROR_EOF) {
+                endFile = true;
                 break;
             }else{
                 continue;
@@ -347,9 +356,35 @@ void * PlayController::readFrame(void *context){
         av_packet_unref(packet);
     }
     
+    TFMPDLOG_C("readFrame thread end!\n");
     
-    TFMPDLOG_C("readFrame thread end!");
+    if (endFile) controller->startCheckPlayFinish();
     
     return 0;
 }
 
+/** file has reach the end, if the data in packet buffer and frame buffer are used, all resources is showed then now it's need to stop.*/
+void PlayController::startCheckPlayFinish(){
+    
+    Decoder *checkDecoder = nullptr;
+    
+    if (realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) {
+        checkDecoder = audioDecoder;
+    }else if(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO){
+        checkDecoder = videoDecoder;
+    }
+    
+    if (!checkDecoder) {
+        if (playStoped) {
+            playStoped(this, 0);
+        }
+    }
+    
+    while (!checkDecoder->bufferIsEmpty()) {
+        av_usleep(10000);
+    }
+    
+    if (playStoped) {
+        playStoped(this, 0);
+    }
+}

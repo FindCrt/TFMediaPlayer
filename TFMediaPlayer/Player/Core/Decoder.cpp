@@ -97,6 +97,10 @@ void Decoder::flush(){
     TFMPDLOG_C("flush end %s\n",frameBuffer.name);
 }
 
+bool Decoder::bufferIsEmpty(){
+    return pktBuffer.isEmpty() && frameBuffer.isEmpty();
+}
+
 void Decoder::freeResources(){
     
     if (!shouldDecode) shouldDecode = false;
@@ -115,8 +119,6 @@ void Decoder::freeResources(){
 }
 
 void Decoder::decodePacket(AVPacket *packet){
-    
-    TFMPDLOG_C("in packet\n");
     
     AVPacket *refPkt = av_packet_alloc();
     av_packet_ref(refPkt, packet);

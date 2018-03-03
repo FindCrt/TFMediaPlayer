@@ -40,8 +40,6 @@
     TFOPGLESDisplayView *_displayView;
     
     TFMPPlayCmdResolver *_defaultPlayResolver;
-    
-    bool seeked;
 }
 
 @end
@@ -63,12 +61,19 @@
         
         _playController->connectCompleted = [self](tfmpcore::PlayController *playController){
             
-            if (_state == TFMediaPlayerStateConnecting) {
-                _state = TFMediaPlayerStateReady;
+            if (self.state == TFMediaPlayerStateConnecting) {
+                self.state = TFMediaPlayerStateReady;
             }
             
             if (_innerPlayWhenReady || _autoPlayWhenReady) {
                 [self play];
+            }
+        };
+        
+        _playController->playStoped = [self](tfmpcore::PlayController *playController, int errCode){
+            
+            if (_state != TFMediaPlayerStateNone) {
+                [self stop];
             }
         };
         
@@ -159,27 +164,36 @@
     return _mediaType;
 }
 
+-(void)setState:(TFMediaPlayerState)state{
+    if (_state == state) {
+        return;
+    }
+    _state = state;
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{@"state":@(_state)}];
+}
+
 -(void)preparePlay{
     
     if (_mediaURL == nil) {
-        _state = TFMediaPlayerStateNone;
+        self.state = TFMediaPlayerStateNone;
         return;
     }
     
-    _state = TFMediaPlayerStateConnecting;
+    self.state = TFMediaPlayerStateConnecting;
     
     //local file or bundle file need a file reader which is different on different platform.
     bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
     if (!succeed) {
         TFMPDLog(@"play media open error");
-        _state = TFMediaPlayerStateNone;
+        self.state = TFMediaPlayerStateNone;
     }
 }
 
 -(void)play{
     
     if (![self configureAVSession]) {
-        _state = TFMediaPlayerStateNone;
+        self.state = TFMediaPlayerStateNone;
         return;
     }
     
@@ -187,14 +201,14 @@
         _playController->setDesiredDisplayMediaType(_mediaType);
     }
     
-    if (_state == TFMediaPlayerStateNone) {
+    if (self.state == TFMediaPlayerStateNone) {
         
         _innerPlayWhenReady = YES;
         [self preparePlay];
         
-    }else if (_state == TFMediaPlayerStateConnecting) {
+    }else if (self.state == TFMediaPlayerStateConnecting) {
         _innerPlayWhenReady = YES;
-    }else if (_state == TFMediaPlayerStateReady || _state == TFMediaPlayerStatePause){
+    }else if (self.state == TFMediaPlayerStateReady || self.state == TFMediaPlayerStatePause){
         
         _playController->play();
         
@@ -202,7 +216,7 @@
             [_audioPlayer play];
         }
         
-        _state = TFMediaPlayerStatePlaying;
+        self.state = TFMediaPlayerStatePlaying;
     }
 }
 
@@ -224,7 +238,7 @@
         default:
             break;
     }
-    _state = TFMediaPlayerStatePause;
+    self.state = TFMediaPlayerStatePause;
 }
 
 -(void)stop{
@@ -249,7 +263,7 @@
             break;
     }
     
-    _state = TFMediaPlayerStateNone;
+    self.state = TFMediaPlayerStateNone;
 }
 
 -(BOOL)configureAVSession{
@@ -276,6 +290,10 @@
     [_audioPlayer setShareAudioStruct:shareAudioStruct];
 }
 
+-(double)duration{
+    return _playController->getDuration();
+}
+
 #pragma mark - platform special
 
 int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
@@ -290,12 +308,13 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 
 -(void)seekToPlayTime:(NSTimeInterval)playTime{
     _playController->seekTo(playTime);
-    seeked = YES;
 }
 
 -(void)seekByForward:(NSTimeInterval)interval{
+    if (_state == TFMediaPlayerStateNone) {
+        return;
+    }
     _playController->seekByForward(interval);
-    seeked = YES;
 }
 
 -(void)changeFullScreenState{
@@ -307,8 +326,8 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 }
 
 -(double)currentTime{
-    if (_state == TFMediaPlayerStatePlaying || _state == TFMediaPlayerStatePause) {
-        return _playController->getDisplayer()->getCurrentPlayTime();
+    if (self.state == TFMediaPlayerStatePlaying || self.state == TFMediaPlayerStatePause) {
+        return MIN(_playController->getDisplayer()->getCurrentPlayTime(), self.duration);
     }else{
         return 0;
     }

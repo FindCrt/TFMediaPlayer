@@ -11,12 +11,14 @@
 #import "TFMPPlayControlView.h"
 
 typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
-    TFMediaPlayerStateNone,
+    TFMediaPlayerStateNone,    //playing is unstart or stoped.
     TFMediaPlayerStateConnecting,
     TFMediaPlayerStateReady,
     TFMediaPlayerStatePlaying,
     TFMediaPlayerStatePause,
 };
+
+static NSString *TFMPStateChangedNotification = @"TFMPStateChangedNotification";
 
 @interface TFMediaPlayer : NSObject
 
@@ -38,6 +40,8 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
 @property (nonatomic, assign, readonly) TFMediaPlayerState state;
 
 @property (nonatomic, assign) BOOL autoPlayWhenReady;
+
+@property (nonatomic, assign, readonly) double duration;
 
 @property (nonatomic, assign) double currentTime;
 

@@ -8,9 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^TFMPStateObserveHandler) (NSString *state, id value);
+
 @protocol TFMPControlProtocol <NSObject>
 
 -(void)dealPlayControlCommand:(NSString *)command params:(NSDictionary<NSString *, id> *)params;
+
+-(void)helpObserveStates:(NSArray<NSString *> *)states withChangedHandler:(TFMPStateObserveHandler)handler;
 
 @end
 
@@ -41,3 +45,12 @@ static NSString *TFMPCmd_brightness = @"TFMPCmd_brightness";
 /** params **/
 
 static NSString *TFMPCmd_param_duration = @"duration";
+
+static NSString *TFMPCmd_param_time = @"time";
+
+
+/** states **/
+
+static NSString *TFMPState_duration = @"duration";
+
+static NSString *TFMPState_currentTime = @"TFMPState_currentTime";
