@@ -25,6 +25,7 @@ extern "C"{
 
 namespace tfmpcore {
     
+    bool videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
     class PlayController{
@@ -50,6 +51,7 @@ namespace tfmpcore {
         
         //read frames
         bool shouldRead = false;
+        bool paused = false;
         void startReadingFrames();
         pthread_t readThread;
         static void * readFrame(void *context);
@@ -77,6 +79,8 @@ namespace tfmpcore {
         
         friend void frameEmpty(Decoder *decoder, void* context);
         
+        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
+        
         /** controls **/
         
         bool connectAndOpenMedia(std::string mediaPath);
@@ -86,7 +90,7 @@ namespace tfmpcore {
         std::function<void(PlayController*, int)> playStoped;
         
         void play();
-        void pause();
+        void pause(bool flag);
         void stop();
         
         void seekTo(double time);

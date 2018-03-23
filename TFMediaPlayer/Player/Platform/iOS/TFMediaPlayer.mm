@@ -208,7 +208,7 @@
         
     }else if (self.state == TFMediaPlayerStateConnecting) {
         _innerPlayWhenReady = YES;
-    }else if (self.state == TFMediaPlayerStateReady || self.state == TFMediaPlayerStatePause){
+    }else if (self.state == TFMediaPlayerStateReady){
         
         _playController->play();
         
@@ -216,6 +216,9 @@
             [_audioPlayer play];
         }
         
+        self.state = TFMediaPlayerStatePlaying;
+    }else if(self.state == TFMediaPlayerStatePause){
+        _playController->pause(false);
         self.state = TFMediaPlayerStatePlaying;
     }
 }
@@ -232,13 +235,14 @@
             _innerPlayWhenReady = false;
             break;
         case TFMediaPlayerStatePlaying:
-            _playController->pause();
+            _playController->pause(true);
+            self.state = TFMediaPlayerStatePause;
             
             break;
         default:
             break;
     }
-    self.state = TFMediaPlayerStatePause;
+    
 }
 
 -(void)stop{

@@ -121,21 +121,9 @@ void PlayController::play(){
     displayer->startDisplay();
 }
 
-void PlayController::pause(){
-    
-    shouldRead = false;
-    
-    displayer->stopDisplay();
-    
-    if (videoDecoder) {
-        videoDecoder->stopDecode();
-    }
-    if (audioDecoder) {
-        audioDecoder->stopDecode();
-    }
-    if (subtitleDecoder) {
-        subtitleDecoder->stopDecode();
-    }
+void PlayController::pause(bool flag){
+    paused = flag;
+    displayer->pause(flag);
 }
 
 void PlayController::stop(){
@@ -170,10 +158,26 @@ void PlayController::stop(){
 
 void PlayController::seekTo(double time){
     
+    TFMPDLOG_C("seekTo: %d.%d\n",(int)time/60,(int)time%60);
+    
+    /* 
+     1. turn off inlet
+     2. flush all buffers 
+     3. turn off outlet 
+     4. seek stream to new position 
+     5. turn on inlet
+     6. turn on outlet when the pool fill to a certain size.
+     */
+    
     if (time > duration) {
         time = duration-0.1;
     }
     
+    //Flushing all old frames and packets. Firstly, stop reading new packets.
+    //1. turn off inlet
+    paused = true;
+    
+    //2. flush all buffers
     if (videoDecoder) {
         videoDecoder->flush();
     }
@@ -184,15 +188,28 @@ void PlayController::seekTo(double time){
         subtitleDecoder->flush();
     }
     
-    displayer->syncClock->reset();
+    //pause displaing until gather a lot of new frames.
+    //3. turn off outlet
+    displayer->pause(true);
     
     TFMPDLOG_C("flush all end!\n");
     
+    //4. seek stream to new position
     if (videoStrem) {
         av_seek_frame(fmtCtx, videoStrem, time/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
     }
     if (audioStream) {
         av_seek_frame(fmtCtx, audioStream, time/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
+    }
+    
+    //5. turn on inlet
+    paused = false;
+    
+    //6. turn on outlet when the pool fill to a certain size.
+    if (videoDecoder) {
+        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+    }else if (audioDecoder){
+        audioDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
     }
     
     TFMPDLOG_C("seek end! %.3f\n",time);
@@ -324,10 +341,12 @@ void * PlayController::readFrame(void *context){
     
     while (controller->shouldRead) {
         
+        while (controller->paused) {
+            av_usleep(10000);
+        }
+        
         int retval = av_read_frame(controller->fmtCtx, packet);
-        
-        TFMPDLOG_C("read frame: %d\n",inframeCount++);
-        
+
         if(retval < 0){
             if (retval == AVERROR_EOF) {
                 endFile = true;
@@ -336,6 +355,8 @@ void * PlayController::readFrame(void *context){
                 continue;
             }
         }
+        
+        TFMPDLOG_C("read frame: %lld,%.3f\n",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -380,6 +401,7 @@ void PlayController::startCheckPlayFinish(){
         }
     }
     
+    //TODO: using observe func
     while (!checkDecoder->bufferIsEmpty()) {
         av_usleep(10000);
     }
@@ -387,4 +409,15 @@ void PlayController::startCheckPlayFinish(){
     if (playStoped) {
         playStoped(this, 0);
     }
+}
+
+#pragma mark -
+
+bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer){
+    
+    PlayController *controller = (PlayController *)observer;
+    TFMPDLOG_C("frame buffer size has be greater than 20\n");
+    controller->displayer->pause(false);
+    
+    return true;
 }

@@ -27,6 +27,7 @@ inline void freePacket(AVPacket **pkt){
 }
 
 inline void freeFrame(AVFrame **frame){
+    TFMPDLOG_C(",%lld\n",(*frame)->pts);
     av_frame_free(frame);
 }
 
@@ -88,9 +89,17 @@ void Decoder::stopDecode(){
 void Decoder::flush(){
     
     pause = true;
-    
+
     frameBuffer.flush();
     pktBuffer.flush();
+    
+    while (isDecoding) {
+        av_usleep(10000); //0.01s
+        TFMPDLOG_C("wait one decode loop end.[%d]\n",steamIndex);
+    }
+    
+    //If dont'f call this, there are some new packets which contain old frame. It will
+    avcodec_flush_buffers(codecCtx);
     
     pause = false;
     
@@ -136,6 +145,7 @@ void *Decoder::decodeLoop(void *context){
     while (decoder->shouldDecode) {
         
         while (decoder->pause) {
+            decoder->isDecoding = false;
             av_usleep(TFMPDecodePauseInterval);
         }
         
@@ -177,6 +187,7 @@ void *Decoder::decodeLoop(void *context){
                 if (decoder->shouldDecode) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
+                    TFMPDLOG_C("insert audio frame: %lld,%lld\n",pkt->pts,refFrame->pts);
                     decoder->frameBuffer.blockInsert(refFrame);
                 }else{
                     av_frame_unref(frame);
@@ -201,13 +212,16 @@ void *Decoder::decodeLoop(void *context){
             if (decoder->shouldDecode) {
                 AVFrame *refFrame = av_frame_alloc();
                 av_frame_ref(refFrame, frame);
+                TFMPDLOG_C("insert video frame1: %lld,%lld\n",pkt->pts,refFrame->pts);
                 decoder->frameBuffer.blockInsert(refFrame);
+                TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
             }else{
                 av_frame_unref(frame);
             }
         }
         
-       if (pkt != nullptr)  av_packet_free(&pkt);
+        if (pkt != nullptr)  av_packet_free(&pkt);
+        decoder->isDecoding = false;
     }
     
     av_frame_free(&frame);

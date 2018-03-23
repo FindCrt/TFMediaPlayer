@@ -17,6 +17,7 @@ extern "C"{
 using namespace tfmpcore;
 
 static unsigned int minExeTime = 0.01; //seconds
+static int TFMPDisplayPauseInterval = 10000;
 
 void DisplayController::startDisplay(){
     
@@ -45,6 +46,13 @@ void DisplayController::startDisplay(){
 void DisplayController::stopDisplay(){
     shouldDisplay = false;
     printf("shouldDisplay to false\n");
+}
+
+void DisplayController::pause(bool flag){
+    paused = flag;
+    if (paused) {
+        syncClock->reset();
+    }
 }
 
 double DisplayController::getCurrentPlayTime(){
@@ -88,6 +96,11 @@ void *DisplayController::displayLoop(void *context){
     
     while (displayer->shouldDisplay) {
         
+        while (displayer->paused) {
+            TFMPDLOG_C("display pause\n");
+            av_usleep(TFMPDisplayPauseInterval);
+        }
+        
         displayer->isDispalyingVideo = true;
         videoFrame = nullptr; //reset it
         
@@ -95,14 +108,16 @@ void *DisplayController::displayLoop(void *context){
         
         if (videoFrame == nullptr) continue;
         
+        TFMPDLOG_C("show video1: %lld\n",videoFrame->pts);
+        
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
+        TFMPDLOG_C("remainTime: %.6f\n",remainTime);
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }else if (remainTime < -remainTime){
             av_frame_free(&videoFrame);
             continue;
         }
-        
         
         
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
@@ -136,7 +151,7 @@ void *DisplayController::displayLoop(void *context){
                 displayer->lastPts = videoFrame->pts;
             }
             
-            displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
+            if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
         }
         
         av_frame_free(&videoFrame);
@@ -155,6 +170,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     
     if (!displayer->shouldDisplay){
         return 0;
+    }
+    
+    while (displayer->paused) {
+        av_usleep(TFMPDisplayPauseInterval);
     }
     
     displayer->isFillingAudio = true;
@@ -196,6 +215,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             //TODO: need more calm way to wait
             if (frame == nullptr) continue;
             
+            TFMPDLOG_C(",%lld\n",frame->pts);
+            
             TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);
             
             if (displayer->audioResampler->isNeedResample(frame)) {
@@ -226,7 +247,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->lastPresentTime = av_gettime_relative();
                 displayer->lastPts = frame->pts;
             }
-            displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
+            if(!displayer->paused) displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
             
             
             if (needReadSize >= linesize) {

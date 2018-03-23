@@ -42,6 +42,7 @@ namespace tfmpcore {
         static void *displayLoop(void *context);
         
         bool shouldDisplay = false;
+        bool paused = false;
         bool isDispalyingVideo = false;
         bool isFillingAudio = false;
         
@@ -85,6 +86,8 @@ namespace tfmpcore {
 
         void startDisplay();
         void stopDisplay();
+        
+        void pause(bool flag);
         
         void freeResources();
     };

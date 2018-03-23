@@ -74,13 +74,6 @@
     _tableView.frame = self.view.bounds;
     _tableView.hidden = YES;
     [self.view addSubview:_tableView];
-    
-    static int count = 0;
-    [NSTimer scheduledTimerWithTimeInterval:0.1 repeats:YES block:^(NSTimer * _Nonnull timer) {
-        
-        count++;
-        
-    }];
 }
 
 -(void)viewDidLayoutSubviews{
