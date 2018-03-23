@@ -90,8 +90,8 @@ void Decoder::flush(){
     
     pause = true;
 
-    frameBuffer.flush();
     pktBuffer.flush();
+    frameBuffer.flush();
     
     while (isDecoding) {
         av_usleep(10000); //0.01s
