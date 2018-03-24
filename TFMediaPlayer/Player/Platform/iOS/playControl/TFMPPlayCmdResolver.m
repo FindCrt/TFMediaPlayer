@@ -63,7 +63,7 @@
     _observeHandler = handler;
     
     if ([states containsObject:TFMPState_currentTime]) {
-        _stateTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(getPlayStates) userInfo:nil repeats:YES];
+        _stateTimer = [NSTimer timerWithTimeInterval:0.05 target:self selector:@selector(getPlayStates) userInfo:nil repeats:YES];
         
         [[NSRunLoop mainRunLoop] addTimer:_stateTimer forMode:NSRunLoopCommonModes];
     }

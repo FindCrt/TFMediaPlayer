@@ -122,13 +122,13 @@ static CGFloat TFMPTimeLabelWidth = 50;
 }
 
 -(void)setCurrentTime:(float)currentTime{
-    _currentTime = currentTime;
     
-    _curTimeLabel.text = [self timeTextFromInterval:_currentTime];
-    
-    if (!_touching) {
-        [self _currentTimeChanged];
+    if (_touching) {
+        return;
     }
+    
+    _currentTime = currentTime;
+    [self _currentTimeChanged];
 }
 
 -(void)setDuration:(float)duration{
@@ -140,6 +140,8 @@ static CGFloat TFMPTimeLabelWidth = 50;
 #pragma mark -
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    
+    _curTimeLabel.textColor = [UIColor greenColor];
     _touching = YES;
 }
 
@@ -149,6 +151,8 @@ static CGFloat TFMPTimeLabelWidth = 50;
     float rate = location.x / self.frame.size.width;
     _currentTime = rate*_duration;
     
+    NSLog(@"_currentTime: %.3f, rate:%.3f, duration: %.3f",_currentTime,rate,_duration);
+    
     [self _currentTimeChanged];
     if (!_notifyWhenUntouch) {
         [self notifyWhenUntouch];
@@ -156,11 +160,17 @@ static CGFloat TFMPTimeLabelWidth = 50;
 }
 
 -(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    _touching = NO;
+    
+    //滚动的值和_currentTime并非同一个东西，滚动只是一个未来的期望值
+    CGPoint location = [touches.anyObject locationInView:self];
+    float rate = location.x / self.frame.size.width;
     
     if (_notifyWhenUntouch) {
-        [self notifyValueChanged];
+        [self notifyValueChanged:rate*_duration];
     }
+    
+    _curTimeLabel.textColor = [UIColor whiteColor];
+    _touching = NO;
 }
 
 -(void)_currentTimeChanged{
@@ -169,11 +179,13 @@ static CGFloat TFMPTimeLabelWidth = 50;
     _indicator.center = CGPointMake(CGRectGetMinX(_stickView.frame)+stickWidth*rate, self.frame.size.height/2.0);
     
     _stickView.rate = rate;
+    
+    _curTimeLabel.text = [self timeTextFromInterval:_currentTime];
 }
 
--(void)notifyValueChanged{
+-(void)notifyValueChanged:(double)touchValue{
     if (self.valueChangedHandler) {
-        self.valueChangedHandler(self);
+        self.valueChangedHandler(self, touchValue);
     }
 }
 

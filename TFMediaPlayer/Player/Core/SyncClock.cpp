@@ -23,25 +23,36 @@ void SyncClock::reset(){
 }
 
 double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
+    
+    double sourcePts = videoPts *av_q2d(timeBase);
+    
+    TFMPDLOG_C("video sourcePts: %.3f, minPtsLimit: %.3f\n",sourcePts,minPtsLimit);
+    if (sourcePts < minPtsLimit) {
+        return 0;  //discard this frame
+    }
+    
     if (ptsCorrection < 0) {
         TFMPDLOG_C("ptsCorrection < 0 \n");
         return av_gettime_relative()/timeDen;
     }
     
-    int64_t sourcePts = videoPts *av_q2d(timeBase)*timeDen;
     TFMPDLOG_C("sync: %.6f, %.6f\n",ptsCorrection/timeDen, sourcePts/timeDen);
-    return (ptsCorrection+sourcePts - lastRealPts)/timeDen;
+    return ptsCorrection/timeDen+sourcePts;
 }
 
 double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     
+    double sourcePts = audioPts *av_q2d(timeBase);
+    
+    TFMPDLOG_C("audio sourcePts: %.3f, minPtsLimit: %.3f\n",sourcePts,minPtsLimit);
+    if (sourcePts < minPtsLimit) {
+        return 0; //discard this frame
+    }
+    
     if (ptsCorrection < 0) {
         return av_gettime_relative()/timeDen;
     }
-    
-    int64_t sourcePts = audioPts *av_q2d(timeBase)*timeDen;
-    
-    return (ptsCorrection+sourcePts - lastRealPts)/timeDen;
+    return ptsCorrection/timeDen+sourcePts;
 }
 
 //TODO: remain time is much bigger than the duration of frame, discard it and correct ptsCorrection's value.
@@ -56,8 +67,6 @@ double SyncClock::remainTimeForAudio(int64_t audioPts, AVRational timeBase){
 
 void SyncClock::presentVideo(int64_t videoPts, AVRational timeBase){
     
-    TFMPDLOG_C("presentVideo: %.3f, %lld\n",ptsCorrection/timeDen,videoPts);
-    
     if (isAudioMajor) {
         return;
     }
@@ -70,6 +79,6 @@ void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay
         return;
     }
     
-    TFMPDLOG_C("presentAudio: %.3f, %lld\n",ptsCorrection/timeDen,audioPts);
+    TFMPDLOG_C("presentAudio: %.3f, %lld[%.6f]\n",ptsCorrection/timeDen,audioPts, audioPts*av_q2d(timeBase));
     ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
 }

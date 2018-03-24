@@ -59,6 +59,9 @@ namespace tfmpcore {
         //real audio format
         void resolveAudioStreamFormat();
         
+        //seek
+        bool seeking = false;
+        double seekingTime = 0;
         
         TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
@@ -99,6 +102,7 @@ namespace tfmpcore {
         /** properties **/
         
         double getDuration();
+        double getCurrentTime();
         
         //the real value is affect by realDisplayMediaType. For example, there is no audio stream, isAudioMajor couldn't be true.
         bool isAudioMajor = true;

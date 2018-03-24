@@ -251,7 +251,7 @@ namespace tfmpcore {
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&outCond, &mutex);
                 pthread_mutex_unlock(&mutex);
-                RecycleBufferLog("<<<<unlock empty %s\n",name);
+                RecycleBufferLog("<<<<unlock empty %s[%d,%d]\n",name,usedSize,allocedSize);
             }
             
             if (!ioDisable) {

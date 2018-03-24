@@ -18,7 +18,7 @@ namespace tfmpcore {
         //frame pts + correction = the real present time that come from av_gettime_relative.
         int64_t ptsCorrection = -1;
         
-        
+        double minPtsLimit = 0;
         
     public:
         
@@ -37,6 +37,10 @@ namespace tfmpcore {
         
         void presentVideo(int64_t videoPts, AVRational timeBase);
         void presentAudio(int64_t audioPts, AVRational timeBase, double delay);
+        
+        void setMinPtsLimit(double minPtsLimit){
+            this->minPtsLimit = minPtsLimit;
+        }
         
         void reset();
     };

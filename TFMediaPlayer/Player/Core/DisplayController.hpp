@@ -26,6 +26,7 @@ extern "C"{
 namespace tfmpcore {
     
     typedef struct{
+        uint32_t allocSize = 0;
         uint32_t validSize = 0;
         uint32_t readIndex = 0;
         
@@ -52,8 +53,9 @@ namespace tfmpcore {
         
         AudioResampler *audioResampler = nullptr;
         
-        int64_t lastPresentTime;
-        double lastPts;
+        uint64_t lastPRealTime = 0;
+        int64_t lastPts = 0;
+        bool lastIsAudio = true;
         
     public:
         
@@ -81,14 +83,21 @@ namespace tfmpcore {
         AVRational videoTimeBase;
         AVRational audioTimeBase;
         
+        
         SyncClock *syncClock = nullptr;
-        double getCurrentPlayTime();
+        double getLastPlayTime();
+        void setMinPtsLimit(double minPtsLimit){
+            if (syncClock) syncClock->setMinPtsLimit(minPtsLimit);
+        }
 
+        //controls
         void startDisplay();
         void stopDisplay();
         
         void pause(bool flag);
         
+        //release
+        void flush();
         void freeResources();
     };
 }

@@ -142,6 +142,9 @@ void *Decoder::decodeLoop(void *context){
     AVPacket *pkt = nullptr;
     AVFrame *frame = av_frame_alloc();
     
+    bool frameDelay = false;
+    bool delayFramesReleasing = false;
+    
     while (decoder->shouldDecode) {
         
         while (decoder->pause) {
@@ -194,30 +197,52 @@ void *Decoder::decodeLoop(void *context){
                 }
             }
         }else{
+            TFMPDLOG_C("\n\n------------------------\n");
+            //frame type: i p     b b b b            p                b b              p
+            //status:    normal->frameDelay->delayFramesReleasing->frameDelay->delayFramesReleasing
             
-            retval = avcodec_receive_frame(decoder->codecCtx, frame);
+            int releaseTime = 0;
+            do {
+                releaseTime++;
+                retval = avcodec_receive_frame(decoder->codecCtx, frame);
+                
+                if (retval == AVERROR(EAGAIN)) {  //encounter B-frame
+                    TFMPDLOG_C("encounter B-frame\n");
+                    frameDelay = true;
+                    delayFramesReleasing = false;
+                    break;
+                }else if (retval != 0) {  //other error
+                    TFCheckRetval("avcodec receive frame");
+                    delayFramesReleasing = false;
+                    av_frame_unref(frame);
+                    break;
+                }
+                
+                if (frameDelay) {
+                    TFMPDLOG_C("delayFramesReleasing\n");
+                    delayFramesReleasing = true;
+                    frameDelay = false;
+                }
+                
+                TFMPDLOG_C("[%d]frame Type: %d",releaseTime,frame->pict_type);
+                
+                if (frame->extended_data == nullptr) {
+                    printf("video frame data is null\n");
+                    av_frame_unref(frame);
+                    continue;
+                }
+                
+                if (decoder->shouldDecode) {
+                    AVFrame *refFrame = av_frame_alloc();
+                    av_frame_ref(refFrame, frame);
+                    decoder->frameBuffer.blockInsert(refFrame);
+                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
+                }else{
+                    av_frame_unref(frame);
+                }
+            } while (delayFramesReleasing);
             
-            if (retval != 0) {
-                TFCheckRetval("avcodec receive frame");
-                av_frame_unref(frame);
-                continue;
-            }
-            
-            if (frame->extended_data == nullptr) {
-                printf("video frame data is null\n");
-                av_frame_unref(frame);
-                continue;
-            }
-            
-            if (decoder->shouldDecode) {
-                AVFrame *refFrame = av_frame_alloc();
-                av_frame_ref(refFrame, frame);
-                TFMPDLOG_C("insert video frame1: %lld,%lld\n",pkt->pts,refFrame->pts);
-                decoder->frameBuffer.blockInsert(refFrame);
-                TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
-            }else{
-                av_frame_unref(frame);
-            }
+            TFMPDLOG_C("------------------------\n\n");
         }
         
         if (pkt != nullptr)  av_packet_free(&pkt);

@@ -109,7 +109,7 @@
     _defaultPlayResolver.player = self;
     _defaultControlView.delegate = _defaultPlayResolver;
     
-    _defaultControlView.swipeSeekDuration = 5;
+    _defaultControlView.swipeSeekDuration = 3;
     
     self.controlView = _defaultControlView;
 }
@@ -331,7 +331,7 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 
 -(double)currentTime{
     if (self.state == TFMediaPlayerStatePlaying || self.state == TFMediaPlayerStatePause) {
-        return MIN(_playController->getDisplayer()->getCurrentPlayTime(), self.duration);
+        return _playController->getCurrentTime();
     }else{
         return 0;
     }

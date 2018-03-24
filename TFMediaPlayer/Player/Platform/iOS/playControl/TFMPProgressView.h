@@ -17,7 +17,7 @@
 /** If is't YES, don't notify value changing when user is touching the progressView. */
 @property (nonatomic, assign) BOOL notifyWhenUntouch;
 
-@property (nonatomic, copy) void(^valueChangedHandler)(TFMPProgressView *progressView);
+@property (nonatomic, copy) void(^valueChangedHandler)(TFMPProgressView *progressView, double touchValue);
 
 
 

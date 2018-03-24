@@ -158,7 +158,7 @@ void PlayController::stop(){
 
 void PlayController::seekTo(double time){
     
-    TFMPDLOG_C("seekTo: %d.%d\n",(int)time/60,(int)time%60);
+    TFMPDLOG_C("seekTo: %d:%d\n",(int)time/60,(int)time%60);
     
     /* 
      1. turn off inlet
@@ -172,6 +172,9 @@ void PlayController::seekTo(double time){
     if (time > duration) {
         time = duration-0.1;
     }
+    
+    seeking = true;
+    seekingTime = time;
     
     //Flushing all old frames and packets. Firstly, stop reading new packets.
     //1. turn off inlet
@@ -188,17 +191,19 @@ void PlayController::seekTo(double time){
         subtitleDecoder->flush();
     }
     
+    displayer->flush();
+    
     //pause displaing until gather a lot of new frames.
     //3. turn off outlet
     displayer->pause(true);
+    displayer->setMinPtsLimit(seekingTime);
     
     TFMPDLOG_C("flush all end!\n");
     
     //4. seek stream to new position
-    if (videoStrem) {
+    if (videoStrem >= 0) {
         av_seek_frame(fmtCtx, videoStrem, time/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
-    }
-    if (audioStream) {
+    }else if (audioStream >= 0){
         av_seek_frame(fmtCtx, audioStream, time/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
     }
     
@@ -206,17 +211,17 @@ void PlayController::seekTo(double time){
     paused = false;
     
     //6. turn on outlet when the pool fill to a certain size.
-    if (videoDecoder) {
-        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
-    }else if (audioDecoder){
+    if (audioDecoder) {
         audioDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+    }else if (videoDecoder){
+        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
     }
     
     TFMPDLOG_C("seek end! %.3f\n",time);
 }
 
 void PlayController::seekByForward(double interval){
-    double currentTime = displayer->getCurrentPlayTime();
+    double currentTime = getCurrentTime();
     
     double seekTime = currentTime + interval;
     seekTo(seekTime);
@@ -300,6 +305,14 @@ double PlayController::getDuration(){
     return duration;
 }
 
+double PlayController::getCurrentTime(){
+    if (seeking) {
+        return seekingTime;
+    }else{
+        return fmin(displayer->getLastPlayTime(),duration);
+    }
+}
+
 /***** private ******/
 
 void PlayController::resolveAudioStreamFormat(){
@@ -330,7 +343,6 @@ void PlayController::startReadingFrames(){
     pthread_detach(readThread);
 }
 
-static int inframeCount = 0;
 void * PlayController::readFrame(void *context){
     
     PlayController *controller = (PlayController *)context;
@@ -356,7 +368,7 @@ void * PlayController::readFrame(void *context){
             }
         }
         
-        TFMPDLOG_C("read frame: %lld,%.3f\n",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
+        TFMPDLOG_C("read frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -416,8 +428,15 @@ void PlayController::startCheckPlayFinish(){
 bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer){
     
     PlayController *controller = (PlayController *)observer;
-    TFMPDLOG_C("frame buffer size has be greater than 20\n");
+    if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
+        TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
+    }else{
+        TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
+    }
+    
     controller->displayer->pause(false);
+    
+    controller->seeking = false;
     
     return true;
 }

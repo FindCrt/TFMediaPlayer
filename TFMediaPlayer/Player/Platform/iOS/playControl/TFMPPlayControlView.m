@@ -20,7 +20,8 @@ static CGFloat TFMPCVBottomSpace = 10;
 static CGFloat TFMPCVFullScreenWidth = 32;
 
 @interface TFMPPlayControlView()<UIGestureRecognizerDelegate>{
-    UISwipeGestureRecognizer *_swipe;
+    UISwipeGestureRecognizer *_swipeRight;
+    UISwipeGestureRecognizer *_swipeLeft;
     
     UIButton *_fullScreenButton;
     
@@ -66,24 +67,27 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 }
 
 -(void)setupSeekControls{
-    _swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeScreen:)];
-    _swipe.delegate = self;
+    _swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeScreen:)];
+    _swipeLeft.delegate = self;
+    _swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+    [self addGestureRecognizer:_swipeLeft];
     
-    [self addGestureRecognizer:_swipe];
+    _swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeScreen:)];
+    _swipeRight.delegate = self;
+    [self addGestureRecognizer:_swipeRight];
     
     _progressView = [[TFMPProgressView alloc] init];
     _progressView.notifyWhenUntouch = YES;
     
     __weak typeof(self) weakSelf = self;
-    [_progressView setValueChangedHandler:^(TFMPProgressView *progressView) {
+    [_progressView setValueChangedHandler:^(TFMPProgressView *progressView, double seekTime) {
         
         if (weakSelf.duration <= 0) {
             return;
         }
-        double time = progressView.currentTime;
         
         //seek to a time point.
-        [weakSelf.delegate dealPlayControlCommand:TFMPCmd_seek_TP params:@{TFMPCmd_param_time : @(time) }];
+        [weakSelf.delegate dealPlayControlCommand:TFMPCmd_seek_TP params:@{TFMPCmd_param_time : @(seekTime) }];
     }];
     [self addSubview:_progressView];
 }

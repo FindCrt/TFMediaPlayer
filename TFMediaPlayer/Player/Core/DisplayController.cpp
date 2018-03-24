@@ -12,11 +12,11 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
-#define TFMPBufferReadLog(fmt,...) //printf(fmt,__VA_ARGS__);printf("\n");
+#define TFMPBufferReadLog(fmt,...) printf(fmt,__VA_ARGS__);printf("\n");
 
 using namespace tfmpcore;
 
-static unsigned int minExeTime = 0.01; //seconds
+static double minExeTime = 0.01; //seconds
 static int TFMPDisplayPauseInterval = 10000;
 
 void DisplayController::startDisplay(){
@@ -48,20 +48,25 @@ void DisplayController::stopDisplay(){
     printf("shouldDisplay to false\n");
 }
 
-void DisplayController::pause(bool flag){
-    paused = flag;
-    if (paused) {
-        syncClock->reset();
-    }
+void DisplayController::flush(){
+    
+    remainingAudioBuffers.validSize = 0;
+    remainingAudioBuffers.readIndex = 0;
+    
+    syncClock->reset();
 }
 
-double DisplayController::getCurrentPlayTime(){
+void DisplayController::pause(bool flag){
+    paused = flag;
+}
+
+double DisplayController::getLastPlayTime(){
     if (videoTimeBase.den == 0 || videoTimeBase.num == 0) {
         return 0;
     }
     
-    double presentTime = lastPts * av_q2d(syncClock->isAudioMajor?audioTimeBase:videoTimeBase);
-    return (av_gettime_relative() - lastPresentTime)/1000000.0 + presentTime;
+    double lastPMediaTime = lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
+    return (av_gettime_relative() - lastPRealTime)/1000000.0 + lastPMediaTime;
 }
 
 void DisplayController::freeResources(){
@@ -73,7 +78,7 @@ void DisplayController::freeResources(){
     
     while (isDispalyingVideo || isFillingAudio) {
         av_usleep(10000); //0.01s
-        TFMPDLOG_C("waiting video or audio displaying loop end\n");
+        TFMPDLOG_C("waiting %s displaying loop end\n",isDispalyingVideo?"video":"audio");
     }
     
     audioResampler->freeResources();
@@ -97,7 +102,7 @@ void *DisplayController::displayLoop(void *context){
     while (displayer->shouldDisplay) {
         
         while (displayer->paused) {
-            TFMPDLOG_C("display pause\n");
+//            TFMPDLOG_C("display pause video\n");
             av_usleep(TFMPDisplayPauseInterval);
         }
         
@@ -108,14 +113,13 @@ void *DisplayController::displayLoop(void *context){
         
         if (videoFrame == nullptr) continue;
         
-        TFMPDLOG_C("show video1: %lld\n",videoFrame->pts);
-        
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
         TFMPDLOG_C("remainTime: %.6f\n",remainTime);
         if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
-        }else if (remainTime < -remainTime){
+        }else if (remainTime < -minExeTime){
             av_frame_free(&videoFrame);
+            TFMPDLOG_C("discard video frame\n");
             continue;
         }
         
@@ -147,8 +151,9 @@ void *DisplayController::displayLoop(void *context){
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
             
             if (!displayer->syncClock->isAudioMajor) {
-                displayer->lastPresentTime = av_gettime_relative();
+                displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = videoFrame->pts;
+                displayer->lastIsAudio = false;
             }
             
             if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
@@ -172,9 +177,14 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         return 0;
     }
     
+    TFMPDLOG_C("fillAudioBuffer1\n");
+    
     while (displayer->paused) {
+//        TFMPDLOG_C("display pause audio\n");
         av_usleep(TFMPDisplayPauseInterval);
     }
+    
+    TFMPDLOG_C("fillAudioBuffer2\n");
     
     displayer->isFillingAudio = true;
     
@@ -184,16 +194,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     uint8_t *buffer = buffersList[0];
     
     if (unreadSize >= oneLineSize) {
-        
         memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
         
         remainingBuffer->readIndex += oneLineSize;
         
     }else{
-        
         int needReadSize = oneLineSize;
         if (unreadSize > 0) {
-            
             needReadSize -= unreadSize;
             memcpy(buffer, remainingBuffer->readingPoint(), unreadSize);
             
@@ -217,7 +224,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             TFMPDLOG_C(",%lld\n",frame->pts);
             
-            TFMPBufferReadLog("new frame %d,%d",frame->linesize[0], frame->nb_samples);
+            double remainTime = displayer->syncClock->remainTimeForAudio(frame->pts, displayer->audioTimeBase);
+            TFMPDLOG_C("remainTime audio: %.6f\n",remainTime);
+            if (remainTime < -minExeTime){
+                av_frame_free(&frame);
+                TFMPDLOG_C("discard audio frame\n");
+                continue;
+            }
             
             if (displayer->audioResampler->isNeedResample(frame)) {
                 if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
@@ -237,15 +250,17 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 continue;
             }
             
-            //update sync clock
+            
             int filledSize = oneLineSize - needReadSize;
             int destSampleRate = displayer->audioResampler->adoptedAudioDesc.sampleRate;
             int destBytesPerChannel =  displayer->audioResampler->adoptedAudioDesc.bitsPerChannel/8;
             double preBufferDuration = (filledSize/destBytesPerChannel)/destSampleRate;
             
+            //update sync clock
             if (displayer->syncClock->isAudioMajor) {
-                displayer->lastPresentTime = av_gettime_relative();
+                displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = frame->pts;
+                displayer->lastIsAudio = true;
             }
             if(!displayer->paused) displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
             
@@ -265,9 +280,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 uint32_t remainingSize = linesize - needReadSize;
             
                 //alloc a larger memory
-                if (remainingBuffer->validSize < remainingSize) {
+                if (remainingBuffer->allocSize < remainingSize) {
                     free(remainingBuffer->head);
                     remainingBuffer->head = (uint8_t *)malloc(remainingSize);
+                    remainingBuffer->allocSize = remainingSize;
                 }
                 
                 remainingBuffer->readIndex = 0;
