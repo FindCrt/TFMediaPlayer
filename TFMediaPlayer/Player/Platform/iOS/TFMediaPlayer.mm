@@ -77,13 +77,10 @@
             }
         };
         
-#if TFMPUseAudioUnitPlayer
-        _audioPlayer = [[TFAudioUnitPlayer alloc] init];
-        _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
-#endif
-        
         _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
 #if TFMPUseAudioUnitPlayer
+            _audioPlayer = [[TFAudioUnitPlayer alloc] init];
+            _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
             TFMPAudioStreamDescription result = [_audioPlayer resultAudioDescForSource:sourceDesc];
             return result;
 #else
@@ -149,15 +146,15 @@
     _playController->setDesiredDisplayMediaType(mediaType);
     
     
-    if ((_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO)) {
-        if (_audioPlayer.state == TFAudioQueueStateUnplay) {
-            [_audioPlayer play];
-        }
-    }else{
-        if (_audioPlayer.state == TFAudioQueueStatePlaying) {
-            [_audioPlayer stop];
-        }
-    }
+//    if ((_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO)) {
+//        if (_audioPlayer.state == TFAudioQueueStateUnplay) {
+//            [_audioPlayer play];
+//        }
+//    }else{
+//        if (_audioPlayer.state == TFAudioQueueStatePlaying) {
+//            [_audioPlayer stop];
+//        }
+//    }
 }
 
 -(TFMPMediaType)mediaType{
@@ -224,7 +221,13 @@
         
         self.state = TFMediaPlayerStatePlaying;
     }else if(self.state == TFMediaPlayerStatePause){
+        
+        if (_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO) {
+            [_audioPlayer play];
+        }
+        
         _playController->pause(false);
+        
         self.state = TFMediaPlayerStatePlaying;
     }
 }
@@ -242,6 +245,9 @@
             break;
         case TFMediaPlayerStatePlaying:
             _playController->pause(true);
+            if (_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO) {
+                [_audioPlayer pause];
+            }
             self.state = TFMediaPlayerStatePause;
             
             break;

@@ -107,7 +107,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
         return;
     }
     
-    NSError *error;
+//    NSError *error;
     
 //    if ([[AVAudioSession sharedInstance] setActive:YES error:&error]) {
 //        NSLog(@"audio session active error: %@",error);
@@ -116,6 +116,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
 //    }
     
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
+    TFMPDLOG_C("AudioQueueStart %d\n",status);
     TFCheckStatusToDo(status, @"AudioQueue start failed!", {
         [_lock unlock];
         return;
@@ -134,7 +135,8 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
         return;
     }
     
-    AudioQueuePause(_audioQueue);
+    OSStatus status = AudioQueuePause(_audioQueue);
+    TFMPDLOG_C("AudioQueuePause %d\n",status);
     _state = TFAudioQueueStatePaused;
     
     [_lock unlock];
@@ -170,12 +172,14 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
     
     if (controller.fillStruct.fillFunc) {
         int retval = controller.fillStruct.fillFunc(buffers,count, inBuffer->mAudioDataByteSize, controller.fillStruct.context);
-        if (retval == -1) {
+        if (retval < 0) {
             return;
         }
         
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
+        TFMPDLOG_C("AudioQueueEnqueueBuffer\n");
         
+        TFMPPrintBuffer(buffers[0], 100, 100);
         
         if (controller->_shareAudioStruct.shareAudioFunc) {
             int size = (int)inBuffer->mAudioDataByteSize;

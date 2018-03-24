@@ -103,7 +103,7 @@ void *DisplayController::displayLoop(void *context){
     while (displayer->shouldDisplay) {
         
         while (displayer->paused) {
-            TFMPDLOG_C("display pause video\n");
+//            TFMPDLOG_C("display pause video\n");
             av_usleep(TFMPDisplayPauseInterval);
         }
         
@@ -203,8 +203,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         
         remainingBuffer->readIndex += oneLineSize;
         
-        TFMPDLOG_C("way 1\n");
-        
     }else{
         int needReadSize = oneLineSize;
         if (unreadSize > 0) {
@@ -213,8 +211,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             remainingBuffer->readIndex = 0;
             remainingBuffer->validSize = 0;
-            
-            TFMPDLOG_C("way 2\n");
         }
         
         AVFrame *frame = nullptr;
