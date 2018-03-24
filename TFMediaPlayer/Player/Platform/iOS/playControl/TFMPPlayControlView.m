@@ -23,6 +23,8 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     UISwipeGestureRecognizer *_swipeRight;
     UISwipeGestureRecognizer *_swipeLeft;
     
+    UITapGestureRecognizer *_doubleTap;
+    
     UIButton *_fullScreenButton;
     
     TFMPProgressView *_progressView;
@@ -49,6 +51,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     
     [self setupFullScreenControl];
     [self setupSeekControls];
+    [self setupTapControl];
 }
 
 -(void)layoutSubviews{
@@ -92,7 +95,11 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     [self addSubview:_progressView];
 }
 
-
+-(void)setupTapControl{
+    _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapAction:)];
+    _doubleTap.numberOfTapsRequired = 2;
+    [self addGestureRecognizer:_doubleTap];
+}
 
 #pragma mark - actions
 
@@ -117,6 +124,10 @@ static CGFloat TFMPCVFullScreenWidth = 32;
         TFMPDLog(@"back 10s");
         [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(-_swipeSeekDuration)}];
     }
+}
+
+-(void)doubleTapAction:(UITapGestureRecognizer *)tap{
+    [self.delegate dealPlayControlCommand:TFMPCmd_double_tap params:nil];
 }
 
 #pragma mark - state change

@@ -39,6 +39,8 @@ static NSString *TFMPStateChangedNotification = @"TFMPStateChangedNotification";
 
 @property (nonatomic, assign, readonly) TFMediaPlayerState state;
 
+@property (nonatomic, assign, readonly) BOOL isPlaying;
+
 @property (nonatomic, assign) BOOL autoPlayWhenReady;
 
 @property (nonatomic, assign, readonly) double duration;

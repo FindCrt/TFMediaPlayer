@@ -173,6 +173,12 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{@"state":@(_state)}];
 }
 
+-(BOOL)isPlaying{
+    return self.state == TFMediaPlayerStatePlaying;
+}
+
+#pragma mark -
+
 -(void)preparePlay{
     
     if (_mediaURL == nil) {

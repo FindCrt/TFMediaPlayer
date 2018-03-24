@@ -50,6 +50,15 @@
     }else if ([TFMPCmd_fullScreen isEqualToString:command]){
         
         [_player changeFullScreenState];
+        
+    }else if ([TFMPCmd_double_tap isEqualToString:command]){
+        
+        if (_player.isPlaying) {
+            [_player pause];
+        }else{
+            [_player play];
+        }
+        
     }
 }
 

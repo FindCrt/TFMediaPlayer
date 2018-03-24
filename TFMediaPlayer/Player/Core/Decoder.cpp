@@ -197,7 +197,7 @@ void *Decoder::decodeLoop(void *context){
                 }
             }
         }else{
-            TFMPDLOG_C("\n\n------------------------\n");
+            
             //frame type: i p     b b b b            p                b b              p
             //status:    normal->frameDelay->delayFramesReleasing->frameDelay->delayFramesReleasing
             
@@ -224,7 +224,7 @@ void *Decoder::decodeLoop(void *context){
                     frameDelay = false;
                 }
                 
-                TFMPDLOG_C("[%d]frame Type: %d",releaseTime,frame->pict_type);
+//                TFMPDLOG_C("[%d]frame Type: %d",releaseTime,frame->pict_type);
                 
                 if (frame->extended_data == nullptr) {
                     printf("video frame data is null\n");
@@ -236,13 +236,11 @@ void *Decoder::decodeLoop(void *context){
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
                     decoder->frameBuffer.blockInsert(refFrame);
-                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
+//                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
                 }else{
                     av_frame_unref(frame);
                 }
             } while (delayFramesReleasing);
-            
-            TFMPDLOG_C("------------------------\n\n");
         }
         
         if (pkt != nullptr)  av_packet_free(&pkt);

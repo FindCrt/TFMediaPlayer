@@ -52,12 +52,13 @@ void DisplayController::flush(){
     
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
-    
-    syncClock->reset();
 }
 
 void DisplayController::pause(bool flag){
     paused = flag;
+    if (paused) {
+        syncClock->reset();
+    }
 }
 
 double DisplayController::getLastPlayTime(){
@@ -66,7 +67,7 @@ double DisplayController::getLastPlayTime(){
     }
     
     double lastPMediaTime = lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
-    return (av_gettime_relative() - lastPRealTime)/1000000.0 + lastPMediaTime;
+    return lastPMediaTime;
 }
 
 void DisplayController::freeResources(){
@@ -102,7 +103,7 @@ void *DisplayController::displayLoop(void *context){
     while (displayer->shouldDisplay) {
         
         while (displayer->paused) {
-//            TFMPDLOG_C("display pause video\n");
+            TFMPDLOG_C("display pause video\n");
             av_usleep(TFMPDisplayPauseInterval);
         }
         
@@ -169,7 +170,13 @@ void *DisplayController::displayLoop(void *context){
     return 0;
 }
 
+static double fillAudioTime = 0;
+
 int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
+    
+    double currentTime = av_gettime_relative()/1000000.0;
+    TFMPDLOG_C("fill interval: %.6f\n",currentTime-fillAudioTime);
+    fillAudioTime = currentTime;
     
     DisplayController *displayer = (DisplayController *)context;
     
@@ -177,26 +184,26 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         return 0;
     }
     
-    TFMPDLOG_C("fillAudioBuffer1\n");
+    TFMPDLOG_C("\n\nfillAudioBuffer1[%dx%d]\n",oneLineSize,lineCount);
     
-    while (displayer->paused) {
-//        TFMPDLOG_C("display pause audio\n");
-        av_usleep(TFMPDisplayPauseInterval);
+    uint8_t *buffer = buffersList[0];
+    if (displayer->paused) {
+        TFMPDLOG_C("display pause audio\n");
+        memset(buffer, 0, oneLineSize);
+        return 0;
     }
-    
-    TFMPDLOG_C("fillAudioBuffer2\n");
     
     displayer->isFillingAudio = true;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
     uint32_t unreadSize = remainingBuffer->unreadSize();
     
-    uint8_t *buffer = buffersList[0];
-    
     if (unreadSize >= oneLineSize) {
         memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
         
         remainingBuffer->readIndex += oneLineSize;
+        
+        TFMPDLOG_C("way 1\n");
         
     }else{
         int needReadSize = oneLineSize;
@@ -206,6 +213,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             remainingBuffer->readIndex = 0;
             remainingBuffer->validSize = 0;
+            
+            TFMPDLOG_C("way 2\n");
         }
         
         AVFrame *frame = nullptr;
@@ -250,7 +259,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 continue;
             }
             
-            
+            TFMPDLOG_C("way 3\n");
             int filledSize = oneLineSize - needReadSize;
             int destSampleRate = displayer->audioResampler->adoptedAudioDesc.sampleRate;
             int destBytesPerChannel =  displayer->audioResampler->adoptedAudioDesc.bitsPerChannel/8;
@@ -272,8 +281,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 needReadSize -= linesize;
                 
                 av_frame_free(&frame);
-
-                
+                TFMPDLOG_C("way 5\n");
             }else{
                 
                 //there is a little buffer left.
@@ -296,9 +304,12 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 needReadSize = 0;
                 
                 av_frame_free(&frame);
+                TFMPDLOG_C("way 6\n");
             }
         }
     }
+    
+    TFMPDLOG_C("fillAudioBuffer2\n\n");
     
     displayer->isFillingAudio = false;
     

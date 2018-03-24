@@ -145,6 +145,8 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
                                  UInt32							inNumberFrames,
                                  AudioBufferList * __nullable	ioData){
     
+    TFMPDLOG_C("%.3f, %d, %d\n",inTimeStamp->mSampleTime, inBusNumber, inNumberFrames);
+    
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     
     int count = ioData->mNumberBuffers;

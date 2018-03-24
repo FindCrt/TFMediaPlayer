@@ -40,7 +40,7 @@ static NSString *TFMPCmd_rate = @"TFMPCmd_rate";
 static NSString *TFMPCmd_allowMedias = @"TFMPCmd_allowMedias";
 static NSString *TFMPCmd_brightness = @"TFMPCmd_brightness";
 
-
+static NSString *TFMPCmd_double_tap = @"TFMPCmd_double_tap";
 
 /** params **/
 

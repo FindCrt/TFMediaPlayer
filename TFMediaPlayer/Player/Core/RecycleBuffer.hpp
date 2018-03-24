@@ -14,7 +14,7 @@
 #include <limits.h>
 #include <vector>
 
-#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>| */
 
