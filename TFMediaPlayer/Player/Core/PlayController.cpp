@@ -20,6 +20,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     this->mediaPath = mediaPath;
     
     av_register_all();
+    avformat_network_init();
     
     fmtCtx = avformat_alloc_context();
     int retval = avformat_open_input(&fmtCtx, mediaPath.c_str(), NULL, NULL);
@@ -85,9 +86,9 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     
     
-    if (audioStream) {
+    if (audioStream >= 0) {
         duration = fmtCtx->streams[audioStream]->duration* av_q2d(fmtCtx->streams[audioStream]->time_base);
-    }else if (videoStrem){
+    }else if (videoStrem >= 0){
         duration = fmtCtx->streams[videoStrem]->duration* av_q2d(fmtCtx->streams[videoStrem]->time_base);
     }
     

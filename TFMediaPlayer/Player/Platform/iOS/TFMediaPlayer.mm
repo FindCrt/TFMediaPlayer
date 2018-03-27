@@ -6,7 +6,7 @@
 //  Copyright © 2017年 shiwei. All rights reserved.
 //
 
-#define TFMPUseAudioUnitPlayer 0
+#define TFMPUseAudioUnitPlayer 1
 
 #import "TFMediaPlayer.h"
 #import "PlayController.hpp"

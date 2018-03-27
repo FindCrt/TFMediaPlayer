@@ -86,6 +86,12 @@
     }
 }
 
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    
+    [_player stop];
+}
+
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
     _curURL = [NSURL URLWithString:textField.text];
     
@@ -185,13 +191,24 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     NSDictionary *mediaInfo = _medias[indexPath.row];
-    _curURL = [NSURL URLWithString:[mediaInfo objectForKey:@"url"]];
     
+    NSString *url = [mediaInfo objectForKey:@"url"];
+    if ([url hasPrefix:@"local://"]) {
+        NSString *extension = [url pathExtension];
+        NSString *name = [[url substringFromIndex:8] stringByDeletingPathExtension];
+        _curURL = [[NSBundle mainBundle] URLForResource:name withExtension:extension];
+    }else{
+        _curURL = [NSURL URLWithString:url];
+    }
     
     [self hideMediaList];
     
     [self stop];
     [self startPlay];
+}
+
+-(void)dealloc{
+    NSLog(@"%@ dealloc",[self class]);
 }
 
 @end

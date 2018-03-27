@@ -165,13 +165,13 @@ static int mediaIndex = 0;
     
     NSURL *videoURL1 = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
     NSURL *videoURL2 = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
-    NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"AACTest" withExtension:@"m4a"];
+    NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"无心法师" withExtension:@"mp4"];
 
     NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
 
     NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
-    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL5];
+    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL3];
     
     _currentMediaURL = mediaSources[mediaIndex];
     mediaIndex++;

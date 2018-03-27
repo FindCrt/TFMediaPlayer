@@ -82,7 +82,7 @@ void DisplayController::freeResources(){
         TFMPDLOG_C("waiting %s displaying loop end\n",isDispalyingVideo?"video":"audio");
     }
     
-    audioResampler->freeResources();
+    if(audioResampler) audioResampler->freeResources();
     
     free(remainingAudioBuffers.head);
     remainingAudioBuffers.validSize = 0;

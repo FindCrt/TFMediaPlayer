@@ -14,5 +14,53 @@
 		<key>name</key>
 		<string>际信测试</string>
 	</dict>
+	<dict>
+		<key>name</key>
+		<string>测试1</string>
+		<key>url</key>
+		<string>http://124.193.165.208/vlive.qqvideo.tc.qq.com//y00221a60w7.p401.1.mp4?sdtfrom=v1010&amp;vkey=539A9C083D166365C28AFDD0A858C40FC53B82044321F0DC3117D11CDAEAB12FABC79042408ED04502D2EB26C2CFDBB6B3B550888DC2E6F92A4B7897CBE3430BDF4E753BF67D27972208A1FDFD15486D612AB3A9E985F0D3</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>凤凰</string>
+		<key>url</key>
+		<string>http://ips.ifeng.com/video.ifeng.com/video04/2011/03/24/480x360_offline20110324.mp4</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>南方有乔木</string>
+		<key>url</key>
+		<string>http://data.vod.itc.cn/?rb=1&amp;key=jbZhEJhlqlUN-Wj_HEI8BjaVqKNFvDrn&amp;prod=flash&amp;pt=1&amp;new=/110/144/81oy7a5MozlVmmxAQf8FyD.mp4</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>女人崛起</string>
+		<key>url</key>
+		<string>local://S9UJAG3QE_sd.flv</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>网易flv-美与真理 </string>
+		<key>url</key>
+		<string>http://mov.bn.netease.com/open-movie/nos/flv/2014/06/24/S9UJAG3QE_sd.flv</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>无心法师</string>
+		<key>url</key>
+		<string>local://noheartWizard.mp4</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>墨梅</string>
+		<key>url</key>
+		<string>local://momei.mp4</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>jonSnow</string>
+		<key>url</key>
+		<string>local://jonSnow.mp4</string>
+	</dict>
 </array>
 </plist>
