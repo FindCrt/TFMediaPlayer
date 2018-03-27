@@ -84,13 +84,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     calculateRealDisplayMediaType();
     setupSyncClock();
     
-    
-    
-    if (audioStream >= 0) {
-        duration = fmtCtx->streams[audioStream]->duration* av_q2d(fmtCtx->streams[audioStream]->time_base);
-    }else if (videoStrem >= 0){
-        duration = fmtCtx->streams[videoStrem]->duration* av_q2d(fmtCtx->streams[videoStrem]->time_base);
-    }
+    duration = fmtCtx->duration/(double)AV_TIME_BASE;
     
     prapareOK = true;
     

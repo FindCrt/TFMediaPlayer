@@ -46,6 +46,7 @@
 		1868B9A0206A45FA00C5D0DB /* momei.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99E206A45FA00C5D0DB /* momei.mp4 */; };
 		1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
 		1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */; };
+		1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
 		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
 		18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 18946DCD2068F8F1004BDF96 /* t1.mp4 */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
@@ -140,6 +141,7 @@
 		1868B99E206A45FA00C5D0DB /* momei.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = momei.mp4; sourceTree = "<group>"; };
 		1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = jonSnow.mp4; sourceTree = "<group>"; };
 		1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = noheartWizard.mp4; sourceTree = "<group>"; };
+		1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */ = {isa = PBXFileReference; lastKnownFileType = file; path = S9UJAG3QE_sd.flv; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18946DCD2068F8F1004BDF96 /* t1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = t1.mp4; sourceTree = "<group>"; };
@@ -410,6 +412,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */,
 				1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */,
 				1868B99E206A45FA00C5D0DB /* momei.mp4 */,
 				1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */,
@@ -913,6 +916,7 @@
 			files = (
 				1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */,
 				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
+				1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */,
 				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
 				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,

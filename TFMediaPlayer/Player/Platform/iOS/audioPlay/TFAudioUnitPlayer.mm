@@ -36,8 +36,8 @@ static UInt32 renderAudioElement = 0;//the id of element that render to system a
 
 -(TFMPAudioStreamDescription)resultAudioDescForSource:(TFMPAudioStreamDescription)sourceDesc{
     
-    //all return s16+44100(no planar),but don't change channel number.
-    tfmpResultDesc.sampleRate = 48000;
+    //TODO: adopt the same sampleRate as source?
+    tfmpResultDesc.sampleRate = 44100;
     setFormatFlagsWithFlags(&(tfmpResultDesc.formatFlags),
                             true,
                             true,
