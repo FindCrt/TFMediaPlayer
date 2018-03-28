@@ -70,9 +70,9 @@
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>jonSnow</string>
+		<string>美拍-本地-两人</string>
 		<key>url</key>
-		<string>local://jonSnow.mp4</string>
+		<string>local://meipai-two.mp4</string>
 	</dict>
 </array>
 </plist>

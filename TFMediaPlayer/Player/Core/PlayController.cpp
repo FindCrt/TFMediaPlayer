@@ -178,6 +178,7 @@ void PlayController::seekTo(double time){
         time = duration-0.1;
     }
     
+    checkingEnd = false;
     seeking = true;
     seekingTime = time;
     
@@ -214,12 +215,13 @@ void PlayController::seekTo(double time){
     
     //5. turn on inlet
     paused = false;
+    pthread_cond_signal(&pause_cond);
     
     //6. turn on outlet when the pool fill to a certain size.
 //    if (audioDecoder) {
-//        audioDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+//        audioDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
 //    }else if (videoDecoder){
-//        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+//        videoDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
 //    }
     
     
@@ -359,8 +361,10 @@ void * PlayController::readFrame(void *context){
     
     while (controller->shouldRead) {
         
-        while (controller->paused) {
-            av_usleep(10000);
+        if (controller->paused) {
+            pthread_mutex_lock(&controller->pause_mutex);
+            pthread_cond_wait(&controller->pause_cond, &controller->pause_mutex);
+            pthread_mutex_unlock(&controller->pause_mutex);
         }
         
         int retval = av_read_frame(controller->fmtCtx, packet);
@@ -368,13 +372,19 @@ void * PlayController::readFrame(void *context){
         if(retval < 0){
             if (retval == AVERROR_EOF) {
                 endFile = true;
-                break;
+                
+                controller->startCheckPlayFinish();
+                
+                pthread_mutex_lock(&controller->pause_mutex);
+                pthread_cond_wait(&controller->pause_cond, &controller->pause_mutex);
+                pthread_mutex_unlock(&controller->pause_mutex);
+//                break;
             }else{
                 continue;
             }
         }
         
-        TFMPDLOG_C("read frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
+//        TFMPDLOG_C("read frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -397,8 +407,6 @@ void * PlayController::readFrame(void *context){
     
     TFMPDLOG_C("readFrame thread end!\n");
     
-    if (endFile) controller->startCheckPlayFinish();
-    
     return 0;
 }
 
@@ -413,20 +421,30 @@ void PlayController::startCheckPlayFinish(){
         checkDecoder = videoDecoder;
     }
     
+    //TODO: run on new thread?
     if (!checkDecoder) {
         if (playStoped) {
             playStoped(this, 0);
         }
+        checkingEnd = false;
+        return;
     }
     
-    //TODO: using observe func
-    while (!checkDecoder->bufferIsEmpty()) {
-        av_usleep(10000);
+    //start to observe frame buffer's size. When the size is less than 1, in other words the buffer is empty, it's really time when video stops.
+    if (!checkingEnd) {
+        checkingEnd = true;
+        checkDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
+    }
+}
+
+void *PlayController::signalPlayFinished(void *context){
+    
+    PlayController *controller = (PlayController *)context;
+    if (controller->playStoped) {
+        controller->playStoped(controller, 0);
     }
     
-    if (playStoped) {
-        playStoped(this, 0);
-    }
+    return 0;
 }
 
 #pragma mark -
@@ -434,13 +452,27 @@ void PlayController::startCheckPlayFinish(){
 bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer){
     
     PlayController *controller = (PlayController *)observer;
-    if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
-        TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
-    }else{
-        TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
+    
+    if (curSize <= bufferEmptySize) {
+        
+        if (controller->checkingEnd){
+            pthread_cond_signal(&controller->pause_cond);
+            
+            pthread_create(&controller->signalThread, nullptr, PlayController::signalPlayFinished, controller);
+            pthread_detach(controller->signalThread);
+        }
+
+    }else if (curSize >= playResumeSize){
+        
+//        if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
+//            TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
+//        }else{
+//            TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
+//        }
+//        
+//        controller->displayer->pause(false);
+        
     }
-    
-    controller->displayer->pause(false);
-    
+
     return true;
 }

@@ -22,12 +22,12 @@ using namespace tfmpcore;
 static int TFMPDecodePauseInterval = 10000;
 
 inline void freePacket(AVPacket **pkt){
-//    logPacketBuffer(*pkt,"free pkt");
+    logPacketBuffer(*pkt,"free pkt");
     av_packet_free(pkt);
 }
 
 inline void freeFrame(AVFrame **frame){
-//    TFMPDLOG_C(",%lld\n",(*frame)->pts);
+    TFMPDLOG_C(",%lld\n",(*frame)->pts);
     av_frame_free(frame);
 }
 

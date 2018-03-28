@@ -28,6 +28,9 @@ namespace tfmpcore {
     bool videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
+    static int playResumeSize = 20;
+    static int bufferEmptySize = 1;
+    
     class PlayController{
         
         std::string mediaPath;
@@ -77,7 +80,14 @@ namespace tfmpcore {
         
         void freeResources();
         
+        pthread_cond_t pause_cond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t pause_mutex = PTHREAD_MUTEX_INITIALIZER;
         void startCheckPlayFinish();
+        
+        //catch play ending
+        bool checkingEnd = false;
+        pthread_t signalThread;
+        static void *signalPlayFinished(void *context);
         
     public:
         

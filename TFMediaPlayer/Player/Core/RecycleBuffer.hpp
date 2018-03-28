@@ -14,7 +14,7 @@
 #include <limits.h>
 #include <vector>
 
-#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>| */
 
@@ -208,10 +208,17 @@ namespace tfmpcore {
             }
             
             if (!observers.empty()) {
-                for (auto iter = observers.begin(); iter != observers.end(); iter++) {
+                for (auto iter = observers.begin(); iter != observers.end();) {
                     UsedSizeObserver *ob = *iter;
                     if (!ob->isGreater && ob->checkSize > usedSize) {
-                        ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
+                        bool shouldRemove = ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
+                        if (shouldRemove) {
+                            iter = observers.erase(iter);
+                        }else{
+                            iter++;
+                        }
+                    }else{
+                        iter++;
                     }
                 }
             }
@@ -345,6 +352,8 @@ namespace tfmpcore {
             backNode = nullptr;
             
             allocedSize = 0;
+            
+            observers.clear();
             
             ioDisable = true;
             

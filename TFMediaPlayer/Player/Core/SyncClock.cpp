@@ -36,7 +36,7 @@ double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
         return av_gettime_relative()/timeDen;
     }
     
-//    TFMPDLOG_C("sync: %.6f, %.6f\n",ptsCorrection/timeDen, sourcePts);
+    TFMPDLOG_C("sync: %.6f, %.6f\n",ptsCorrection/timeDen, sourcePts);
     return ptsCorrection/timeDen+sourcePts;
 }
 
