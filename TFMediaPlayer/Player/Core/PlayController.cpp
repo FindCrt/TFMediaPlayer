@@ -15,6 +15,8 @@
 
 using namespace tfmpcore;
 
+
+
 bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     this->mediaPath = mediaPath;
@@ -83,6 +85,14 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     calculateRealDisplayMediaType();
     setupSyncClock();
+    
+//    displayer->checkingPtsFinishedCallback = [this](){
+//        if (seeking) {
+//            seeking = false;
+//            
+//            TFMPDLOG_C("checkingPtsFinishedCallback\n");
+//        }
+//    };
     
     duration = fmtCtx->duration/(double)AV_TIME_BASE;
     
@@ -190,8 +200,8 @@ void PlayController::seekTo(double time){
     
     //pause displaing until gather a lot of new frames.
     //3. turn off outlet
-    displayer->pause(true);
-    displayer->setMinPtsLimit(seekingTime);
+    displayer->setMinMediaTime(seekingTime);
+    displayer->syncClock->reset();
     
     TFMPDLOG_C("flush all end!\n");
     
@@ -206,11 +216,14 @@ void PlayController::seekTo(double time){
     paused = false;
     
     //6. turn on outlet when the pool fill to a certain size.
-    if (audioDecoder) {
-        audioDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
-    }else if (videoDecoder){
-        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
-    }
+//    if (audioDecoder) {
+//        audioDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+//    }else if (videoDecoder){
+//        videoDecoder->sharedFrameBuffer()->addObserver(this, 20, true, videoFrameSizeNotified);
+//    }
+    pthread_create(&seekCheckThread, nullptr, seekCheck, this);
+    pthread_detach(readThread);
+    
     
     TFMPDLOG_C("seek end! %.3f\n",time);
 }
@@ -220,6 +233,20 @@ void PlayController::seekByForward(double interval){
     
     double seekTime = currentTime + interval;
     seekTo(seekTime);
+}
+
+void *PlayController::seekCheck(void *context){
+    
+    PlayController *controller = (PlayController *)context;
+    
+    
+    while (fabs(controller->displayer->getLastPlayTime() - controller->seekingTime) > 0.1) {
+        av_usleep(100000);
+    }
+    
+    controller->seeking = false;
+    
+    return 0;
 }
 
 void PlayController::freeResources(){
@@ -430,8 +457,6 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
     }
     
     controller->displayer->pause(false);
-    
-    controller->seeking = false;
     
     return true;
 }

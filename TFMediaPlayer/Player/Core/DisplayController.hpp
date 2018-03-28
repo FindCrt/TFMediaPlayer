@@ -15,6 +15,7 @@
 #include "RecycleBuffer.hpp"
 #include "SyncClock.hpp"
 #include "AudioResampler.hpp"
+#include <functional>
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -44,6 +45,8 @@ namespace tfmpcore {
         
         bool shouldDisplay = false;
         bool paused = false;
+//        bool checkingPts = false;
+        
         bool isDispalyingVideo = false;
         bool isFillingAudio = false;
         
@@ -67,7 +70,7 @@ namespace tfmpcore {
         
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
-        void *displayContext;
+        void *displayContext = nullptr;
         
         //the real display function different with different platform
         TFMPVideoFrameDisplayFunc displayVideoFrame;
@@ -84,10 +87,12 @@ namespace tfmpcore {
         AVRational audioTimeBase;
         
         
+        
+        //sync and play time
         SyncClock *syncClock = nullptr;
         double getLastPlayTime();
-        void setMinPtsLimit(double minPtsLimit){
-            if (syncClock) syncClock->setMinPtsLimit(minPtsLimit);
+        void setMinMediaTime(double minMediaTime){
+            if (syncClock) syncClock->setMinMediaTime(minMediaTime);
         }
 
         //controls
@@ -95,6 +100,10 @@ namespace tfmpcore {
         void stopDisplay();
         
         void pause(bool flag);
+        
+        //check frame's pts until finding the first frame which's pts is later than seeking time.
+//        void startCheckingFramePts();
+//        std::function<void()> checkingPtsFinishedCallback;
         
         //release
         void flush();

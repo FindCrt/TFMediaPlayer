@@ -171,7 +171,7 @@ static int mediaIndex = 0;
 
     NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
     
-    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL3];
+    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL4];
     
     _currentMediaURL = mediaSources[mediaIndex];
     mediaIndex++;

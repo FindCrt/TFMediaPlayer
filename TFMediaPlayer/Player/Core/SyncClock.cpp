@@ -26,8 +26,8 @@ double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
     
     double sourcePts = videoPts *av_q2d(timeBase);
     
-//    TFMPDLOG_C("video sourcePts: %.3f, minPtsLimit: %.3f\n",sourcePts,minPtsLimit);
-    if (sourcePts < minPtsLimit) {
+    TFMPDLOG_C("video sourcePts: %.3f, minMediaTime: %.3f\n",sourcePts,minMediaTime);
+    if (sourcePts < minMediaTime) {
         return 0;  //discard this frame
     }
     
@@ -45,7 +45,7 @@ double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     double sourcePts = audioPts *av_q2d(timeBase);
     
 //    TFMPDLOG_C("audio sourcePts: %.3f, minPtsLimit: %.3f\n",sourcePts,minPtsLimit);
-    if (sourcePts < minPtsLimit) {
+    if (sourcePts < minMediaTime) {
         return 0; //discard this frame
     }
     
@@ -66,7 +66,7 @@ double SyncClock::remainTimeForAudio(int64_t audioPts, AVRational timeBase){
 }
 
 void SyncClock::presentVideo(int64_t videoPts, AVRational timeBase){
-    
+    TFMPDLOG_C("presentVideo: %.3f, %lld[%.6f]\n",ptsCorrection/timeDen,videoPts, videoPts*av_q2d(timeBase));
     if (isAudioMajor) {
         return;
     }

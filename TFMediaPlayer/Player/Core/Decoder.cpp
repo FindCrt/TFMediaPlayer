@@ -236,7 +236,7 @@ void *Decoder::decodeLoop(void *context){
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
                     decoder->frameBuffer.blockInsert(refFrame);
-//                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
+                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
                 }else{
                     av_frame_unref(frame);
                 }
