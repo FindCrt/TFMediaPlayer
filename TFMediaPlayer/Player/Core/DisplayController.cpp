@@ -50,8 +50,15 @@ void DisplayController::stopDisplay(){
 
 void DisplayController::flush(){
     
+    paused = true;
+    while (displayingAudio || displayingVideo) {
+        av_usleep(10000); //0.01s
+        TFMPDLOG_C("displayer flush wait\n");
+    }
+    
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
+    paused = false;
 }
 
 void DisplayController::pause(bool flag){
@@ -61,10 +68,10 @@ void DisplayController::pause(bool flag){
     }
 }
 
-//void DisplayController::startCheckingFramePts(){
-//    syncClock->reset();
-//    checkingPts = true;
-//}
+void DisplayController::startToCheckValidFrame(){
+    syncClock->reset();
+    checkingValidFrame = true;
+}
 
 double DisplayController::getLastPlayTime(){
     if (videoTimeBase.den == 0 || videoTimeBase.num == 0) {
@@ -107,14 +114,19 @@ void *DisplayController::displayLoop(void *context){
     
     while (displayer->shouldDisplay) {
         
-        while (displayer->paused) {
-            av_usleep(TFMPDisplayPauseInterval);
-        }
-        
-        displayer->isDispalyingVideo = true;
+        displayer->displayingVideo = nullptr;
         videoFrame = nullptr; //reset it
         
+        
+        while (displayer->paused) {
+            TFMPDLOG_C("display pause video\n");
+            av_usleep(TFMPDisplayPauseInterval);
+        }
+
+        displayer->isDispalyingVideo = true;
+        
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
+        displayer->displayingVideo = videoFrame;
         
         if (videoFrame == nullptr) continue;
         
@@ -126,22 +138,9 @@ void *DisplayController::displayLoop(void *context){
             av_frame_free(&videoFrame);
             TFMPDLOG_C("discard video frame\n");
             continue;
-        }else{
-            
-            if (remainTime > minExeTime) {
-                av_usleep(remainTime*1000000);
-            }
-            
-//            //play resume after buffering.
-//            if (displayer->checkingPts && displayer->checkingPtsFinishedCallback) {
-//                
-//                //check again as conditions may have chenged in multi-threads environment.
-//                double remainTime2 = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
-//                if (remainTime2 > -minExeTime) {
-//                    displayer->checkingPts = false;
-//                    displayer->checkingPtsFinishedCallback();
-//                }
-//            }
+        }else if (remainTime > minExeTime) {
+            TFMPDLOG_C("video sleep: %.3f\n",remainTime);
+            av_usleep(remainTime*1000000);
         }
         
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
@@ -169,16 +168,21 @@ void *DisplayController::displayLoop(void *context){
         
         if (displayer->shouldDisplay){
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
-            
+
             if (!displayer->syncClock->isAudioMajor) {
+                
                 displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = videoFrame->pts;
                 displayer->lastIsAudio = false;
+                
+                //play resume after buffering.
+                if (displayer->checkingValidFrame && displayer->checkValidFrameCallback) {
+                    displayer->checkingValidFrame = false;
+                    displayer->checkValidFrameCallback();
+                }
             }
             
             if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
-            
-            
         }
         
         av_frame_free(&videoFrame);
@@ -202,6 +206,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     uint8_t *buffer = buffersList[0];
     if (displayer->paused) {
         TFMPDLOG_C("display pause audio\n");
+        displayer->isFillingAudio = false;
         memset(buffer, 0, oneLineSize);
         return 0;
     }
@@ -235,7 +240,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         while (needReadSize > 0) {
             //TODO: do more thing for planar audio.
             frame = nullptr;
+            displayer->displayingAudio = nullptr;
+            
             displayer->shareAudioBuffer->blockGetOut(&frame);
+            displayer->displayingAudio = frame;
             
             //TODO: need more calm way to wait
             if (frame == nullptr) continue;
@@ -276,13 +284,15 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = frame->pts;
                 displayer->lastIsAudio = true;
+                
+                //play resume after buffering.
+                if (displayer->checkingValidFrame && displayer->checkValidFrameCallback) {
+                    displayer->checkingValidFrame = false;
+                    displayer->checkValidFrameCallback();
+                }
             }
+            
             if(!displayer->paused) displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
-//            //play resume after buffering.
-//            if (displayer->checkingPts && displayer->checkingPtsFinishedCallback) {
-//                displayer->checkingPts = false;
-//                displayer->checkingPtsFinishedCallback();
-//            }
             
             if (needReadSize >= linesize) {
                 
@@ -315,6 +325,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 av_frame_free(&frame);
             }
+            
+            displayer->displayingAudio = nullptr;
         }
     }
     

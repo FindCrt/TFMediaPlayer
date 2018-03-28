@@ -45,10 +45,13 @@ namespace tfmpcore {
         
         bool shouldDisplay = false;
         bool paused = false;
-//        bool checkingPts = false;
+        bool checkingValidFrame = false;
         
         bool isDispalyingVideo = false;
         bool isFillingAudio = false;
+        
+        AVFrame *displayingVideo = nullptr;
+        AVFrame *displayingAudio = nullptr;
         
         TFMPRemainingBuffer remainingAudioBuffers;
         
@@ -102,8 +105,8 @@ namespace tfmpcore {
         void pause(bool flag);
         
         //check frame's pts until finding the first frame which's pts is later than seeking time.
-//        void startCheckingFramePts();
-//        std::function<void()> checkingPtsFinishedCallback;
+        void startToCheckValidFrame();
+        std::function<void()> checkValidFrameCallback;
         
         //release
         void flush();

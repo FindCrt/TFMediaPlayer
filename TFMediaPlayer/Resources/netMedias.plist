@@ -62,5 +62,17 @@
 		<key>url</key>
 		<string>local://jonSnow.mp4</string>
 	</dict>
+	<dict>
+		<key>name</key>
+		<string>美拍-杨幂</string>
+		<key>url</key>
+		<string>http://mvvideo11.meitudata.com/5aa239561c5413717_H264_15.mp4?k=9384a37d322d1e77db053729782bdb03&amp;t=5abf2b3a</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>jonSnow</string>
+		<key>url</key>
+		<string>local://jonSnow.mp4</string>
+	</dict>
 </array>
 </plist>
