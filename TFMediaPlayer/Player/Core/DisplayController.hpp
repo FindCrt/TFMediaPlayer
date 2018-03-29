@@ -44,8 +44,11 @@ namespace tfmpcore {
         static void *displayLoop(void *context);
         
         bool shouldDisplay = false;
-        bool paused = false;
         bool checkingValidFrame = false;
+        
+        bool paused = false;
+        pthread_cond_t video_pause_cond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t video_pause_mutex = PTHREAD_MUTEX_INITIALIZER;
         
         bool isDispalyingVideo = false;
         bool isFillingAudio = false;

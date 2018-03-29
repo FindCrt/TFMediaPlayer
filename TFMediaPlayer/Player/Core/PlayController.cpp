@@ -89,9 +89,9 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     displayer->checkValidFrameCallback = [this](){
         if (seeking) {
             seeking = false;
-            
-            TFMPDLOG_C("checkValidFrameCallback\n");
         }
+        
+        TFMPDLOG_C("checkValidFrameCallback, seeking:%s\n",seeking?"true":"false");
     };
     
     duration = fmtCtx->duration/(double)AV_TIME_BASE;
@@ -124,6 +124,18 @@ void PlayController::play(){
     }
     
     displayer->startDisplay();
+    
+    
+    //observe the exhaustion of buffers.
+    Decoder *checkDecoder = nullptr;
+    
+    if (realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) {
+        checkDecoder = audioDecoder;
+    }else if(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO){
+        checkDecoder = videoDecoder;
+    }
+    checkDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
+    checkDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
 }
 
 void PlayController::pause(bool flag){
@@ -202,6 +214,7 @@ void PlayController::seekTo(double time){
     //pause displaing until gather a lot of new frames.
     //3. turn off outlet
     displayer->setMinMediaTime(seekingTime);
+//    displayer->pause(true);
     displayer->startToCheckValidFrame();
     
     TFMPDLOG_C("flush all end!\n");
@@ -216,13 +229,6 @@ void PlayController::seekTo(double time){
     //5. turn on inlet
     paused = false;
     pthread_cond_signal(&pause_cond);
-    
-    //6. turn on outlet when the pool fill to a certain size.
-//    if (audioDecoder) {
-//        audioDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
-//    }else if (videoDecoder){
-//        videoDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
-//    }
     
     
     TFMPDLOG_C("seek end! %.3f\n",time);
@@ -362,6 +368,7 @@ void * PlayController::readFrame(void *context){
     while (controller->shouldRead) {
         
         if (controller->paused) {
+            TFMPDLOG_C("read paused!\n");
             pthread_mutex_lock(&controller->pause_mutex);
             pthread_cond_wait(&controller->pause_cond, &controller->pause_mutex);
             pthread_mutex_unlock(&controller->pause_mutex);
@@ -384,7 +391,7 @@ void * PlayController::readFrame(void *context){
             }
         }
         
-//        TFMPDLOG_C("read frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
+        TFMPDLOG_C("\n\nread frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -413,27 +420,9 @@ void * PlayController::readFrame(void *context){
 /** file has reach the end, if the data in packet buffer and frame buffer are used, all resources is showed then now it's need to stop.*/
 void PlayController::startCheckPlayFinish(){
     
-    Decoder *checkDecoder = nullptr;
-    
-    if (realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) {
-        checkDecoder = audioDecoder;
-    }else if(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO){
-        checkDecoder = videoDecoder;
-    }
-    
-    //TODO: run on new thread?
-    if (!checkDecoder) {
-        if (playStoped) {
-            playStoped(this, 0);
-        }
-        checkingEnd = false;
-        return;
-    }
-    
     //start to observe frame buffer's size. When the size is less than 1, in other words the buffer is empty, it's really time when video stops.
     if (!checkingEnd) {
         checkingEnd = true;
-        checkDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
     }
 }
 
@@ -460,19 +449,24 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
             
             pthread_create(&controller->signalThread, nullptr, PlayController::signalPlayFinished, controller);
             pthread_detach(controller->signalThread);
+        }else{
+            //buffer has ran out.We must stop playing until buffer is full again.
+            controller->displayer->pause(true);
+            TFMPDLOG_C("buffer runs out, stop playing\n");
         }
 
     }else if (curSize >= playResumeSize){
         
-//        if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
-//            TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
-//        }else{
-//            TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
-//        }
-//        
-//        controller->displayer->pause(false);
+        if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
+            TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
+        }else{
+            TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
+        }
+        
+        controller->displayer->startToCheckValidFrame();
+        controller->displayer->pause(false);
         
     }
 
-    return true;
+    return false;
 }

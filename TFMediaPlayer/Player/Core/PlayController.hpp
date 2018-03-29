@@ -54,7 +54,7 @@ namespace tfmpcore {
         
         //read frames
         bool shouldRead = false;
-        bool paused = false;
+        
         void startReadingFrames();
         pthread_t readThread;
         static void * readFrame(void *context);
@@ -80,6 +80,7 @@ namespace tfmpcore {
         
         void freeResources();
         
+        bool paused = false;
         pthread_cond_t pause_cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t pause_mutex = PTHREAD_MUTEX_INITIALIZER;
         void startCheckPlayFinish();

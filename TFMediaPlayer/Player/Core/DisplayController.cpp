@@ -52,19 +52,24 @@ void DisplayController::flush(){
     
     paused = true;
     while (displayingAudio || displayingVideo) {
+        TFMPDLOG_C("displayer flush wait: %s\n",displayingAudio?"audio":"video");
         av_usleep(10000); //0.01s
-        TFMPDLOG_C("displayer flush wait\n");
     }
     
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
+    
     paused = false;
+    pthread_cond_signal(&video_pause_cond);
 }
 
 void DisplayController::pause(bool flag){
+    TFMPDLOG_C("DisplayController pause: %s\n",flag?"true":"false");
     paused = flag;
     if (paused) {
         syncClock->reset();
+    }else{
+        pthread_cond_signal(&video_pause_cond);
     }
 }
 
@@ -118,9 +123,11 @@ void *DisplayController::displayLoop(void *context){
         videoFrame = nullptr; //reset it
         
         
-        while (displayer->paused) {
+        if (displayer->paused) {
             TFMPDLOG_C("display pause video\n");
-            av_usleep(TFMPDisplayPauseInterval);
+            pthread_mutex_lock(&displayer->video_pause_mutex);
+            pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
+            pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
 
         displayer->isDispalyingVideo = true;
@@ -238,6 +245,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         int linesize = 0, outSamples = 0;
         
         while (needReadSize > 0) {
+            if (displayer->paused) {
+                break;
+            }
+            
             //TODO: do more thing for planar audio.
             frame = nullptr;
             displayer->displayingAudio = nullptr;
@@ -249,7 +260,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             if (frame == nullptr) continue;
             
             double remainTime = displayer->syncClock->remainTimeForAudio(frame->pts, displayer->audioTimeBase);
-//            TFMPDLOG_C("remainTime audio: %.6f\n",remainTime);
+            TFMPDLOG_C("remainTime audio: %.6f\n",remainTime);
             if (remainTime < -minExeTime){
                 av_frame_free(&frame);
                 TFMPDLOG_C("discard audio frame\n");

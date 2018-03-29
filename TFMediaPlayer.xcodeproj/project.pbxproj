@@ -43,6 +43,7 @@
 		1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856F04C1FFB804D00B4F2A7 /* libx264.a */; };
 		185B7EDD2007694600ACB32D /* AudioResampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 185B7EDB2007694600ACB32D /* AudioResampler.cpp */; };
 		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
+		185F7B38206CD7720028744A /* lisao.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 185F7B37206CD7720028744A /* lisao.mp4 */; };
 		1865D9C0204A4E1000E5C447 /* TFMPProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865D9BF204A4E1000E5C447 /* TFMPProgressView.m */; };
 		1868B9A0206A45FA00C5D0DB /* momei.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99E206A45FA00C5D0DB /* momei.mp4 */; };
 		1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
@@ -138,6 +139,7 @@
 		185EB32E1FF5CD22001E37F7 /* TFMediaPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TFMediaPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		185F7B37206CD7720028744A /* lisao.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = lisao.mp4; sourceTree = "<group>"; };
 		1865D9BE204A4E1000E5C447 /* TFMPProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMPProgressView.h; sourceTree = "<group>"; };
 		1865D9BF204A4E1000E5C447 /* TFMPProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFMPProgressView.m; sourceTree = "<group>"; };
 		1868B99E206A45FA00C5D0DB /* momei.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = momei.mp4; sourceTree = "<group>"; };
@@ -425,6 +427,7 @@
 				187DFBC620084BEF002BDCB3 /* AACTest.m4a */,
 				184FF7501FF48BC0007D5826 /* game.mp4 */,
 				18946DCD2068F8F1004BDF96 /* t1.mp4 */,
+				185F7B37206CD7720028744A /* lisao.mp4 */,
 				18554530202A91FD0014D7CE /* netMedias.plist */,
 			);
 			path = Resources;
@@ -927,6 +930,7 @@
 				1847D87B206B827A00A7CFE8 /* meipai-two.mp4 in Resources */,
 				1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */,
 				18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */,
+				185F7B38206CD7720028744A /* lisao.mp4 in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
 				184C8E12200B481D0063EAC3 /* pure1.caf in Resources */,
 				18554531202A91FD0014D7CE /* netMedias.plist in Resources */,

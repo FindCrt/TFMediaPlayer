@@ -84,6 +84,8 @@
     }else{
         _player.displayView.frame = self.view.bounds;
     }
+    
+    _tableView.frame = self.view.bounds;
 }
 
 -(void)viewWillDisappear:(BOOL)animated{

@@ -190,6 +190,7 @@ void *Decoder::decodeLoop(void *context){
                 if (decoder->shouldDecode) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
+//                    av_usleep(50000);
                     TFMPDLOG_C("insert audio frame: %lld,%lld\n",pkt->pts,refFrame->pts);
                     decoder->frameBuffer.blockInsert(refFrame);
                 }else{
