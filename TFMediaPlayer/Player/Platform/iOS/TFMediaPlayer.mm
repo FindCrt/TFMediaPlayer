@@ -190,12 +190,14 @@
     
     self.state = TFMediaPlayerStateConnecting;
     
-    //local file or bundle file need a file reader which is different on different platform.
-    bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
-    if (!succeed) {
-        TFMPDLog(@"play media open error");
-        self.state = TFMediaPlayerStateNone;
-    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //local file or bundle file need a file reader which is different on different platform.
+        bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
+        if (!succeed) {
+            TFMPDLog(@"play media open error");
+            self.state = TFMediaPlayerStateNone;
+        }
+    });
 }
 
 -(void)play{
