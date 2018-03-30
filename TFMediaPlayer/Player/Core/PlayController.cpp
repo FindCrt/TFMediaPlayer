@@ -88,14 +88,6 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     calculateRealDisplayMediaType();
     setupSyncClock();
     
-    displayer->checkValidFrameCallback = [this](){
-        if (seeking) {
-            seeking = false;
-        }
-        
-        TFMPDLOG_C("checkValidFrameCallback, seeking:%s\n",seeking?"true":"false");
-    };
-    
     duration = fmtCtx->duration/(double)AV_TIME_BASE;
     
     prapareOK = true;

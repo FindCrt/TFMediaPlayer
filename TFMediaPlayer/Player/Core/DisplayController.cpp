@@ -69,11 +69,6 @@ void DisplayController::pause(bool flag){
     }
 }
 
-void DisplayController::startToCheckValidFrame(){
-    syncClock->reset();
-    checkingValidFrame = true;
-}
-
 double DisplayController::getLastPlayTime(){
     if (videoTimeBase.den == 0 || videoTimeBase.num == 0) {
         return 0;
@@ -120,18 +115,7 @@ void *DisplayController::displayLoop(void *context){
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
-        
-        if (displayer->checkingValidFrame) {
-            if (videoFrame->pts * av_q2d(displayer->videoTimeBase) < displayer->minMediaTime) {
-                continue;
-            }else if(!displayer->syncClock->isAudioMajor){
-                
-            }
-        }
         displayer->displayingVideo = videoFrame;
-        
-        
-        
         
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
@@ -189,11 +173,6 @@ void *DisplayController::displayLoop(void *context){
                 displayer->lastPts = videoFrame->pts;
                 displayer->lastIsAudio = false;
                 
-                //play resume after buffering.
-                if (displayer->checkingValidFrame && displayer->checkValidFrameCallback) {
-                    displayer->checkingValidFrame = false;
-                    displayer->checkValidFrameCallback();
-                }
             }
             
             if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
@@ -303,11 +282,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->lastPts = frame->pts;
                 displayer->lastIsAudio = true;
                 
-                //play resume after buffering.
-                if (displayer->checkingValidFrame && displayer->checkValidFrameCallback) {
-                    displayer->checkingValidFrame = false;
-                    displayer->checkValidFrameCallback();
-                }
             }
             
             if(!displayer->paused) displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);

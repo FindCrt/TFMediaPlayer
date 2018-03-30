@@ -64,9 +64,6 @@ namespace tfmpcore {
         int64_t lastPts = 0;
         bool lastIsAudio = true;
         
-        bool checkingValidFrame = false;
-        double minMediaTime = 0;
-        
     public:
         
         ~DisplayController(){
@@ -99,7 +96,6 @@ namespace tfmpcore {
         SyncClock *syncClock = nullptr;
         double getLastPlayTime();
         void setMinMediaTime(double minMediaTime){
-            this->minMediaTime = minMediaTime;
             if (syncClock) syncClock->setMinMediaTime(minMediaTime);
         }
 
@@ -108,10 +104,6 @@ namespace tfmpcore {
         void stopDisplay();
         
         void pause(bool flag);
-        
-        //check frame's pts until finding the first frame whose pts is later than seeking time.
-        void startToCheckValidFrame();
-        std::function<void()> checkValidFrameCallback;
         
         //release
         void flush();
