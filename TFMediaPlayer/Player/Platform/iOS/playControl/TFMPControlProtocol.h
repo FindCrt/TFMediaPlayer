@@ -10,10 +10,18 @@
 
 typedef void(^TFMPStateObserveHandler) (NSString *state, id value);
 
+/**
+ * There are two infos-chain:
+ * first is that controlView give commands to player
+ * second is that notifing player's states changes to controlView.
+ * So there are two tasks for a resolver: delivering controlView's commands to palyer and observing player's states.
+ */
 @protocol TFMPControlProtocol <NSObject>
 
+//infos-chain 1
 -(void)dealPlayControlCommand:(NSString *)command params:(NSDictionary<NSString *, id> *)params;
 
+//infos-chain 2
 -(void)helpObserveStates:(NSArray<NSString *> *)states withChangedHandler:(TFMPStateObserveHandler)handler;
 
 @end
@@ -54,3 +62,5 @@ static NSString *TFMPCmd_param_time = @"time";
 static NSString *TFMPState_duration = @"duration";
 
 static NSString *TFMPState_currentTime = @"TFMPState_currentTime";
+
+static NSString *TFMPState_isLoading = @"is";

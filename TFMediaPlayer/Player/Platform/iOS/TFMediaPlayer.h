@@ -16,8 +16,10 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
     TFMediaPlayerStateReady,
     TFMediaPlayerStatePlaying,
     TFMediaPlayerStatePause,
+    TFMediaPlayerStateLoading,   //net is not good or seeking to new position.
 };
 
+static NSString *TFMPStateChangedKey = @"state";
 static NSString *TFMPStateChangedNotification = @"TFMPStateChangedNotification";
 
 @interface TFMediaPlayer : NSObject

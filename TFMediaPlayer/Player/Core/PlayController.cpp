@@ -37,9 +37,11 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
             videoDecoder = new Decoder(fmtCtx, i, type);
+            videoDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
+            audioDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             audioStream = i;
         }else if (type == AVMEDIA_TYPE_SUBTITLE){
             subtitleDecoder = new Decoder(fmtCtx, i, type);
@@ -211,11 +213,18 @@ void PlayController::seekTo(double time){
     
     displayer->flush();
     
-    //pause displaing until gather a lot of new frames.
+    //3. enable mediaTimeFilter to filter unqualified frames whose pts is earlier than seeking time.
+    if (videoDecoder) {
+        videoDecoder->mediaTimeFilter->enable = true;
+        videoDecoder->mediaTimeFilter->minMediaTime = seekingTime;
+    }
+    if (audioDecoder) {
+        audioDecoder->mediaTimeFilter->enable = true;
+        audioDecoder->mediaTimeFilter->minMediaTime = seekingTime;
+    }
+    
     //3. turn off outlet
-    displayer->setMinMediaTime(seekingTime);
-//    displayer->pause(true);
-    displayer->startToCheckValidFrame();
+    displayer->pause(true);
     
     TFMPDLOG_C("flush all end!\n");
     
@@ -230,7 +239,6 @@ void PlayController::seekTo(double time){
     paused = false;
     pthread_cond_signal(&pause_cond);
     
-    
     TFMPDLOG_C("seek end! %.3f\n",time);
 }
 
@@ -239,6 +247,17 @@ void PlayController::seekByForward(double interval){
     
     double seekTime = currentTime + interval;
     seekTo(seekTime);
+}
+
+void PlayController::seekingEnd(){
+    
+    if (seeking) {
+        seeking = false;
+        
+        if (seekingEndNotify) {
+            seekingEndNotify(this);
+        }
+    }
 }
 
 void PlayController::freeResources(){
@@ -463,8 +482,8 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
             TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
         }
         
-        controller->displayer->startToCheckValidFrame();
         controller->displayer->pause(false);
+        controller->seekingEnd();
         
     }
 

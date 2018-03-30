@@ -94,9 +94,12 @@ void Decoder::flush(){
     frameBuffer.flush();
     
     while (isDecoding) {
-        av_usleep(10000); //0.01s
         TFMPDLOG_C("wait one decode loop end.[%d]\n",steamIndex);
+        av_usleep(10000); //0.01s
     }
+    
+    //Maybe just now a new frame which is a temp var in func of decodeLoop is inserted to frameBuffer.
+    frameBuffer.flush();
     
     //If dont'f call this, there are some new packets which contain old frame. It will
     avcodec_flush_buffers(codecCtx);
@@ -112,7 +115,7 @@ bool Decoder::bufferIsEmpty(){
 
 void Decoder::freeResources(){
     
-    if (!shouldDecode) shouldDecode = false;
+    shouldDecode = false;
     
     frameBuffer.flushAndFree();
     pktBuffer.flushAndFree();
@@ -148,6 +151,7 @@ void *Decoder::decodeLoop(void *context){
     while (decoder->shouldDecode) {
         
         while (decoder->pause) {
+            TFMPDLOG_C("decoder pause: %d\n",decoder->type);
             decoder->isDecoding = false;
             av_usleep(TFMPDecodePauseInterval);
         }
@@ -187,6 +191,11 @@ void *Decoder::decodeLoop(void *context){
                     continue;
                 }
                 
+                if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
+                    av_frame_unref(frame);
+                    continue;
+                }
+                
                 if (decoder->shouldDecode) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
@@ -204,6 +213,7 @@ void *Decoder::decodeLoop(void *context){
             
             int releaseTime = 0;
             do {
+                TFMPDLOG_C("delayFramesReleasing\n");
                 releaseTime++;
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 
@@ -229,6 +239,12 @@ void *Decoder::decodeLoop(void *context){
                 
                 if (frame->extended_data == nullptr) {
                     printf("video frame data is null\n");
+                    av_frame_unref(frame);
+                    continue;
+                }
+                
+                if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
+                    TFMPDLOG_C("video checkFrame\n");
                     av_frame_unref(frame);
                     continue;
                 }

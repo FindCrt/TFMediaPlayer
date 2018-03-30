@@ -65,12 +65,11 @@ namespace tfmpcore {
         /**
          * The state of seeking.
          * It becomes true when the user drags the progressBar and loose fingers.
-         * And it becomes false when displayer find the first frame which's pts is greater than the seeking time, because now is time we can actually resume playing.
+         * And it becomes false when displayer find the first frame whose pts is greater than the seeking time, because now is time we can actually resume playing.
          */
         bool seeking = false;
         double seekingTime = 0;
-        static void * seekCheck(void *context);
-        pthread_t seekCheckThread;
+        void seekingEnd();
         
         TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
@@ -115,6 +114,7 @@ namespace tfmpcore {
         
         void seekTo(double time);
         void seekByForward(double interval);
+        std::function<void(PlayController*)>seekingEndNotify;
         
         /** properties **/
         

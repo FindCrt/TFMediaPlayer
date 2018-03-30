@@ -283,3 +283,23 @@ Printing description of srcp->f->buf[0]->buffer:
   4. 缓冲区空了，会停止不放，满了才会恢复播放。
 
   核心限制是第一个，它的关键是：保证audio和video的frame buffer最新的一个是相近的时间。这样缓冲区内的个数是一致的，就能保证不会一个空
+  
+  
+###总结下常见问题
+
+1. 往后seek,音频有seek前残余，后面的视频计算出remainTime太长，视频缓冲区满，卡死。
+ 
+2. 往前seek，视频有剩余，计算remainTime太长，视频缓冲区满，卡死。
+
+解决方案：
+
+  * 首先保证整个流程没有旧的数据留存，音视频的frame buffer、packet buffer,decode函数里的临时变量，插入buffer时阻塞的临时变量，播放时的临时变量。
+
+  
+  
+  
+  
+  
+###状态的维护
+
+1. pause和loading是有共存的，在loading的时候pause,仍然保持loading，等到loading结束，要跳入playing的时候，要自动切换到pause。所以pause需要一个标记。这样两者就不会存在共存。或者loading加一个标记。具体再研究。

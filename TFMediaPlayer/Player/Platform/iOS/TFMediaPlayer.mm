@@ -38,8 +38,6 @@
 #endif
     
     TFOPGLESDisplayView *_displayView;
-    
-    TFMPPlayCmdResolver *_defaultPlayResolver;
 }
 
 @end
@@ -77,6 +75,11 @@
             }
         };
         
+        _playController->seekingEndNotify = [self](tfmpcore::PlayController *playController){
+            
+            self.state = TFMediaPlayerStatePlaying;
+        };
+        
         _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
 #if TFMPUseAudioUnitPlayer
             _audioPlayer = [[TFAudioUnitPlayer alloc] init];
@@ -92,19 +95,19 @@
 #endif
         };
         
-        [self setupPlayControlView];
+        [self setupDefaultPlayControlView];
     }
     
     return self;
 }
 
--(void)setupPlayControlView{
+-(void)setupDefaultPlayControlView{
     _defaultControlView = [[TFMPPlayControlView alloc] init];
     _defaultControlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    _defaultPlayResolver = [[TFMPPlayCmdResolver alloc] init];
-    _defaultPlayResolver.player = self;
-    _defaultControlView.delegate = _defaultPlayResolver;
+    TFMPPlayCmdResolver *defaultPlayResolver = [[TFMPPlayCmdResolver alloc] init];
+    defaultPlayResolver.player = self;
+    _defaultControlView.delegate = defaultPlayResolver;
     
     _defaultControlView.swipeSeekDuration = 3;
     
@@ -167,7 +170,9 @@
     }
     _state = state;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{@"state":@(_state)}];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{TFMPStateChangedKey:@(state)}];
+    });
 }
 
 -(BOOL)isPlaying{
@@ -244,6 +249,7 @@
             _innerPlayWhenReady = false;
             break;
         case TFMediaPlayerStatePlaying:
+        case TFMediaPlayerStateLoading:
             _playController->pause(true);
             if (_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO) {
                 [_audioPlayer pause];
@@ -273,6 +279,7 @@
             _playController->stop();
             break;
         case TFMediaPlayerStatePlaying:
+        case TFMediaPlayerStateLoading:
             _playController->stop();
             break;
         default:
@@ -324,6 +331,7 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 
 -(void)seekToPlayTime:(NSTimeInterval)playTime{
     _playController->seekTo(playTime);
+    _state = TFMediaPlayerStateLoading;
 }
 
 -(void)seekByForward:(NSTimeInterval)interval{
@@ -331,6 +339,7 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         return;
     }
     _playController->seekByForward(interval);
+    _state = TFMediaPlayerStateLoading;
 }
 
 -(void)changeFullScreenState{
@@ -342,7 +351,9 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 }
 
 -(double)currentTime{
-    if (self.state == TFMediaPlayerStatePlaying || self.state == TFMediaPlayerStatePause) {
+    if (self.state == TFMediaPlayerStatePlaying ||
+        self.state == TFMediaPlayerStatePause ||
+        self.state == TFMediaPlayerStateLoading) {
         return _playController->getCurrentTime();
     }else{
         return 0;

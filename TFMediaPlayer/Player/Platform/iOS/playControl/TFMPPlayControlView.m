@@ -28,6 +28,8 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     UIButton *_fullScreenButton;
     
     TFMPProgressView *_progressView;
+    
+    UIActivityIndicatorView *_actIndicator;
 }
 
 @property (nonatomic, assign) double duration;
@@ -52,6 +54,10 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     [self setupFullScreenControl];
     [self setupSeekControls];
     [self setupTapControl];
+    
+    _actIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:(UIActivityIndicatorViewStyleWhiteLarge)];
+    _actIndicator.hidesWhenStopped = YES;
+    [self addSubview:_actIndicator];
 }
 
 -(void)layoutSubviews{
@@ -60,6 +66,8 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     _fullScreenButton.frame = CGRectMake(TFMPCVWidth-TFMPCVHorizontalSpace-TFMPCVFullScreenWidth, TFMPCVHeight-TFMPCVBottomSpace-TFMPCVFullScreenWidth, TFMPCVFullScreenWidth, TFMPCVFullScreenWidth);
     
     _progressView.frame = CGRectMake(40, TFMPCVHeight - TFMPCVBottomSpace - 30, CGRectGetMinX(_fullScreenButton.frame)-50, 30);
+    
+    _actIndicator.center = CGPointMake(self.bounds.size.width/2.0, self.bounds.size.height/2.0);
 }
 
 -(void)setupFullScreenControl{
@@ -85,12 +93,15 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     __weak typeof(self) weakSelf = self;
     [_progressView setValueChangedHandler:^(TFMPProgressView *progressView, double seekTime) {
         
-        if (weakSelf.duration <= 0) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf.duration <= 0) {
             return;
         }
         
+        [strongSelf->_actIndicator startAnimating];
+        
         //seek to a time point.
-        [weakSelf.delegate dealPlayControlCommand:TFMPCmd_seek_TP params:@{TFMPCmd_param_time : @(seekTime) }];
+        [strongSelf.delegate dealPlayControlCommand:TFMPCmd_seek_TP params:@{TFMPCmd_param_time : @(seekTime) }];
     }];
     [self addSubview:_progressView];
 }
@@ -135,7 +146,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 -(void)setDelegate:(id<TFMPControlProtocol>)delegate{
     _delegate = delegate;
     
-    NSArray *states = @[TFMPState_duration, TFMPState_currentTime];
+    NSArray *states = @[TFMPState_duration, TFMPState_currentTime, TFMPState_isLoading];
     [_delegate helpObserveStates:states withChangedHandler:^(NSString *state, id value) {
         [self playState:state changedTo:value];
     }];
@@ -156,6 +167,13 @@ static CGFloat TFMPCVFullScreenWidth = 32;
         
         double currentTime = [value doubleValue];
         _progressView.currentTime = currentTime;
+    }else if ([state isEqualToString:TFMPState_isLoading]){
+        
+        if ([value boolValue]) {
+            [_actIndicator startAnimating];
+        }else{
+            [_actIndicator stopAnimating];
+        }
     }
 }
 

@@ -50,7 +50,6 @@ void DisplayController::stopDisplay(){
 
 void DisplayController::flush(){
     
-    paused = true;
     while (displayingAudio || displayingVideo) {
         TFMPDLOG_C("displayer flush wait: %s\n",displayingAudio?"audio":"video");
         av_usleep(10000); //0.01s
@@ -58,9 +57,6 @@ void DisplayController::flush(){
     
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
-    
-    paused = false;
-    pthread_cond_signal(&video_pause_cond);
 }
 
 void DisplayController::pause(bool flag){
@@ -89,10 +85,8 @@ double DisplayController::getLastPlayTime(){
 
 void DisplayController::freeResources(){
     
-    if (shouldDisplay){
-        TFMPDLOG_C("free DisplayController resource before stop display\n");
-        shouldDisplay = false;
-    }
+    shouldDisplay = false;
+    paused = false;
     
     while (isDispalyingVideo || isFillingAudio) {
         av_usleep(10000); //0.01s
@@ -121,25 +115,27 @@ void *DisplayController::displayLoop(void *context){
         
         displayer->displayingVideo = nullptr;
         videoFrame = nullptr; //reset it
-        
-        
-        if (displayer->paused) {
-            TFMPDLOG_C("display pause video\n");
-            pthread_mutex_lock(&displayer->video_pause_mutex);
-            pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
-            pthread_mutex_unlock(&displayer->video_pause_mutex);
-        }
 
         displayer->isDispalyingVideo = true;
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
+        if (videoFrame == nullptr) continue;
+        
+        if (displayer->checkingValidFrame) {
+            if (videoFrame->pts * av_q2d(displayer->videoTimeBase) < displayer->minMediaTime) {
+                continue;
+            }else if(!displayer->syncClock->isAudioMajor){
+                
+            }
+        }
         displayer->displayingVideo = videoFrame;
         
-        if (videoFrame == nullptr) continue;
+        
+        
+        
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
         TFMPDLOG_C("remainTime: %lld,%.6f\n",videoFrame->pts,remainTime);
-        
         
         if (remainTime < -minExeTime){
             av_frame_free(&videoFrame);
@@ -149,6 +145,8 @@ void *DisplayController::displayLoop(void *context){
             TFMPDLOG_C("video sleep: %.3f\n",remainTime);
             av_usleep(remainTime*1000000);
         }
+        
+        
         
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
         interimBuffer->width = videoFrame->width;
@@ -173,7 +171,16 @@ void *DisplayController::displayLoop(void *context){
         }
         
         
+        
         if (displayer->shouldDisplay){
+            
+            if (displayer->paused) {
+                TFMPDLOG_C("display pause video\n");
+                pthread_mutex_lock(&displayer->video_pause_mutex);
+                pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
+                pthread_mutex_unlock(&displayer->video_pause_mutex);
+            }
+            
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
 
             if (!displayer->syncClock->isAudioMajor) {

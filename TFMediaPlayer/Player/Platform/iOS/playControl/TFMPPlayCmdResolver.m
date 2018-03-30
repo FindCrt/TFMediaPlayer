@@ -89,10 +89,25 @@
 /** the changing of playing or pausing... */
 -(void)playerStateChanged:(NSNotification *)notification{
     
-    if (_player.state == TFMediaPlayerStateReady) {
+    TFMediaPlayerState state = [[notification.userInfo objectForKey:TFMPStateChangedKey] integerValue];
+    
+    if (state == TFMediaPlayerStateReady) {
         
         if ([_observedStates containsObject:TFMPState_duration] && _observeHandler) {
             _observeHandler(TFMPState_duration, @(_player.duration));
+        }
+    }
+    
+    if (state == TFMediaPlayerStatePlaying ||
+        state == TFMediaPlayerStateNone ||
+        state == TFMediaPlayerStatePause){
+        
+        if ([_observedStates containsObject:TFMPState_isLoading] && _observeHandler) {
+            _observeHandler(TFMPState_isLoading, @(NO));
+        }
+    }else{
+        if ([_observedStates containsObject:TFMPState_isLoading] && _observeHandler) {
+            _observeHandler(TFMPState_isLoading, @(YES));
         }
     }
 }

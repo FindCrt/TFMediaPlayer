@@ -44,8 +44,6 @@ namespace tfmpcore {
         static void *displayLoop(void *context);
         
         bool shouldDisplay = false;
-        bool checkingValidFrame = false;
-        
         bool paused = false;
         pthread_cond_t video_pause_cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t video_pause_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -65,6 +63,9 @@ namespace tfmpcore {
         uint64_t lastPRealTime = 0;
         int64_t lastPts = 0;
         bool lastIsAudio = true;
+        
+        bool checkingValidFrame = false;
+        double minMediaTime = 0;
         
     public:
         
@@ -98,6 +99,7 @@ namespace tfmpcore {
         SyncClock *syncClock = nullptr;
         double getLastPlayTime();
         void setMinMediaTime(double minMediaTime){
+            this->minMediaTime = minMediaTime;
             if (syncClock) syncClock->setMinMediaTime(minMediaTime);
         }
 
@@ -107,7 +109,7 @@ namespace tfmpcore {
         
         void pause(bool flag);
         
-        //check frame's pts until finding the first frame which's pts is later than seeking time.
+        //check frame's pts until finding the first frame whose pts is later than seeking time.
         void startToCheckValidFrame();
         std::function<void()> checkValidFrameCallback;
         
