@@ -11,7 +11,7 @@
 
 /** log */
 
-#define TFMPLOG 1
+#define TFMPLOG 0
 #define TFMPErrorLog 1
 
 #if DEBUG

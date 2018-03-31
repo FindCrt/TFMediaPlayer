@@ -185,7 +185,9 @@ void PlayController::seekTo(double time){
     }
     
     checkingEnd = false;
+    prepareForSeeking = true;
     seeking = true;
+    TFMPDLOG_C("seeking true\n");
     seekingTime = time;
     
     //Flushing all old frames and packets. Firstly, stop reading new packets.
@@ -204,6 +206,8 @@ void PlayController::seekTo(double time){
     }
     
     displayer->flush();
+    
+    prepareForSeeking = false;
     
     //3. enable mediaTimeFilter to filter unqualified frames whose pts is earlier than seeking time.
     if (videoDecoder) {
@@ -245,7 +249,7 @@ void PlayController::seekingEnd(){
     
     if (seeking) {
         seeking = false;
-        
+        TFMPDLOG_C("seeking false\n");
         if (seekingEndNotify) {
             seekingEndNotify(this);
         }
@@ -331,6 +335,7 @@ double PlayController::getDuration(){
 }
 
 double PlayController::getCurrentTime(){
+    TFMPDLOG_C("seeking is %s\n",seeking?"true":"false");
     if (seeking) {
         return seekingTime;
     }else{
@@ -467,6 +472,10 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
         }
 
     }else if (curSize >= playResumeSize){
+        
+        if (controller->prepareForSeeking) {
+            return false;
+        }
         
         if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
             TFMPDLOG_C("video: frame buffer size has be greater than 20\n");

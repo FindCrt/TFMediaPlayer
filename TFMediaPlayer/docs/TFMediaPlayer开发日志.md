@@ -291,11 +291,15 @@ Printing description of srcp->f->buf[0]->buffer:
  
 2. 往前seek，视频有剩余，计算remainTime太长，视频缓冲区满，卡死。
 
-解决方案：
+  解决方案：
+   * 首先保证整个流程没有旧的数据留存，音视频的frame buffer、packet buffer,decode函数里的临时变量，插入buffer时阻塞的临时变量，播放时的临时变量。
+   * 然后使用过滤器把没到时间的frame直接丢弃，而不是到displayer才处理
+   * 
 
-  * 首先保证整个流程没有旧的数据留存，音视频的frame buffer、packet buffer,decode函数里的临时变量，插入buffer时阻塞的临时变量，播放时的临时变量。
-
+3. seek过程最后是关闭播放，等待frame缓冲区满再打开播放，这个回调可能会插入到开始seek但还没有flush缓冲区的这个区间里，这样就会出错。简单说，这个过程里，缓冲区的数据是多线程公用的资源，需要互斥。
   
+4. seek结束，打开播放到实际有一个audio播放出去之间是有一段间隔的，在这期间，currentTime是错误的。
+5. seek开始声音卡顿、重复
   
   
   

@@ -68,6 +68,7 @@ namespace tfmpcore {
          * And it becomes false when displayer find the first frame whose pts is greater than the seeking time, because now is time we can actually resume playing.
          */
         bool seeking = false;
+        bool prepareForSeeking = false;
         double seekingTime = 0;
         void seekingEnd();
         

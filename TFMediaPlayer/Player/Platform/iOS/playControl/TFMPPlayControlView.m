@@ -167,6 +167,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
         
         double currentTime = [value doubleValue];
         _progressView.currentTime = currentTime;
+        //NSLog(@"currentTime: %.3f\n",currentTime);
     }else if ([state isEqualToString:TFMPState_isLoading]){
         
         if ([value boolValue]) {

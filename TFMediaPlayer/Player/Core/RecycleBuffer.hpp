@@ -13,8 +13,11 @@
 #include <pthread.h>
 #include <limits.h>
 #include <vector>
+extern "C"{
+#include <libavutil/time.h>
+}
 
-#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>| */
 
@@ -322,6 +325,7 @@ namespace tfmpcore {
                 RecycleNode *curNode = frontNode;
                 do {
                     usedSize--;
+                    //av_usleep(10000);
                     RecycleBufferLog("free: %s[%ld],[%x->%x,%x->%x],",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
                     valueFreeFunc(&(curNode->val));
                     curNode = curNode->next;

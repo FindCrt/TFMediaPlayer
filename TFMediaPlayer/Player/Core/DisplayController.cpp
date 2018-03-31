@@ -198,7 +198,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     
     uint8_t *buffer = buffersList[0];
     if (displayer->paused) {
-        TFMPDLOG_C("display pause audio\n");
+        printf("display pause audio\n");
         displayer->isFillingAudio = false;
         memset(buffer, 0, oneLineSize);
         return 0;

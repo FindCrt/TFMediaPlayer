@@ -82,6 +82,7 @@
 -(void)getPlayStates{
     
     if ([_observedStates containsObject:TFMPState_currentTime]) {
+        
         _observeHandler(TFMPState_currentTime, @(_player.currentTime));
     }
 }
