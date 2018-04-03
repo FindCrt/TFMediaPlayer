@@ -48,20 +48,44 @@ namespace tfmpcore {
         
         DisplayController *displayer = nullptr;
         
-        bool prapareOK;
+        TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+        TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+        void calculateRealDisplayMediaType();
+
+        double duration = 0;
         
-        double duration;
         
-        //read frames
-        bool shouldRead = false;
+        /*** A lot of controls and states ***/
         
+        //0. prepare
+        bool prapareOK = false;
+        //real audio format
+        void resolveAudioStreamFormat();
+        void setupSyncClock();
+        
+        //1. start
         void startReadingFrames();
         pthread_t readThread;
         static void * readFrame(void *context);
         
-        //real audio format
-        void resolveAudioStreamFormat();
+        //2. pause and resume
+        bool paused = false;   //It's order from outerside, not state of player. In other word, it's a mark.
+        bool readable = false;  //It's ability to read.
+        pthread_cond_t read_cond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t read_mutex = PTHREAD_MUTEX_INITIALIZER;
+        //Stop playing and start buffering when buffer is empty or seeking. This func'll be called when buffer is full again.
+        void bufferDone();
         
+        //3. stop
+        bool stoping = false;
+        
+        //4. media resource is going to end. catch play ending
+        bool checkingEnd = false;
+        void startCheckPlayFinish();
+        pthread_t signalThread;
+        static void *signalPlayFinished(void *context);
+        
+        //5. seek
         /**
          * The state of seeking.
          * It becomes true when the user drags the progressBar and loose fingers.
@@ -69,27 +93,11 @@ namespace tfmpcore {
          */
         bool seeking = false;
         bool prepareForSeeking = false;
-        double seekingTime = 0;
-        void seekingEnd();
+        double markTime = 0;  //The media time that seek to or start to pause.
         
-        TFMPMediaType desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-        TFMPMediaType realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
-        
-        void calculateRealDisplayMediaType();
-        void setupSyncClock();
-        
+        //6. free
         void freeResources();
-        
-        bool paused = false;
-        pthread_cond_t pause_cond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t pause_mutex = PTHREAD_MUTEX_INITIALIZER;
-        void startCheckPlayFinish();
-        
-        //catch play ending
-        bool checkingEnd = false;
-        pthread_t signalThread;
-        static void *signalPlayFinished(void *context);
-        
+
     public:
         
         ~PlayController(){

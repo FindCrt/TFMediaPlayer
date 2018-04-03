@@ -53,10 +53,10 @@
         
     }else if ([TFMPCmd_double_tap isEqualToString:command]){
         
-        if (_player.isPlaying) {
-            [_player pause];
-        }else{
+        if (_player.state == TFMediaPlayerStatePaused) {
             [_player play];
+        }else{
+            [_player pause];
         }
         
     }
@@ -101,7 +101,7 @@
     
     if (state == TFMediaPlayerStatePlaying ||
         state == TFMediaPlayerStateNone ||
-        state == TFMediaPlayerStatePause){
+        state == TFMediaPlayerStatePaused){
         
         if ([_observedStates containsObject:TFMPState_isLoading] && _observeHandler) {
             _observeHandler(TFMPState_isLoading, @(NO));

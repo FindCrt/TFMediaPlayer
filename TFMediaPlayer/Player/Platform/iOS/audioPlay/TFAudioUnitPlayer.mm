@@ -145,7 +145,7 @@ OSStatus playAudioBufferCallback(void *							inRefCon,
                                  UInt32							inNumberFrames,
                                  AudioBufferList * __nullable	ioData){
     
-    NSLog(@"audioUnit fill: %.3f, %d, %d\n",inTimeStamp->mSampleTime, inBusNumber, inNumberFrames);
+//    NSLog(@"audioUnit fill: %.3f, %d, %d\n",inTimeStamp->mSampleTime, inBusNumber, inNumberFrames);
     
     TFAudioUnitPlayer *player = (__bridge TFAudioUnitPlayer *)(inRefCon);
     

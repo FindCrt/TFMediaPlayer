@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
     TFMediaPlayerStateConnecting,
     TFMediaPlayerStateReady,
     TFMediaPlayerStatePlaying,
-    TFMediaPlayerStatePause,
+    TFMediaPlayerStatePaused,
     TFMediaPlayerStateLoading,   //net is not good or seeking to new position.
 };
 

@@ -128,6 +128,9 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 }
 
 -(void)swipeScreen:(UISwipeGestureRecognizer *)swipe{
+    
+    [_actIndicator startAnimating];
+    
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         TFMPDLog(@"forward 10s");
         [self.delegate dealPlayControlCommand:TFMPCmd_seek_TD params:@{TFMPCmd_param_duration : @(_swipeSeekDuration)}];
@@ -167,7 +170,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
         
         double currentTime = [value doubleValue];
         _progressView.currentTime = currentTime;
-        //NSLog(@"currentTime: %.3f\n",currentTime);
+//        NSLog(@"currentTime: %.3f\n",currentTime);
     }else if ([state isEqualToString:TFMPState_isLoading]){
         
         if ([value boolValue]) {

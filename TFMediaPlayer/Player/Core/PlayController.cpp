@@ -99,12 +99,14 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     return true;
 }
 
+#pragma mark - controls
+
 void PlayController::play(){
     if (!prapareOK) {
         return;
     }
     printf("start Play: %s\n",mediaPath.c_str());
-    shouldRead = true;
+    readable = true;
     
     startReadingFrames();
     if (videoDecoder) {
@@ -132,14 +134,24 @@ void PlayController::play(){
     checkDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
 }
 
+
 void PlayController::pause(bool flag){
+    
+    if (flag) {
+        markTime = getCurrentTime();
+    }
+    
     paused = flag;
+    
+    //just change state of displaying, don't change state of reading.
     displayer->pause(flag);
+    //TODO: resume readable if paused is false.
 }
 
 void PlayController::stop(){
     
-    shouldRead = false;
+    stoping = true;
+    paused = false;
     
     //displayer
     displayer->stopDisplay();
@@ -164,21 +176,18 @@ void PlayController::stop(){
     audioStream = -1;
     subTitleStream = -1;
 
+    stoping = false;
+    readable = false;
+    checkingEnd = false;
+    seeking = false;
+    prepareForSeeking = false;
+    markTime = 0;
     TFMPDLOG_C("player stoped!\n");
 }
 
 void PlayController::seekTo(double time){
     
     TFMPDLOG_C("seekTo: %d:%d\n",(int)time/60,(int)time%60);
-    
-    /* 
-     1. turn off inlet
-     2. flush all buffers 
-     3. turn off outlet 
-     4. seek stream to new position 
-     5. turn on inlet
-     6. turn on outlet when the pool fill to a certain size.
-     */
     
     if (time > duration) {
         time = duration-0.1;
@@ -187,12 +196,13 @@ void PlayController::seekTo(double time){
     checkingEnd = false;
     prepareForSeeking = true;
     seeking = true;
+    markTime = time;
+    
     TFMPDLOG_C("seeking true\n");
-    seekingTime = time;
     
     //Flushing all old frames and packets. Firstly, stop reading new packets.
     //1. turn off inlet
-    paused = true;
+    readable = false;
     
     //2. flush all buffers
     if (videoDecoder) {
@@ -207,20 +217,19 @@ void PlayController::seekTo(double time){
     
     displayer->flush();
     
-    prepareForSeeking = false;
-    
     //3. enable mediaTimeFilter to filter unqualified frames whose pts is earlier than seeking time.
     if (videoDecoder) {
         videoDecoder->mediaTimeFilter->enable = true;
-        videoDecoder->mediaTimeFilter->minMediaTime = seekingTime;
+        videoDecoder->mediaTimeFilter->minMediaTime = time;
     }
     if (audioDecoder) {
         audioDecoder->mediaTimeFilter->enable = true;
-        audioDecoder->mediaTimeFilter->minMediaTime = seekingTime;
+        audioDecoder->mediaTimeFilter->minMediaTime = time;
     }
     
     //3. turn off outlet
     displayer->pause(true);
+    displayer->resetPlayTime();
     
     TFMPDLOG_C("flush all end!\n");
     
@@ -232,10 +241,11 @@ void PlayController::seekTo(double time){
     }
     
     //5. turn on inlet
-    paused = false;
-    pthread_cond_signal(&pause_cond);
+    readable = true;
+    pthread_cond_signal(&read_cond);
     
-    TFMPDLOG_C("seek end! %.3f\n",time);
+    prepareForSeeking = false;
+    TFMPDLOG_C("seek prepare end! %.3f\n",time);
 }
 
 void PlayController::seekByForward(double interval){
@@ -245,7 +255,15 @@ void PlayController::seekByForward(double interval){
     seekTo(seekTime);
 }
 
-void PlayController::seekingEnd(){
+void PlayController::bufferDone(){
+    
+    if (prepareForSeeking) {
+        return;
+    }
+    
+    if(!paused) {
+        displayer->pause(false);
+    }
     
     if (seeking) {
         seeking = false;
@@ -283,7 +301,31 @@ void PlayController::freeResources(){
     if (fmtCtx) avformat_free_context(fmtCtx);
 }
 
-/***** properties *****/
+#pragma mark - properties
+
+TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
+    return displayer->getFillAudioBufferStruct();
+}
+DisplayController *PlayController::getDisplayer(){
+    return displayer;
+}
+
+double PlayController::getDuration(){
+    return duration;
+}
+
+double PlayController::getCurrentTime(){
+//    TFMPDLOG_C("seeking is %s\n",seeking?"true":"false");
+    
+    double playTime = displayer->getPlayTime();
+    if (seeking || paused || playTime < 0) {  //invalid time
+        playTime = markTime;
+    }
+    
+    return fmin(fmax(playTime, 0), duration);
+}
+
+#pragma mark - palying processes
 
 void PlayController::calculateRealDisplayMediaType(){
     int realType = 0;
@@ -323,28 +365,6 @@ void PlayController::setupSyncClock(){
     
 }
 
-TFMPFillAudioBufferStruct PlayController::getFillAudioBufferStruct(){
-    return displayer->getFillAudioBufferStruct();
-}
-DisplayController *PlayController::getDisplayer(){
-    return displayer;
-}
-
-double PlayController::getDuration(){
-    return duration;
-}
-
-double PlayController::getCurrentTime(){
-    TFMPDLOG_C("seeking is %s\n",seeking?"true":"false");
-    if (seeking) {
-        return seekingTime;
-    }else{
-        return fmin(displayer->getLastPlayTime(),duration);
-    }
-}
-
-/***** private ******/
-
 void PlayController::resolveAudioStreamFormat(){
     
     auto codecpar = fmtCtx->streams[audioStream]->codecpar;
@@ -381,13 +401,13 @@ void * PlayController::readFrame(void *context){
     
     bool endFile = false;
     
-    while (controller->shouldRead) {
+    while (!controller->stoping) {
         
-        if (controller->paused) {
-            TFMPDLOG_C("read paused!\n");
-            pthread_mutex_lock(&controller->pause_mutex);
-            pthread_cond_wait(&controller->pause_cond, &controller->pause_mutex);
-            pthread_mutex_unlock(&controller->pause_mutex);
+        if (!controller->readable) {
+            TFMPDLOG_C("read disable!\n");
+            pthread_mutex_lock(&controller->read_mutex);
+            pthread_cond_wait(&controller->read_cond, &controller->read_mutex);
+            pthread_mutex_unlock(&controller->read_mutex);
         }
         
         int retval = av_read_frame(controller->fmtCtx, packet);
@@ -398,9 +418,9 @@ void * PlayController::readFrame(void *context){
                 
                 controller->startCheckPlayFinish();
                 
-                pthread_mutex_lock(&controller->pause_mutex);
-                pthread_cond_wait(&controller->pause_cond, &controller->pause_mutex);
-                pthread_mutex_unlock(&controller->pause_mutex);
+                pthread_mutex_lock(&controller->read_mutex);
+                pthread_cond_wait(&controller->read_cond, &controller->read_mutex);
+                pthread_mutex_unlock(&controller->read_mutex);
 //                break;
             }else{
                 continue;
@@ -461,7 +481,7 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
     if (curSize <= bufferEmptySize) {
         
         if (controller->checkingEnd){
-            pthread_cond_signal(&controller->pause_cond);
+            pthread_cond_signal(&controller->read_cond);
             
             pthread_create(&controller->signalThread, nullptr, PlayController::signalPlayFinished, controller);
             pthread_detach(controller->signalThread);
@@ -473,18 +493,13 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
 
     }else if (curSize >= playResumeSize){
         
-        if (controller->prepareForSeeking) {
-            return false;
-        }
-        
         if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
             TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
         }else{
             TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
         }
         
-        controller->displayer->pause(false);
-        controller->seekingEnd();
+        controller->bufferDone();
         
     }
 

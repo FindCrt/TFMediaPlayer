@@ -26,6 +26,8 @@ extern "C"{
 
 namespace tfmpcore {
     
+    static double invalidPlayTime = -1;
+    
     typedef struct{
         uint32_t allocSize = 0;
         uint32_t validSize = 0;
@@ -60,7 +62,6 @@ namespace tfmpcore {
         
         AudioResampler *audioResampler = nullptr;
         
-        uint64_t lastPRealTime = 0;
         int64_t lastPts = 0;
         bool lastIsAudio = true;
         
@@ -91,12 +92,12 @@ namespace tfmpcore {
         AVRational audioTimeBase;
         
         
-        
         //sync and play time
         SyncClock *syncClock = nullptr;
-        double getLastPlayTime();
-        void setMinMediaTime(double minMediaTime){
-            if (syncClock) syncClock->setMinMediaTime(minMediaTime);
+        double getPlayTime();
+        void resetPlayTime(){
+            lastPts = -1;
+            lastIsAudio = false;
         }
 
         //controls

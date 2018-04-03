@@ -16,7 +16,7 @@
 
 #define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
 
-/* |->--front-----back------>| */
+/* |->--front-----back------>|  The range of [front, back] contains all valid nodes */
 
 namespace tfmpcore {
     template<typename T>
@@ -30,8 +30,8 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
-        /** Use this to observe the change of usedsize. It makes you know RecycleBuffer's status to do specific things. 
-         * if return true, remove the observer.
+        /** Use this to observe the change of usedsize. It makes you know RecycleBuffer's status and helping you do specific things.
+         * if return true, observer'll be removed.
          */
         typedef bool (*ObserverNotifyFunc)(RecycleBuffer *buffer, int curSize, bool isGreater, void *context);
         class UsedSizeObserver{

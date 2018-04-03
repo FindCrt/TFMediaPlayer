@@ -60,6 +60,9 @@ void DisplayController::flush(){
 }
 
 void DisplayController::pause(bool flag){
+    if (paused == flag) {
+        return;
+    }
     TFMPDLOG_C("DisplayController pause: %s\n",flag?"true":"false");
     paused = flag;
     if (paused) {
@@ -69,13 +72,12 @@ void DisplayController::pause(bool flag){
     }
 }
 
-double DisplayController::getLastPlayTime(){
-    if (videoTimeBase.den == 0 || videoTimeBase.num == 0) {
-        return 0;
+double DisplayController::getPlayTime(){
+    if (videoTimeBase.den == 0 || videoTimeBase.num == 0 || lastPts < 0) {
+        return invalidPlayTime;
     }
     
-    double lastPMediaTime = lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
-    return lastPMediaTime;
+    return lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
 }
 
 void DisplayController::freeResources(){
@@ -110,8 +112,14 @@ void *DisplayController::displayLoop(void *context){
         
         displayer->displayingVideo = nullptr;
         videoFrame = nullptr; //reset it
-
         displayer->isDispalyingVideo = true;
+        
+        if (displayer->paused) {
+            TFMPDLOG_C("display pause video\n");
+            pthread_mutex_lock(&displayer->video_pause_mutex);
+            pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
+            pthread_mutex_unlock(&displayer->video_pause_mutex);
+        }
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
@@ -158,18 +166,10 @@ void *DisplayController::displayLoop(void *context){
         
         if (displayer->shouldDisplay){
             
-            if (displayer->paused) {
-                TFMPDLOG_C("display pause video\n");
-                pthread_mutex_lock(&displayer->video_pause_mutex);
-                pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
-                pthread_mutex_unlock(&displayer->video_pause_mutex);
-            }
-            
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
 
             if (!displayer->syncClock->isAudioMajor) {
                 
-                displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = videoFrame->pts;
                 displayer->lastIsAudio = false;
                 
@@ -283,7 +283,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             //update sync clock
             if (displayer->syncClock->isAudioMajor) {
-                displayer->lastPRealTime = av_gettime_relative();
                 displayer->lastPts = frame->pts;
                 displayer->lastIsAudio = true;
                 

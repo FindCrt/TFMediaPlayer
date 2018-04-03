@@ -299,12 +299,14 @@ Printing description of srcp->f->buf[0]->buffer:
 
 3. seek过程最后是关闭播放，等待frame缓冲区满再打开播放，这个回调可能会插入到开始seek但还没有flush缓冲区的这个区间里，这样就会出错。简单说，这个过程里，缓冲区的数据是多线程公用的资源，需要互斥。
   
-4. seek结束，打开播放到实际有一个audio播放出去之间是有一段间隔的，在这期间，currentTime是错误的。
+4. seek结束，打开播放到实际有一个audio播放出去之间是有一段间隔的，在这期间，currentTime是错误的。**这个不能忽视，比较明显**
 5. seek开始声音卡顿、重复
   
   
-  
+###多种操作混合
   
 ###状态的维护
 
 1. pause和loading是有共存的，在loading的时候pause,仍然保持loading，等到loading结束，要跳入playing的时候，要自动切换到pause。所以pause需要一个标记。这样两者就不会存在共存。或者loading加一个标记。具体再研究。
+2. pause是用户的意图，这个是完全独立于媒体资源的状态的，所以必须单独标记。loading是一种状态，但不会是一种标记。标记代表着它独立存在，不受播放器自身状态影响。
+
