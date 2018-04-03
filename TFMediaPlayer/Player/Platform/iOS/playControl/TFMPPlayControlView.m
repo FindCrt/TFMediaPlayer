@@ -30,6 +30,8 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     TFMPProgressView *_progressView;
     
     UIActivityIndicatorView *_actIndicator;
+    
+    BOOL _seekable;
 }
 
 @property (nonatomic, assign) double duration;
@@ -129,6 +131,9 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 
 -(void)swipeScreen:(UISwipeGestureRecognizer *)swipe{
     
+    if (!_seekable) {
+        return;
+    }
     [_actIndicator startAnimating];
     
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
@@ -149,7 +154,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
 -(void)setDelegate:(id<TFMPControlProtocol>)delegate{
     _delegate = delegate;
     
-    NSArray *states = @[TFMPState_duration, TFMPState_currentTime, TFMPState_isLoading];
+    NSArray *states = @[TFMPState_duration, TFMPState_currentTime, TFMPState_isLoading, TFMPState_seekable];
     [_delegate helpObserveStates:states withChangedHandler:^(NSString *state, id value) {
         [self playState:state changedTo:value];
     }];
@@ -178,6 +183,10 @@ static CGFloat TFMPCVFullScreenWidth = 32;
         }else{
             [_actIndicator stopAnimating];
         }
+    }else if ([state isEqualToString:TFMPState_seekable]){
+        
+        _seekable = [value boolValue];
+        _progressView.enable = [value boolValue];
     }
 }
 

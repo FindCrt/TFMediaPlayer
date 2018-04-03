@@ -25,5 +25,7 @@
 
 @property (nonatomic, strong) UIColor *normalColor;
 
+@property (nonatomic, assign) BOOL enable;
+
 
 @end

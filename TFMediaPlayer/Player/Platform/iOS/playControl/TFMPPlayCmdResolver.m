@@ -92,6 +92,7 @@
     
     TFMediaPlayerState state = [[notification.userInfo objectForKey:TFMPStateChangedKey] integerValue];
     
+    //duration
     if (state == TFMediaPlayerStateReady) {
         
         if ([_observedStates containsObject:TFMPState_duration] && _observeHandler) {
@@ -99,6 +100,7 @@
         }
     }
     
+    //isLoading
     if (state == TFMediaPlayerStatePlaying ||
         state == TFMediaPlayerStateNone ||
         state == TFMediaPlayerStatePaused){
@@ -109,6 +111,17 @@
     }else{
         if ([_observedStates containsObject:TFMPState_isLoading] && _observeHandler) {
             _observeHandler(TFMPState_isLoading, @(YES));
+        }
+    }
+    
+    //seekable
+    if (state == TFMediaPlayerStateReady) {
+        if ([_observedStates containsObject:TFMPState_seekable] && _observeHandler) {
+            _observeHandler(TFMPState_seekable, @(YES));
+        }
+    }else if (state == TFMediaPlayerStateNone){
+        if ([_observedStates containsObject:TFMPState_seekable] && _observeHandler) {
+            _observeHandler(TFMPState_seekable, @(NO));
         }
     }
 }

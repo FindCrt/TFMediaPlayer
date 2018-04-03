@@ -63,4 +63,6 @@ static NSString *TFMPState_duration = @"duration";
 
 static NSString *TFMPState_currentTime = @"TFMPState_currentTime";
 
-static NSString *TFMPState_isLoading = @"is";
+static NSString *TFMPState_isLoading = @"isLoading";
+
+static NSString *TFMPState_seekable = @"seekable";

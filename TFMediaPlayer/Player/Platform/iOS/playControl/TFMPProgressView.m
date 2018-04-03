@@ -137,6 +137,12 @@ static CGFloat TFMPTimeLabelWidth = 50;
     _durationLabel.text = [self timeTextFromInterval:_duration];
 }
 
+-(void)setEnable:(BOOL)enable{
+    _enable = enable;
+    
+    self.userInteractionEnabled = _enable;
+}
+
 #pragma mark -
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
@@ -154,7 +160,7 @@ static CGFloat TFMPTimeLabelWidth = 50;
     NSLog(@"_currentTime: %.3f, rate:%.3f, duration: %.3f",_currentTime,rate,_duration);
     
     [self _currentTimeChanged];
-    if (!_notifyWhenUntouch) {
+    if (!_notifyWhenUntouch && _enable) {
         [self notifyWhenUntouch];
     }
 }
@@ -165,7 +171,7 @@ static CGFloat TFMPTimeLabelWidth = 50;
     CGPoint location = [touches.anyObject locationInView:self];
     float rate = location.x / self.frame.size.width;
     
-    if (_notifyWhenUntouch) {
+    if (_notifyWhenUntouch && _enable) {
         [self notifyValueChanged:rate*_duration];
     }
     
