@@ -16,6 +16,7 @@
  * FFmpeg的linesize单位是byte.
  * 奇怪的是`AV_SAMPLE_FMT_FLTP`格式，linesize为8192,nb_samples为1024，算起来bitPerSample为8.
  * `av_frame_clone`返回为null，如果src不是ref的话。
+ * **audioUnit音频不能阻塞**，线程卡住会导致最后的声音片段重复，非常不好。在音频framebuffer为空或暂停播放的时候，填充空数据，也即是把要传递的buffer剩余部分全部置为0。
  
 
 4. 音视频同步

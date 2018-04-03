@@ -231,16 +231,21 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         int linesize = 0, outSamples = 0;
         
         while (needReadSize > 0) {
-            if (displayer->paused) {
-                break;
-            }
             
             //TODO: do more thing for planar audio.
             frame = nullptr;
             displayer->displayingAudio = nullptr;
             
-            displayer->shareAudioBuffer->blockGetOut(&frame);
-            displayer->displayingAudio = frame;
+            if (displayer->shareAudioBuffer->isEmpty() || displayer->paused) {
+                //fill remain buffer to 0.
+                memset(buffer+(oneLineSize - needReadSize), 0, needReadSize);
+                break;
+            }else{
+                displayer->shareAudioBuffer->blockGetOut(&frame);
+                displayer->displayingAudio = frame;
+            }
+            
+            
             
             //TODO: need more calm way to wait
             if (frame == nullptr) continue;
@@ -258,7 +263,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                     dataBuffer = displayer->audioResampler->resampledBuffers;
                     resample = true;
                     
-                    TFMPBufferReadLog("resample %d, %d",linesize, outSamples);
+//                    TFMPBufferReadLog("resample %d, %d",linesize, outSamples);
                 }
                 
             }else{

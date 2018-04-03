@@ -254,7 +254,7 @@
         case TFMediaPlayerStateLoading:
             _playController->pause(true);
             if (_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO) {
-                [_audioPlayer pause];
+//                [_audioPlayer pause];
             }
             self.state = TFMediaPlayerStatePause;
             

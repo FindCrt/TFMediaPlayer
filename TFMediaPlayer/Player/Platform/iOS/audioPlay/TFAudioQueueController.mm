@@ -136,7 +136,7 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
     }
     
     OSStatus status = AudioQueuePause(_audioQueue);
-    TFMPDLOG_C("AudioQueuePause %d\n",status);
+    NSLog(@"AudioQueuePause %d\n",status);
     _state = TFAudioQueueStatePaused;
     
     [_lock unlock];
@@ -177,9 +177,9 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
         }
         
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
-        TFMPDLOG_C("AudioQueueEnqueueBuffer\n");
+        NSLog(@"AudioQueueEnqueueBuffer\n");
         
-        TFMPPrintBuffer(buffers[0], 100, 100);
+//        TFMPPrintBuffer(buffers[0], 100, 100);
         
         if (controller->_shareAudioStruct.shareAudioFunc) {
             int size = (int)inBuffer->mAudioDataByteSize;
