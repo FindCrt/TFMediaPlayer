@@ -131,6 +131,10 @@ then
 			LDFLAGS="$LDFLAGS -L$FDK_AAC/lib"
 		fi
 
+a="--target-os=darwin \ --arch=$ARCH \ --cc="$CC" \ --as="$AS" \ $CONFIGURE_FLAGS \ --extra-cflags="$CFLAGS" \ --extra-ldflags="$LDFLAGS" \ --prefix="$THIN/$ARCH""
+
+echo $a
+
 		TMPDIR=${TMPDIR/%\/} $CWD/$SOURCE/configure \
 		    --target-os=darwin \
 		    --arch=$ARCH \
