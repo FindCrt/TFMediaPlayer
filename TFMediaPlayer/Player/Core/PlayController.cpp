@@ -185,7 +185,7 @@ void PlayController::stop(){
     TFMPDLOG_C("player stoped!\n");
 }
 
-void PlayController::seekTo(double time){
+bool PlayController::seekTo(double time){
     
     TFMPDLOG_C("seekTo: %d:%d\n",(int)time/60,(int)time%60);
     
@@ -234,10 +234,29 @@ void PlayController::seekTo(double time){
     TFMPDLOG_C("flush all end!\n");
     
     //4. seek stream to new position
+    int retval = -1;
     if (videoStrem >= 0) {
-        av_seek_frame(fmtCtx, videoStrem, time/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
+        retval = av_seek_frame(fmtCtx, videoStrem, time/av_q2d(fmtCtx->streams[videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
+        TFCheckRetval("seek video");
     }else if (audioStream >= 0){
-        av_seek_frame(fmtCtx, audioStream, time/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
+        retval = av_seek_frame(fmtCtx, audioStream, time/av_q2d(fmtCtx->streams[audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
+        TFCheckRetval("seek audio");
+    }
+    
+    if (retval < 0) { //seek failed
+        if (audioDecoder) {
+            audioDecoder->mediaTimeFilter->enable = false;
+        }
+        if (videoDecoder) {
+            videoDecoder->mediaTimeFilter->enable = false;
+        }
+        
+        seeking = false;
+        displayer->pause(false);
+        
+        if (seekingEndNotify) {
+            seekingEndNotify(this);
+        }
     }
     
     //5. turn on inlet
@@ -246,13 +265,15 @@ void PlayController::seekTo(double time){
     
     prepareForSeeking = false;
     TFMPDLOG_C("seek prepare end! %.3f\n",time);
+    
+    return retval == 0;
 }
 
-void PlayController::seekByForward(double interval){
+bool PlayController::seekByForward(double interval){
     double currentTime = getCurrentTime();
     
     double seekTime = currentTime + interval;
-    seekTo(seekTime);
+    return seekTo(seekTime);
 }
 
 void PlayController::bufferDone(){

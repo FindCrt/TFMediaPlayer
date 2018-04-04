@@ -353,8 +353,9 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         _state == TFMediaPlayerStateReady) {
         return;
     }
-    _playController->seekTo(playTime);
-    self.state = TFMediaPlayerStateLoading;
+    if (_playController->seekTo(playTime)) {
+        self.state = TFMediaPlayerStateLoading;
+    }
 }
 
 -(void)seekByForward:(NSTimeInterval)interval{
@@ -363,8 +364,9 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         _state == TFMediaPlayerStateReady) {
         return;
     }
-    _playController->seekByForward(interval);
-    self.state = TFMediaPlayerStateLoading;
+    if (_playController->seekByForward(interval)) {
+        self.state = TFMediaPlayerStateLoading;
+    }
 }
 
 -(void)changeFullScreenState{

@@ -121,8 +121,8 @@ namespace tfmpcore {
         void pause(bool flag);
         void stop();
         
-        void seekTo(double time);
-        void seekByForward(double interval);
+        bool seekTo(double time);
+        bool seekByForward(double interval);
         std::function<void(PlayController*)>seekingEndNotify;
         
         /** properties **/

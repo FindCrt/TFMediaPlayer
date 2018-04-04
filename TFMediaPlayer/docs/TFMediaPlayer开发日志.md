@@ -310,3 +310,7 @@ Printing description of srcp->f->buf[0]->buffer:
 1. pause和loading是有共存的，在loading的时候pause,仍然保持loading，等到loading结束，要跳入playing的时候，要自动切换到pause。所以pause需要一个标记。这样两者就不会存在共存。或者loading加一个标记。具体再研究。
 2. pause是用户的意图，这个是完全独立于媒体资源的状态的，所以必须单独标记。loading是一种状态，但不会是一种标记。标记代表着它独立存在，不受播放器自身状态影响。
 
+
+###不同格式调试
+
+1. flv的seek由问题。

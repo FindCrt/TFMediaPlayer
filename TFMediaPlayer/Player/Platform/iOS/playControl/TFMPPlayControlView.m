@@ -100,7 +100,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
             return;
         }
         
-        [strongSelf->_actIndicator startAnimating];
+//        [strongSelf->_actIndicator startAnimating];
         
         //seek to a time point.
         [strongSelf.delegate dealPlayControlCommand:TFMPCmd_seek_TP params:@{TFMPCmd_param_time : @(seekTime) }];
@@ -134,7 +134,7 @@ static CGFloat TFMPCVFullScreenWidth = 32;
     if (!_seekable) {
         return;
     }
-    [_actIndicator startAnimating];
+//    [_actIndicator startAnimating];
     
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         TFMPDLog(@"forward 10s");
