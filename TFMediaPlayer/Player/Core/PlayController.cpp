@@ -9,9 +9,7 @@
 #include "PlayController.hpp"
 #include "TFMPDebugFuncs.h"
 #include "TFMPUtilities.h"
-#if DEBUG
 #include "FFmpegInternalDebug.h"
-#endif
 
 using namespace tfmpcore;
 

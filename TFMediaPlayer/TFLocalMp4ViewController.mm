@@ -252,7 +252,7 @@ int fillAudioBuffer(uint8_t **buffer, int lineCount, int oneLineize,void *contex
     TFLocalMp4ViewController *localPlayer = (__bridge TFLocalMp4ViewController *)context;
     
     int bytesPerFrame = localPlayer->_reader.outputDesc.mBytesPerFrame;
-    uint32_t framesNum = oneLineize/bytesPerFrame;
+    UInt32 framesNum = oneLineize/bytesPerFrame;
     
     AudioBuffer audioBuffer = {localPlayer->_reader.outputDesc.mChannelsPerFrame, (UInt32)(oneLineize), buffer[0]};
     AudioBufferList bufList;

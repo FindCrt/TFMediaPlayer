@@ -126,8 +126,8 @@
 		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
 		1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaTimeFilter.cpp; sourceTree = "<group>"; };
 		1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MediaTimeFilter.hpp; sourceTree = "<group>"; };
-		18547D292020478900FE24AB /* buffer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffer_internal.h; sourceTree = "<group>"; };
-		18547D2A202047C000FE24AB /* thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = thread.h; sourceTree = "<group>"; };
+		18547D292020478900FE24AB /* buffer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer_internal.h; path = ../../buffer_internal.h; sourceTree = "<group>"; };
+		18547D2A202047C000FE24AB /* thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../thread.h; sourceTree = "<group>"; };
 		18554530202A91FD0014D7CE /* netMedias.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = netMedias.plist; sourceTree = "<group>"; };
 		18554532202A9B1B0014D7CE /* TFAudioQueueController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioQueueController.h; sourceTree = "<group>"; };
 		18554533202A9B1B0014D7CE /* TFAudioQueueController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFAudioQueueController.mm; sourceTree = "<group>"; };
@@ -439,6 +439,8 @@
 		184FF7521FF4A15E007D5826 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				18547D292020478900FE24AB /* buffer_internal.h */,
+				18547D2A202047C000FE24AB /* thread.h */,
 				184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */,
 				185708392006342D008FB4CF /* TFMPUtilities.h */,
 				1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */,
@@ -522,8 +524,6 @@
 				18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */,
 				184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */,
 				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */,
-				18547D292020478900FE24AB /* buffer_internal.h */,
-				18547D2A202047C000FE24AB /* thread.h */,
 				18C66DC21FF0F253002BFBBC /* Player */,
 				892C12962003B63A0081CF79 /* FFmpeg */,
 				1856F0471FFB804D00B4F2A7 /* x264 */,

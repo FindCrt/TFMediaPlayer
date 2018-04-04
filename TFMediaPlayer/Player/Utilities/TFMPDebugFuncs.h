@@ -115,6 +115,21 @@ checkP++;\
 }\
 printf("\n-------------\n");
 
+#else
+
+//release
+#define TFCheckRetval(statement)
+#define TFCheckRetvalAndReturnFalse(statement)
+#define TFCheckRetvalAndGotoFail(statement)
+#define TFCheckStatus(status, log)
+#define TFCheckStatusToDo(status, log, code)
+#define TFCheckStatusReturnStatus(status, log)
+#define TFCheckStatusUnReturn(status, log)
+#define TFCheckStatusGoToFail(status, log)
+#define TFCheckError(error, log)
+#define TFMPPrintBuffer_S16(buffer, start, length)
+#define TFMPPrintBuffer(buffer, start, length)
+
 #endif
 
 #endif /* TFMPDebugFuncs_h */

@@ -46,6 +46,8 @@ namespace tfmpcore {
         };
         
         const static int defaultInitAllocSize = 8;
+        int outLimit = 3;
+        int inLimit = LONG_MAX;
         
         long limitSize = LONG_MAX;
         long allocedSize = 0;
@@ -125,6 +127,7 @@ namespace tfmpcore {
         RecycleBuffer(long limitSize = 0, bool allocToLimit = false){
             if (limitSize > 0) {
                 this->limitSize = limitSize;
+                inLimit = limitSize-3;
             }
             
             if (limitSize && allocToLimit) {
@@ -165,7 +168,7 @@ namespace tfmpcore {
             
             RecycleBufferLog("insert: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
-            if (usedSize > allocedSize/2) {
+            if (usedSize >= outLimit) {
                 pthread_cond_signal(&outCond);
             }
             
@@ -203,7 +206,7 @@ namespace tfmpcore {
             
             RecycleBufferLog("getout: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
-            if (usedSize < allocedSize/2) {
+            if (usedSize <= inLimit) {
                 pthread_cond_signal(&inCond);
             }
             

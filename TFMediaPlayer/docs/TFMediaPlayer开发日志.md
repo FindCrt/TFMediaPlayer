@@ -314,3 +314,8 @@ Printing description of srcp->f->buf[0]->buffer:
 ###不同格式调试
 
 1. flv的seek由问题。
+
+
+###性能问题
+
+1. 在解码时候，cpu大量消耗，然后会有一段时间的暂停。可能是缓冲区满了或者packet缓冲区没了，绝对的总量是没法降低的，但可以让解码过程更均匀的分布，也就是packet buffer的出和frame buffer的进不要设门槛，有一个就解一个。
