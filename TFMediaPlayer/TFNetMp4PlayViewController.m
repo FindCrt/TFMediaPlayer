@@ -65,7 +65,7 @@
     [_playButton setTitleColor:[UIColor whiteColor] forState:(UIControlStateNormal)];
     [_playButton addTarget:self action:@selector(clickPlayButton) forControlEvents:(UIControlEventTouchUpInside)];
     [_playButton setTitle:@"停止" forState:(UIControlStateSelected)];
-    [self.view addSubview:_playButton];
+//    [self.view addSubview:_playButton];
     
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:(UITableViewStyleGrouped)];
     _tableView.delegate = self;

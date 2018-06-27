@@ -17,7 +17,6 @@ extern "C"{
 using namespace tfmpcore;
 
 static double minExeTime = 0.01; //seconds
-static int TFMPDisplayPauseInterval = 10000;
 
 void DisplayController::startDisplay(){
     
@@ -48,17 +47,6 @@ void DisplayController::stopDisplay(){
     printf("shouldDisplay to false\n");
 }
 
-void DisplayController::flush(){
-    
-    while (displayingAudio || displayingVideo) {
-        TFMPDLOG_C("displayer flush wait: %s\n",displayingAudio?"audio":"video");
-        av_usleep(10000); //0.01s
-    }
-    
-    remainingAudioBuffers.validSize = 0;
-    remainingAudioBuffers.readIndex = 0;
-}
-
 void DisplayController::pause(bool flag){
     if (paused == flag) {
         return;
@@ -68,7 +56,7 @@ void DisplayController::pause(bool flag){
     if (paused) {
         syncClock->reset();
     }else{
-        pthread_cond_signal(&video_pause_cond);
+        TFMPCondSignal(video_pause_cond)
     }
 }
 
@@ -80,14 +68,47 @@ double DisplayController::getPlayTime(){
     return lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
 }
 
+void DisplayController::flush(){
+    
+    paused = true;
+    TFMPDLOG_C("DisplayController::flush\n");
+    
+    bool handleVideo = processingVideo, handleAudio = fillingAudio;
+    if (handleVideo) {
+        TFMPDLOG_C("sem wait video\n");
+        shareVideoBuffer->disableIO(true);
+        sem_wait(wait_display_sem);
+    }
+    if (handleAudio) {
+        TFMPDLOG_C("sem wait audio\n");
+        shareAudioBuffer->disableIO(true);
+        sem_wait(wait_display_sem);
+    }
+    TFMPDLOG_C("DisplayController::flush wait end\n");
+    
+    remainingAudioBuffers.validSize = 0;
+    remainingAudioBuffers.readIndex = 0;
+    
+    if (handleVideo) {
+        shareVideoBuffer->disableIO(false);
+    }
+    if (handleAudio) {
+        shareAudioBuffer->disableIO(false);
+    }
+    paused = false;
+    TFMPCondSignal(video_pause_cond)
+}
+
 void DisplayController::freeResources(){
     
     shouldDisplay = false;
     paused = false;
     
-    while (isDispalyingVideo || isFillingAudio) {
-        av_usleep(10000); //0.01s
-        TFMPDLOG_C("waiting %s displaying loop end\n",isDispalyingVideo?"video":"audio");
+    if (processingVideo) {
+        sem_wait(wait_display_sem);
+    }
+    if (fillingAudio) {
+        sem_wait(wait_display_sem);
     }
     
     if(audioResampler) audioResampler->freeResources();
@@ -110,20 +131,22 @@ void *DisplayController::displayLoop(void *context){
     
     while (displayer->shouldDisplay) {
         
-        displayer->displayingVideo = nullptr;
         videoFrame = nullptr; //reset it
-        displayer->isDispalyingVideo = true;
+        displayer->processingVideo = true;
         
         if (displayer->paused) {
             TFMPDLOG_C("display pause video\n");
-            pthread_mutex_lock(&displayer->video_pause_mutex);
-            pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
-            pthread_mutex_unlock(&displayer->video_pause_mutex);
+            
+            displayer->processingVideo = false;
+            sem_post(displayer->wait_display_sem);
+            TFMPDLOG_C("sem post video\n");
+            
+            TFMPCondWait(displayer->video_pause_cond, displayer->video_pause_mutex)
+            displayer->processingVideo = true;
         }
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
-        displayer->displayingVideo = videoFrame;
         
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
@@ -179,11 +202,7 @@ void *DisplayController::displayLoop(void *context){
         }
         
         av_frame_free(&videoFrame);
-        
-        displayer->isDispalyingVideo = false;
     }
-    
-    displayer->isDispalyingVideo = false;
     
     return 0;
 }
@@ -199,12 +218,11 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     uint8_t *buffer = buffersList[0];
     if (displayer->paused) {
         printf("display pause audio\n");
-        displayer->isFillingAudio = false;
         memset(buffer, 0, oneLineSize);
         return 0;
     }
     
-    displayer->isFillingAudio = true;
+    displayer->fillingAudio = true;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
     uint32_t unreadSize = remainingBuffer->unreadSize();
@@ -326,7 +344,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         }
     }
     
-    displayer->isFillingAudio = false;
+    if (displayer->paused) {
+        displayer->fillingAudio = false;
+        sem_post(displayer->wait_display_sem);
+        TFMPDLOG_C("sem post audio\n");
+    }
+    
+    displayer->fillingAudio = false;
     
     return 0;
 }

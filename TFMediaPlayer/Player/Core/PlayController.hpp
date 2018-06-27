@@ -86,6 +86,8 @@ namespace tfmpcore {
         static void *signalPlayFinished(void *context);
         
         //5. seek
+        pthread_t seekThread;
+        static void * seekOperation(void *context);
         /**
          * The state of seeking.
          * It becomes true when the user drags the progressBar and loose fingers.
@@ -96,7 +98,8 @@ namespace tfmpcore {
         double markTime = 0;  //The media time that seek to or start to pause.
         
         //6. free
-        void freeResources();
+        pthread_t freeThread;
+        static void * freeResources(void *context);
 
     public:
         
@@ -121,9 +124,11 @@ namespace tfmpcore {
         void pause(bool flag);
         void stop();
         
-        bool seekTo(double time);
-        bool seekByForward(double interval);
+        void seekTo(double time);
+        void seekByForward(double interval);
         std::function<void(PlayController*)>seekingEndNotify;
+        
+        std::function<void(PlayController*, bool)> bufferingStateChanged;
         
         /** properties **/
         

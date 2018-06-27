@@ -43,6 +43,12 @@ namespace tfmpcore {
         
         bool pause = false;
         
+        pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
+        
+        pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
+        
     public:
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};

@@ -90,6 +90,14 @@
             }
         };
         
+        _playController->bufferingStateChanged = [self](tfmpcore::PlayController *playController, bool isBuffering){
+            if (isBuffering) {
+                [_audioPlayer pause];
+            }else{
+                [_audioPlayer play];
+            }
+        };
+        
         _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
 #if TFMPUseAudioUnitPlayer
             _audioPlayer = [[TFAudioUnitPlayer alloc] init];
@@ -353,9 +361,8 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         _state == TFMediaPlayerStateReady) {
         return;
     }
-    if (_playController->seekTo(playTime)) {
-        self.state = TFMediaPlayerStateLoading;
-    }
+    _playController->seekTo(playTime);
+    self.state = TFMediaPlayerStateLoading;
 }
 
 -(void)seekByForward:(NSTimeInterval)interval{
@@ -364,9 +371,9 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         _state == TFMediaPlayerStateReady) {
         return;
     }
-    if (_playController->seekByForward(interval)) {
-        self.state = TFMediaPlayerStateLoading;
-    }
+    
+    _playController->seekByForward(interval);
+    self.state = TFMediaPlayerStateLoading;
 }
 
 -(void)changeFullScreenState{

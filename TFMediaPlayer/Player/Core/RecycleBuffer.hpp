@@ -146,6 +146,16 @@ namespace tfmpcore {
         /** Use this func to free RecycleNode.val as RecycleBuffer doesn't know what T exactly is. */
         void (*valueFreeFunc)(T *val);
         
+        void disableIO(bool disable){
+            bool pre = ioDisable;
+            ioDisable = disable;
+            if (!pre) {
+                pthread_cond_broadcast(&inCond);
+                pthread_cond_broadcast(&outCond);
+            }
+            RecycleBufferLog("ioDisable %s\n",disable?"true":"false");
+        }
+        
         bool isFull(){
             return usedSize == limitSize;
         };
@@ -237,12 +247,12 @@ namespace tfmpcore {
         void blockInsert(T val){
             
             if (!ioDisable && usedSize >= limitSize) {
-                RecycleBufferLog(">>>>lock full %s\n",name);
+                RecycleBufferLog("***************************lock full %s\n",name);
                 insertingVal = &val;
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&inCond, &mutex);
                 pthread_mutex_unlock(&mutex);
-                RecycleBufferLog("<<<<unlock full %s\n",name);
+                RecycleBufferLog("---------------------------unlock full %s\n",name);
             }
             
             if (ioDisable) {
@@ -257,16 +267,15 @@ namespace tfmpcore {
         void blockGetOut(T *valP){
 
             if (!ioDisable && usedSize == 0) {
-                RecycleBufferLog(">>>>lock empty %s\n",name);
+                RecycleBufferLog("***************************lock empty %s\n",name);
                 pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&outCond, &mutex);
                 pthread_mutex_unlock(&mutex);
-                RecycleBufferLog("<<<<unlock empty %s[%d,%d]\n",name,usedSize,allocedSize);
+                RecycleBufferLog("---------------------------unlock empty %s[%d,%d]\n",name,usedSize,allocedSize);
             }
             
             if (!ioDisable) {
                 getOut(valP);
-//                pthread_cond_signal(&cond);
             }
         }
         
@@ -335,6 +344,7 @@ namespace tfmpcore {
             backNode = frontNode->pre;
             
             ioDisable = false;
+            RecycleBufferLog("ioDisable false\n");
         }
         
         /** remove all inserted data and free all alloced nodes. */
@@ -359,7 +369,7 @@ namespace tfmpcore {
             observers.clear();
             
             ioDisable = true;
-            
+            RecycleBufferLog("ioDisable false\n");
             RecycleBufferLog("ioDisable end\n");
         }
     };

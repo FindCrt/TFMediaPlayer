@@ -16,6 +16,7 @@
 #include "SyncClock.hpp"
 #include "AudioResampler.hpp"
 #include <functional>
+#include <semaphore.h>
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -50,8 +51,9 @@ namespace tfmpcore {
         pthread_cond_t video_pause_cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t video_pause_mutex = PTHREAD_MUTEX_INITIALIZER;
         
-        bool isDispalyingVideo = false;
-        bool isFillingAudio = false;
+        sem_t *wait_display_sem = sem_open("wait_display_sem", 2);
+        bool fillingAudio = false;
+        bool processingVideo = false;
         
         AVFrame *displayingVideo = nullptr;
         AVFrame *displayingAudio = nullptr;
@@ -105,6 +107,7 @@ namespace tfmpcore {
         void stopDisplay();
         
         void pause(bool flag);
+        bool isPaused(){ return paused;};
         
         //release
         void flush();

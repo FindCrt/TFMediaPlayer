@@ -106,4 +106,11 @@ inline uint64_t channelLayoutForChannels(int channels){
     return av_get_default_channel_layout(channels);
 }
 
+#define TFMPCondWait(cond, mutex) \
+    pthread_mutex_lock(&mutex);\
+    pthread_cond_wait(&cond, &mutex);\
+    pthread_mutex_unlock(&mutex);
+
+#define TFMPCondSignal(cond) pthread_cond_signal(&cond);
+
 #endif /* TFUtilities_h */

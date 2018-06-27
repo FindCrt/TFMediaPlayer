@@ -169,9 +169,9 @@ static int mediaIndex = 0;
 
     NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
 
-    NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"pure1" withExtension:@"caf"];
+    NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"ninja" withExtension:@"mp4"];
     
-    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL4];
+    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL5];
     
     _currentMediaURL = mediaSources[mediaIndex];
     mediaIndex++;
@@ -202,10 +202,11 @@ static int mediaIndex = 0;
 -(void)startPlay{
     
     if (!_currentMediaURL) {
+        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"ninja" withExtension:@"mp4"];
 //        _currentMediaURL = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
 //        _currentMediaURL = [NSURL URLWithString:@"http://oys9374yl.bkt.clouddn.com/voice/278/15d8a04d-15eb-4d12-809b-c9be924ad92f.mp3"];
 //        _currentMediaURL = [NSURL URLWithString:@"http://flv2.bn.netease.com/videolib3/1711/04/aMSoJ8166/HD/aMSoJ8166-mobile.mp4"];
-        _currentMediaURL = [NSURL URLWithString:@"http://flv.bn.netease.com/videolib3/1605/16/nTaMi2329/HD/nTaMi2329-mobile.mp4"];
+//        _currentMediaURL = [NSURL URLWithString:@"http://flv.bn.netease.com/videolib3/1605/16/nTaMi2329/HD/nTaMi2329-mobile.mp4"];
     }
     
     _player.mediaURL = _currentMediaURL;
