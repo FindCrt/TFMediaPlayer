@@ -169,21 +169,6 @@ void PlayController::stop(){
     }
     
     pthread_create(&freeThread, nullptr, freeResources, this);
-    
-    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
-    
-    videoStrem = -1;
-    audioStream = -1;
-    subTitleStream = -1;
-
-    stoping = false;
-    readable = false;
-    checkingEnd = false;
-    seeking = false;
-    prepareForSeeking = false;
-    markTime = 0;
-    TFMPDLOG_C("player stoped!\n");
 }
 
 void *PlayController::seekOperation(void *context){
@@ -341,7 +326,26 @@ void *PlayController::freeResources(void *context){
     //ffmpeg
     if (playController->fmtCtx) avformat_free_context(playController->fmtCtx);
     
+    playController->resetStatus();
+    
     return 0;
+}
+
+void PlayController::resetStatus(){
+    desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+    realDisplayMediaType = TFMP_MEDIA_TYPE_NONE;
+    
+    videoStrem = -1;
+    audioStream = -1;
+    subTitleStream = -1;
+    
+    stoping = false;
+    readable = false;
+    checkingEnd = false;
+    seeking = false;
+    prepareForSeeking = false;
+    markTime = 0;
+    TFMPDLOG_C("player stoped!\n");
 }
 
 #pragma mark - properties

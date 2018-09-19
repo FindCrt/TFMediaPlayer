@@ -167,11 +167,11 @@ static int mediaIndex = 0;
     NSURL *videoURL2 = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
     NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"无心法师" withExtension:@"mp4"];
 
-    NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"LuckyDay" withExtension:@"mp3"];
+    NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"111" withExtension:@"mp3"];
 
     NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"ninja" withExtension:@"mp4"];
     
-    NSArray *mediaSources = @[videoURL1,videoURL2,videoURL5];
+    NSArray *mediaSources = @[videoURL4];
     
     _currentMediaURL = mediaSources[mediaIndex];
     mediaIndex++;
@@ -225,6 +225,13 @@ static int mediaIndex = 0;
             [_audioPlayer stop];
         });
     }
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        while (1) {
+            sleep(1);
+            NSLog(@"running");
+        }
+    });
 }
 
 

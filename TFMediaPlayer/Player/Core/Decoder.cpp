@@ -28,7 +28,9 @@ inline void freeFrame(AVFrame **frame){
     printf("freeFrame\n");
 //    av_usleep(100000);
 
+    logAVBufferPool((*frame)->buf[0], false);
     av_frame_free(frame);
+    
 }
 
 bool Decoder::prepareDecode(){
@@ -232,6 +234,7 @@ void *Decoder::decodeLoop(void *context){
                     TFMPDLOG_C("encounter B-frame\n");
                     frameDelay = true;
                     delayFramesReleasing = false;
+                    av_frame_unref(frame);
                     break;
                 }else if (retval != 0) {  //other error
                     TFCheckRetval("avcodec receive frame");

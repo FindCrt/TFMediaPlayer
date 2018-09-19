@@ -11,6 +11,7 @@
 
 #include "TFMPDebugFuncs.h"
 #include <iostream>
+#include <atomic>
 
 /*** There are some internal structs of FFmpeg such as AVBuffer, and some function for tracing the change of internal status such as AVBuffer.refcount. Those are useful for debuging memory leak. ***/
 

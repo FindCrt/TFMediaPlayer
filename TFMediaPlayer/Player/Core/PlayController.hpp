@@ -100,6 +100,7 @@ namespace tfmpcore {
         //6. free
         pthread_t freeThread;
         static void * freeResources(void *context);
+        void resetStatus();
 
     public:
         

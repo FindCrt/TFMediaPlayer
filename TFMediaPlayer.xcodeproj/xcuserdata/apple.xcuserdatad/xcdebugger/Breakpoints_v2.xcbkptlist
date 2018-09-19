@@ -91,27 +91,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             symbolName = "buffer_pool_free"
             moduleName = "">
             <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "buffer_pool_free"
-                  moduleName = "TFMediaPlayer"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-                  timestampString = "538993215.896273"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "261"
-                  endingLineNumber = "261"
-                  offsetFromSymbolStart = "28">
-               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -132,7 +117,7 @@
                   moduleName = "TFMediaPlayer"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-                  timestampString = "538993171.616177"
+                  timestampString = "552191282.935701"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "291"
@@ -375,7 +360,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1020"
             endingLineNumber = "1020"
-            landmarkName = "h264_decode_frame()"
+            landmarkName = "h264_decode_frame"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -391,7 +376,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "848"
             endingLineNumber = "848"
-            landmarkName = "output_frame()"
+            landmarkName = "output_frame"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -402,12 +387,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "Yes"
             filePath = "../../AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-            timestampString = "539496073.685322"
+            timestampString = "552192447.609284"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "102"
             endingLineNumber = "102"
-            landmarkName = "av_buffer_ref()"
+            landmarkName = "av_buffer_ref"
             landmarkType = "9">
             <Actions>
                <BreakpointActionProxy
@@ -420,36 +405,6 @@
                   ActionExtensionID = "Xcode.BreakpointAction.DebuggerCommand">
                   <ActionContent
                      consoleCommand = "p buf-&gt;buffer-&gt;refcount">
-                  </ActionContent>
-               </BreakpointActionProxy>
-            </Actions>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "Yes"
-            filePath = "../../AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-            timestampString = "539496188.248049"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "111"
-            endingLineNumber = "111"
-            landmarkName = "buffer_replace()"
-            landmarkType = "9">
-            <Actions>
-               <BreakpointActionProxy
-                  ActionExtensionID = "Xcode.BreakpointAction.DebuggerCommand">
-                  <ActionContent
-                     consoleCommand = "p (*dst)-&gt;buffer">
-                  </ActionContent>
-               </BreakpointActionProxy>
-               <BreakpointActionProxy
-                  ActionExtensionID = "Xcode.BreakpointAction.DebuggerCommand">
-                  <ActionContent
-                     consoleCommand = "p src">
                   </ActionContent>
                </BreakpointActionProxy>
             </Actions>
@@ -568,38 +523,6 @@
                   offsetFromSymbolStart = "16">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Platform/iOS/audioPlay/TFAudioQueueController.mm"
-            timestampString = "544416753.6447411"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "139"
-            endingLineNumber = "139"
-            landmarkName = "-pause"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Platform/iOS/audioPlay/TFAudioQueueController.mm"
-            timestampString = "544416754.869681"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "145"
-            endingLineNumber = "145"
-            landmarkName = "-stop"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

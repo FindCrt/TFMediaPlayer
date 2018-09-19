@@ -50,6 +50,8 @@
             AudioQueueEnqueueBuffer(_audioQueue, _audioBufferArray[i], 0, NULL);
         }
         
+        AudioQueueAddPropertyListener(_audioQueue, kAudioQueueProperty_IsRunning, audioQueueListen, (__bridge void*)self);
+        
         _lock = [[NSLock alloc] init];
     }
     
@@ -95,6 +97,19 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
     audioDesc->mBytesPerPacket = audioDesc->mBytesPerFrame * audioDesc->mFramesPerPacket;
 }
 
+void audioQueueListen(
+                                       void * __nullable       inUserData,
+                                       AudioQueueRef           inAQ,
+                                       AudioQueuePropertyID    inID){
+    
+    if (inID == kAudioQueueProperty_IsRunning) {
+        UInt32 isRuning = NO;
+        UInt32 size = sizeof(isRuning);
+        AudioQueueGetProperty(inAQ, kAudioQueueProperty_IsRunning, &isRuning, &size);
+        NSLog(@"isRuningxxx: %d",isRuning);
+    }
+}
+
 -(void)play{
     if (!_audioQueue) {
         return;
@@ -115,12 +130,22 @@ static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc,
 //        return;
 //    }
     
+    UInt32 isRuning = NO;
+    UInt32 size = sizeof(isRuning);
+    AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
+    NSLog(@"isRuning1: %d",isRuning);
+    
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
     TFMPDLOG_C("AudioQueueStart %d\n",status);
     TFCheckStatusToDo(status, @"AudioQueue start failed!", {
         [_lock unlock];
         return;
     })
+    
+    AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
+    NSLog(@"isRuning2: %d",isRuning);
+    
+
     
     _state = TFAudioQueueStatePlaying;
     

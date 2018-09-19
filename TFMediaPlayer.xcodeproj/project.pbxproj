@@ -45,6 +45,7 @@
 		185B7EDD2007694600ACB32D /* AudioResampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 185B7EDB2007694600ACB32D /* AudioResampler.cpp */; };
 		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
 		185F7B38206CD7720028744A /* lisao.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 185F7B37206CD7720028744A /* lisao.mp4 */; };
+		1863F3C321072BB00006D513 /* 111.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 1863F3C221072BA90006D513 /* 111.mp3 */; };
 		1865D9C0204A4E1000E5C447 /* TFMPProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865D9BF204A4E1000E5C447 /* TFMPProgressView.m */; };
 		1868B9A0206A45FA00C5D0DB /* momei.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99E206A45FA00C5D0DB /* momei.mp4 */; };
 		1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
@@ -144,6 +145,7 @@
 		185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayerTests.mm; sourceTree = "<group>"; };
 		185EB3321FF5CD22001E37F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		185F7B37206CD7720028744A /* lisao.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = lisao.mp4; sourceTree = "<group>"; };
+		1863F3C221072BA90006D513 /* 111.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = 111.mp3; sourceTree = "<group>"; };
 		1865D9BE204A4E1000E5C447 /* TFMPProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMPProgressView.h; sourceTree = "<group>"; };
 		1865D9BF204A4E1000E5C447 /* TFMPProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFMPProgressView.m; sourceTree = "<group>"; };
 		1868B99E206A45FA00C5D0DB /* momei.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = momei.mp4; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 		184FF74F1FF48BC0007D5826 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1863F3C221072BA90006D513 /* 111.mp3 */,
 				188AA8AD20E2487600F36DCD /* ninja.mp4 */,
 				1847D87A206B827A00A7CFE8 /* meipai-two.mp4 */,
 				1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */,
@@ -892,8 +895,13 @@
 					};
 					18C66D941FF0F1F6002BFBBC = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = M6385GL5N8;
+						DevelopmentTeam = 457J2FRWRF;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -930,6 +938,7 @@
 			files = (
 				1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */,
 				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
+				1863F3C321072BB00006D513 /* 111.mp3 in Resources */,
 				1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */,
 				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
 				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
@@ -1142,7 +1151,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = M6385GL5N8;
+				DEVELOPMENT_TEAM = 457J2FRWRF;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/TFMediaPlayer/FFmpeg/include";
 				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
@@ -1162,7 +1171,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = M6385GL5N8;
+				DEVELOPMENT_TEAM = 457J2FRWRF;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/TFMediaPlayer/FFmpeg/include";
 				INFOPLIST_FILE = TFMediaPlayer/Info.plist;
