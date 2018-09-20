@@ -51,6 +51,7 @@
 		1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
 		1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */; };
 		1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
+		18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18706DC3215396EA009C21BE /* TFDebugStateShower.mm */; };
 		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
 		188AA8AE20E248CE00F36DCD /* ninja.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 188AA8AD20E2487600F36DCD /* ninja.mp4 */; };
 		18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 18946DCD2068F8F1004BDF96 /* t1.mp4 */; };
@@ -152,6 +153,9 @@
 		1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = jonSnow.mp4; sourceTree = "<group>"; };
 		1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = noheartWizard.mp4; sourceTree = "<group>"; };
 		1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */ = {isa = PBXFileReference; lastKnownFileType = file; path = S9UJAG3QE_sd.flv; sourceTree = "<group>"; };
+		18706DC0215392EB009C21BE /* TFStateObserver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TFStateObserver.hpp; sourceTree = "<group>"; };
+		18706DC2215396EA009C21BE /* TFDebugStateShower.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFDebugStateShower.h; sourceTree = "<group>"; };
+		18706DC3215396EA009C21BE /* TFDebugStateShower.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFDebugStateShower.mm; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		188AA8AD20E2487600F36DCD /* ninja.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = ninja.mp4; sourceTree = "<group>"; };
@@ -450,6 +454,9 @@
 				184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */,
 				185708392006342D008FB4CF /* TFMPUtilities.h */,
 				1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */,
+				18706DC0215392EB009C21BE /* TFStateObserver.hpp */,
+				18706DC2215396EA009C21BE /* TFDebugStateShower.h */,
+				18706DC3215396EA009C21BE /* TFDebugStateShower.mm */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -995,6 +1002,7 @@
 				899A4D592035AD7F00E26AF6 /* TFMPPlayCmdResolver.m in Sources */,
 				183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */,
 				18C66DD21FF0F96F002BFBBC /* TFNetMp4PlayViewController.m in Sources */,
+				18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */,
 				18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */,
 				1834340E200851E300ED9B05 /* TFAudioFileReader.m in Sources */,
 			);

@@ -10,6 +10,7 @@
 #include "TFMPDebugFuncs.h"
 #include "TFMPUtilities.h"
 #include "FFmpegInternalDebug.h"
+#include "TFStateObserver.hpp"
 
 using namespace tfmpcore;
 
@@ -475,11 +476,13 @@ void * PlayController::readFrame(void *context){
             packet->stream_index == controller->videoStrem) {
             
             controller->videoDecoder->decodePacket(packet);
+            myStateObserver.timeMark("video frame in");
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
             
             controller->audioDecoder->decodePacket(packet);
+            myStateObserver.timeMark("audio frame in");
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
                   packet->stream_index == controller->subTitleStream){

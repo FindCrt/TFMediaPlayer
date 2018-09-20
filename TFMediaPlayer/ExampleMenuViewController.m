@@ -11,6 +11,7 @@
 #import "TFLocalMp4ViewController.h"
 
 #import "UnitTest.h"
+#import "TFDebugStateShower.h"
 
 @interface ExampleMenuViewController (){
     NSArray *_exampleInfos;
@@ -28,12 +29,7 @@
                       @{@"title": @"播放网络mp4视频", @"actionVC": @"TFNetMp4PlayViewController"}
                       ];
     
-    //test
-    
-//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-//        UnitTest *test = [[UnitTest alloc] init];
-//        [test testRecycleBuffer];
-//    });
+    [TFDebugStateShower startDebuging];
 }
 
 #pragma mark - Table view data source
