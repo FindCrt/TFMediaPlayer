@@ -244,7 +244,8 @@
         _playController->setDesiredDisplayMediaType(_mediaType);
     }
     
-    if (self.state == TFMediaPlayerStateNone) {
+    if (self.state == TFMediaPlayerStateNone ||
+        self.state == TFMediaPlayerStateStoped) {
         
         _innerPlayWhenReady = YES;
         [self preparePlay];
@@ -383,7 +384,8 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 -(void)seekToPlayTime:(NSTimeInterval)playTime{
     if (_state == TFMediaPlayerStateNone ||
         _state == TFMediaPlayerStateConnecting ||
-        _state == TFMediaPlayerStateReady) {
+        _state == TFMediaPlayerStateReady ||
+        _state == TFMediaPlayerStateStoped) {
         return;
     }
     _playController->seekTo(playTime);
@@ -393,7 +395,8 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
 -(void)seekByForward:(NSTimeInterval)interval{
     if (_state == TFMediaPlayerStateNone ||
         _state == TFMediaPlayerStateConnecting ||
-        _state == TFMediaPlayerStateReady) {
+        _state == TFMediaPlayerStateReady ||
+        _state == TFMediaPlayerStateStoped) {
         return;
     }
     

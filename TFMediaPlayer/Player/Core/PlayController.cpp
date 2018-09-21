@@ -54,19 +54,19 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     }
     
     if (videoStrem < 0 && audioStream < 0) {
-        return false;
+        goto fail;
     }
     
     if (videoDecoder && !videoDecoder->prepareDecode()) {
-        return false;
+        goto fail;
     }
     
     if (audioDecoder && !audioDecoder->prepareDecode()) {
-        return false;
+        goto fail;
     }
     
     if (subtitleDecoder && !subtitleDecoder->prepareDecode()) {
-        return false;
+        goto fail;
     }
     
     displayer = new DisplayController();
@@ -77,7 +77,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     //check whether stream can display.
     if ((desiredDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && videoDecoder != nullptr && displayVideoFrame == nullptr) {
-        return false;
+        goto fail;
     }else{
         displayer->displayVideoFrame = displayVideoFrame;
     }
@@ -111,6 +111,13 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     }
     
     return true;
+    
+fail:
+    avformat_free_context(fmtCtx);
+    if (videoDecoder) free(videoDecoder);
+    if (audioDecoder) free(audioDecoder);
+    if (subtitleDecoder) free(subtitleDecoder);
+    return false;
 }
 
 #pragma mark - controls
