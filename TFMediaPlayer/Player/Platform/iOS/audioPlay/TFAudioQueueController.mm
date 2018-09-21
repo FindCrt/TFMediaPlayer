@@ -202,7 +202,7 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
         }
         
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
-        NSLog(@"AudioQueueEnqueueBuffer\n");
+//        NSLog(@"AudioQueueEnqueueBuffer\n");
         
 //        TFMPPrintBuffer(buffers[0], 100, 100);
         

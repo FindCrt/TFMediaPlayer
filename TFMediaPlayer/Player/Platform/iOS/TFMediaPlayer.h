@@ -17,6 +17,8 @@ typedef NS_ENUM(NSInteger, TFMediaPlayerState) {
     TFMediaPlayerStatePlaying,
     TFMediaPlayerStatePaused,
     TFMediaPlayerStateLoading,   //net is not good or seeking to new position.
+    TFMediaPlayerStateStoping,  //The player is stoping, actually the main task is releasing media sources.
+    TFMediaPlayerStateStoped
 };
 
 static NSString *TFMPStateChangedKey = @"state";
@@ -36,6 +38,9 @@ static NSString *TFMPStateChangedNotification = @"TFMPStateChangedNotification";
 -(void)play;
 -(void)pause;
 -(void)stop;
+
+/** Call this func to switch media instead if using stop+play because stop actually is aync. */
+-(void)switchToNewMedia:(NSURL *)mediaURL;
 
 @property (nonatomic, assign) TFMPShareAudioBufferStruct shareAudioStruct;
 

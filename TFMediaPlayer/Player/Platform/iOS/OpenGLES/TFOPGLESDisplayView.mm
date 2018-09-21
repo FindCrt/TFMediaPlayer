@@ -194,6 +194,9 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
 
 -(void)displayFrameBuffer:(TFMPVideoFrameBuffer *)frameBuf{
     
+#if DisableRenderVideo
+    return;
+#endif
     if (self.appIsUnactive) {
         return;
     }

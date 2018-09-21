@@ -7,10 +7,14 @@
 //
 
 #include "DisplayController.hpp"
-#include "TFMPDebugFuncs.h"
+
 extern "C"{
 #include <libavutil/time.h>
 }
+
+//debug
+#include "TFStateObserver.hpp"
+#include "TFMPDebugFuncs.h"
 
 #define TFMPBufferReadLog(fmt,...) printf(fmt,__VA_ARGS__);printf("\n");
 
@@ -56,7 +60,7 @@ void DisplayController::pause(bool flag){
     if (paused) {
         syncClock->reset();
     }else{
-        TFMPCondSignal(video_pause_cond)
+        TFMPCondSignal(video_pause_cond, video_pause_mutex)
     }
 }
 
@@ -96,7 +100,7 @@ void DisplayController::flush(){
         shareAudioBuffer->disableIO(false);
     }
     paused = false;
-    TFMPCondSignal(video_pause_cond)
+    TFMPCondSignal(video_pause_cond, video_pause_mutex)
 }
 
 void DisplayController::freeResources(){
@@ -129,40 +133,43 @@ void *DisplayController::displayLoop(void *context){
     
     AVFrame *videoFrame = nullptr;
     
+    myStateObserver.mark("video display", 1);
     while (displayer->shouldDisplay) {
         
         videoFrame = nullptr; //reset it
         displayer->processingVideo = true;
         
         if (displayer->paused) {
-            TFMPDLOG_C("display pause video\n");
             
+            pthread_mutex_lock(&displayer->video_pause_mutex);
             displayer->processingVideo = false;
-            sem_post(displayer->wait_display_sem);
-            TFMPDLOG_C("sem post video\n");
-            
-            TFMPCondWait(displayer->video_pause_cond, displayer->video_pause_mutex)
+            if (displayer->paused) {  //must put condition inside the lock.
+                sem_post(displayer->wait_display_sem);
+                myStateObserver.mark("video display", 2);
+                pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
+            }
             displayer->processingVideo = true;
+            myStateObserver.mark("video display", 20);
+            pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
+        
+        myStateObserver.mark("video display", 3);
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
-        
+        myStateObserver.mark("video display", 4);
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
-        TFMPDLOG_C("remainTime: %lld,%.6f\n",videoFrame->pts,remainTime);
         
         if (remainTime < -minExeTime){
             av_frame_free(&videoFrame);
-            TFMPDLOG_C("discard video frame\n");
             continue;
         }else if (remainTime > minExeTime) {
             TFMPDLOG_C("video sleep: %.3f\n",remainTime);
             av_usleep(remainTime*1000000);
         }
         
-        
-        
+        myStateObserver.mark("video display", 5);
         TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
         interimBuffer->width = videoFrame->width;
         //TODO: when should i cut one line of data to avoid the green data-empty zone in bottom?
@@ -186,9 +193,9 @@ void *DisplayController::displayLoop(void *context){
         }
         
         
-        
+        myStateObserver.mark("video display", 6);
         if (displayer->shouldDisplay){
-            
+            myStateObserver.mark("video display", 7);
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
 
             if (!displayer->syncClock->isAudioMajor) {
@@ -197,7 +204,7 @@ void *DisplayController::displayLoop(void *context){
                 displayer->lastIsAudio = false;
                 
             }
-            
+            myStateObserver.mark("video display", 8);
             if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
         }
         

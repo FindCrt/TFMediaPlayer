@@ -14,6 +14,8 @@
 #include <limits.h>
 #include <vector>
 
+#include "TFStateObserver.hpp"
+
 #define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>|  The range of [front, back] contains all valid nodes */
@@ -153,7 +155,7 @@ namespace tfmpcore {
                 pthread_cond_broadcast(&inCond);
                 pthread_cond_broadcast(&outCond);
             }
-            RecycleBufferLog("ioDisable %s\n",disable?"true":"false");
+            RecycleBufferLog("%s ioDisable %s\n",name, disable?"true":"false");
         }
         
         bool isFull(){
@@ -175,6 +177,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
+            myStateObserver.mark(name, usedSize, false);
             
             RecycleBufferLog("insert: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
@@ -213,6 +216,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
+            myStateObserver.mark(name, usedSize, false);
             
             RecycleBufferLog("getout: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
@@ -334,7 +338,6 @@ namespace tfmpcore {
                 RecycleNode *curNode = frontNode;
                 do {
                     usedSize--;
-                    RecycleBufferLog("free: %s[%ld],[%x->%x,%x->%x],",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
                     valueFreeFunc(&(curNode->val));
                     curNode = curNode->next;
                 } while (curNode != backNode->next);
@@ -342,6 +345,7 @@ namespace tfmpcore {
             
             usedSize = 0;
             backNode = frontNode->pre;
+            myStateObserver.mark(name, usedSize);
             
             ioDisable = false;
             RecycleBufferLog("ioDisable false\n");

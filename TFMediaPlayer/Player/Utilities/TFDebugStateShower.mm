@@ -30,6 +30,7 @@ bool stateShowing = false;
     showButton.layer.borderWidth = 1;
     [showButton setTitle:@"states" forState:(UIControlStateNormal)];
     [showButton setTitleColor:[UIColor redColor] forState:(UIControlStateNormal)];
+    [showButton setTitleColor:[UIColor colorWithRed:0.4 green:0 blue:0 alpha:1] forState:(UIControlStateSelected)];
     [showButton addTarget:self action:@selector(showHideStates:) forControlEvents:(UIControlEventTouchUpInside)];
     showButton.backgroundColor = [UIColor whiteColor];
     
@@ -38,6 +39,7 @@ bool stateShowing = false;
 
 +(void)showHideStates:(UIButton *)button{
     stateShowing = !stateShowing;
+    button.selected = !button.selected;
     
     statesView.hidden = !stateShowing;
     
@@ -53,8 +55,7 @@ bool stateShowing = false;
     }
     
     CGFloat lineHeight = 20, width = [UIScreen mainScreen].bounds.size.width;
-    NSInteger count = myStateObserver.getCounts().size() + myStateObserver.getTimeMarks().size();
-    NSLog(@"%ld",myStateObserver.getTimeMarks().size());
+    NSInteger count = myStateObserver.getCounts().size() + myStateObserver.getTimeMarks().size() + myStateObserver.getLabels().size();
     
     CGFloat maxHeight = [UIScreen mainScreen].bounds.size.height-40;
     [statesView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -77,6 +78,16 @@ bool stateShowing = false;
         label.textColor = [UIColor colorWithWhite:0.1 alpha:1];
         label.font = [UIFont systemFontOfSize:13];
         label.text = [NSString stringWithFormat:@"%s : %.3f", pair.first.c_str(), currentTime-pair.second];
+        [statesView addSubview:label];
+        
+        line++;
+    }
+    
+    for (auto pair : myStateObserver.getLabels()){
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, line*lineHeight, width, lineHeight)];
+        label.textColor = [UIColor colorWithWhite:0.1 alpha:1];
+        label.font = [UIFont systemFontOfSize:13];
+        label.text = [NSString stringWithFormat:@"%s : %s", pair.first.c_str(), pair.second.c_str()];
         [statesView addSubview:label];
         
         line++;

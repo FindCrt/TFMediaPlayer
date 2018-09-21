@@ -39,10 +39,12 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
             videoDecoder = new Decoder(fmtCtx, i, type);
+            videoDecoder->name = "videoDecoder";
             videoDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
+            audioDecoder->name = "audioDecoder";
             audioDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             audioStream = i;
         }else if (type == AVMEDIA_TYPE_SUBTITLE){
@@ -152,6 +154,8 @@ void PlayController::pause(bool flag){
 
 void PlayController::stop(){
     
+    TFMPDLOG_C("play stop");
+    
     stoping = true;
     paused = false;
     
@@ -254,9 +258,11 @@ void *PlayController::seekOperation(void *context){
     pthread_cond_signal(&(playController->read_cond));
     
     playController->prepareForSeeking = false;
+    playController->displayer->pause(false);
     TFMPDLOG_C("seek prepare end! %.3f\n",time);
     
     free(context);
+    
     
     return 0;
 }
@@ -284,13 +290,6 @@ void PlayController::bufferDone(){
         return;
     }
     
-    if(!paused && displayer->isPaused()) {
-        displayer->pause(false);
-        if (bufferingStateChanged) {
-            bufferingStateChanged(this, false);
-        }
-    }
-    
     if (seeking) {
         seeking = false;
         TFMPDLOG_C("seeking false\n");
@@ -305,16 +304,16 @@ void *PlayController::freeResources(void *context){
     PlayController *playController = (PlayController *)context;
     //decodes
     if (playController->videoDecoder) {
+        myStateObserver.labelMark("freeResources", "videoDecoder");
         playController->videoDecoder->freeResources();
         free(playController->videoDecoder);
         playController->videoDecoder = nullptr;
-        TFMPDLOG_C("videoDecoder null\n");
     }
     if (playController->audioDecoder) {
+        myStateObserver.labelMark("freeResources", "audioDecoder");
         playController->audioDecoder->freeResources();
         free(playController->audioDecoder);
         playController->audioDecoder = nullptr;
-        TFMPDLOG_C("audioDecoder null\n");
     }
     if (playController->subtitleDecoder) {
         playController->subtitleDecoder->freeResources();
@@ -322,12 +321,18 @@ void *PlayController::freeResources(void *context){
         playController->subtitleDecoder = nullptr;
     }
     
+    myStateObserver.labelMark("freeResources", "audioDecoder");
     playController->displayer->freeResources();
     
+    myStateObserver.labelMark("freeResources", "ffmpeg");
     //ffmpeg
     if (playController->fmtCtx) avformat_free_context(playController->fmtCtx);
     
     playController->resetStatus();
+    
+    if (playController->playStoped) {
+        playController->playStoped(playController, 1);
+    }
     
     return 0;
 }
@@ -451,10 +456,12 @@ void * PlayController::readFrame(void *context){
     
     while (!controller->stoping) {
         
+        pthread_mutex_lock(&controller->read_mutex);
         if (!controller->readable) {
             TFMPDLOG_C("read disable!\n");
-            TFMPCondWait(controller->read_cond, controller->read_mutex)
+            pthread_cond_wait(&controller->read_cond, &controller->read_mutex);
         }
+        pthread_mutex_unlock(&controller->read_mutex);
         
         int retval = av_read_frame(controller->fmtCtx, packet);
 
@@ -540,8 +547,6 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
             if (controller->bufferingStateChanged) {
                 controller->bufferingStateChanged(controller, true);
             }
-            controller->displayer->pause(true);
-            
         }
 
     }else if (curSize >= playResumeSize){

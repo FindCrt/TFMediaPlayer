@@ -9,6 +9,10 @@
 #ifndef TFMPDebugFuncs_h
 #define TFMPDebugFuncs_h
 
+/*** debug flags ***/
+
+#define DisableRenderVideo 1
+
 /** log */
 
 #define TFMPLOG 1

@@ -205,8 +205,8 @@
     
     [self hideMediaList];
     
-    [self stop];
-    [self startPlay];
+    [self configureAVSession];
+    [_player switchToNewMedia:_curURL];
 }
 
 -(void)dealloc{

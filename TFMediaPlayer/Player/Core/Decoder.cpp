@@ -20,17 +20,11 @@
 using namespace tfmpcore;
 
 inline void freePacket(AVPacket **pkt){
-    printf("freePacket\n");
     av_packet_free(pkt);
 }
 
 inline void freeFrame(AVFrame **frame){
-    printf("freeFrame\n");
-//    av_usleep(100000);
-
-    logAVBufferPool((*frame)->buf[0], false);
     av_frame_free(frame);
-    
 }
 
 bool Decoder::prepareDecode(){
@@ -89,32 +83,48 @@ void Decoder::stopDecode(){
 }
 
 void Decoder::flush(){
-    TFMPDLOG_C("Decoder::flush");
+    
+    string stateName = name+" flush";
+    
     //1. prevent from starting next decode loop
     pause = true;
     
     //2. disable buffer's in and out to invalid the frame or packet in current loop.
+    myStateObserver.mark(stateName, 1);
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
+    myStateObserver.mark(stateName, 1);
     
     //3. wait for the end of current loop
-    TFMPCondWait(waitLoopCond, waitLoopMutex)
-    TFMPDLOG_C("flush wait end");
+    pthread_mutex_lock(&waitLoopMutex);
+    if (isDecoding) {
+        myStateObserver.mark(stateName, 3);
+        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
+    }else{
+        myStateObserver.mark(stateName, 4);
+    }
+    pthread_mutex_unlock(&waitLoopMutex);
+    myStateObserver.mark(stateName, 5);
     
     //4. flush all reserved buffers
     pktBuffer.flush();
+    myStateObserver.mark(stateName, 6);
     frameBuffer.flush();
+    myStateObserver.mark(stateName, 7);
     
     //5. flush FFMpeg's buffer.
     //If dont'f call this, there are some new packets which contains old frames.
     avcodec_flush_buffers(codecCtx);
+    myStateObserver.mark(stateName, 8);
     
     //6. resume the decode loop
     pktBuffer.disableIO(false);
     frameBuffer.disableIO(false);
     
     pause = false;
-    TFMPCondSignal(pauseCond)
+    myStateObserver.mark(stateName, 9);
+    TFMPCondSignal(pauseCond, pauseMutex);
+    myStateObserver.mark(stateName, 10);
     
     TFMPDLOG_C("flush end %s\n",frameBuffer.name);
 }
@@ -124,14 +134,20 @@ bool Decoder::bufferIsEmpty(){
 }
 
 void Decoder::freeResources(){
-    
     shouldDecode = false;
     
     //2. disable buffer's in and out to invalid the frame or packet in current loop.
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
     //3. wait for the end of current loop
-    TFMPCondWait(waitLoopCond, waitLoopMutex)
+    pthread_mutex_lock(&waitLoopMutex);
+    if (isDecoding) {
+        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
+        myStateObserver.labelMark(name+" isDecoding", "true");
+    }else{
+        myStateObserver.labelMark(name+" isDecoding", "false");
+    }
+    pthread_mutex_unlock(&waitLoopMutex);
     
     //4. flush all reserved buffers
     pktBuffer.flush();
@@ -154,27 +170,44 @@ void *Decoder::decodeLoop(void *context){
     
     Decoder *decoder = (Decoder *)context;
     
+    decoder->isDecoding = true;
+    
     AVPacket *pkt = nullptr;
     AVFrame *frame = av_frame_alloc();
     
     bool frameDelay = false;
     bool delayFramesReleasing = false;
     
+    string name = decoder->name;
     while (decoder->shouldDecode) {
         
         if (decoder->pause) {
-            TFMPDLOG_C("decoder pause");
-            TFMPCondSignal(decoder->waitLoopCond);
-            TFMPCondWait(decoder->pauseCond, decoder->pauseMutex);
+            myStateObserver.mark(name, 1);
+            decoder->isDecoding = false;
+            TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
+            myStateObserver.mark(name, 11);
+            
+            pthread_mutex_lock(&decoder->pauseMutex);
+            if (decoder->pause) {
+                myStateObserver.mark(name, 12);
+                pthread_cond_wait(&decoder->pauseCond, &decoder->pauseMutex);
+            }else{
+                myStateObserver.mark(name, 13);
+            }
+            pthread_mutex_unlock(&decoder->pauseMutex);
+            decoder->isDecoding = true;
         }
         
         pkt = nullptr;
+        myStateObserver.mark(name, 2);
         decoder->pktBuffer.blockGetOut(&pkt);
+        myStateObserver.mark(name, 3);
         if (pkt == nullptr) {
             TFMPDLOG_C("pkt null");
         }
         if (pkt == nullptr) continue;
         
+        myStateObserver.mark(name, 4);
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
@@ -187,7 +220,7 @@ void *Decoder::decodeLoop(void *context){
             
             //may many frames in one packet.
             while (retval == 0) {
-                
+                myStateObserver.mark(name, 6);
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 if (retval == AVERROR(EAGAIN)) {
                     break;
@@ -208,12 +241,12 @@ void *Decoder::decodeLoop(void *context){
                     av_frame_unref(frame);
                     continue;
                 }
-                
+                myStateObserver.mark(name, 7);
                 if (decoder->shouldDecode) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
 //                    av_usleep(50000);
-                    TFMPDLOG_C("insert audio frame: %lld,%lld\n",pkt->pts,refFrame->pts);
+                    myStateObserver.mark(name, 8);
                     decoder->frameBuffer.blockInsert(refFrame);
                 }else{
                     av_frame_unref(frame);
@@ -276,9 +309,12 @@ void *Decoder::decodeLoop(void *context){
         
         if (pkt != nullptr)  av_packet_free(&pkt);
     }
-    TFMPDLOG_C("decode end");
+    
+    myStateObserver.mark(name, 9);
     av_frame_free(&frame);
-    TFMPCondSignal(decoder->waitLoopCond);
+    decoder->isDecoding = false;
+    TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
+    myStateObserver.mark(name, 10);
     return 0;
 }
 

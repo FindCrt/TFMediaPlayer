@@ -103,7 +103,8 @@
     //isLoading
     if (state == TFMediaPlayerStatePlaying ||
         state == TFMediaPlayerStateNone ||
-        state == TFMediaPlayerStatePaused){
+        state == TFMediaPlayerStatePaused ||
+        state == TFMediaPlayerStateStoped){
         
         if ([_observedStates containsObject:TFMPState_isLoading] && _observeHandler) {
             _observeHandler(TFMPState_isLoading, @(NO));

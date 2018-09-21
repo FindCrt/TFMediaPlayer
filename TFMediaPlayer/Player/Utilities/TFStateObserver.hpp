@@ -32,6 +32,7 @@ class TFStateObserver {
     
     map<string, int> counts;
     map<string, double> timeMarks;
+    map<string, string> labels;
     
 public:
     
@@ -54,12 +55,24 @@ public:
         return timeMarks;
     }
     
-    void mark(string name, int count){
-        counts[name] = count;
+    map<string, string>& getLabels(){
+        return labels;
+    }
+    
+    void mark(string name, int count, bool additive = false){
+        if (additive) {
+            counts[name] += count;
+        }else{
+            counts[name] = count;
+        }
     }
     
     void timeMark(string name){
         timeMarks[name] = currentTime();
+    }
+    
+    void labelMark(string name, string label){
+        labels[name] = label;
     }
 };
 

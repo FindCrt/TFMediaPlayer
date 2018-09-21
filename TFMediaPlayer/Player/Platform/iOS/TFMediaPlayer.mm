@@ -38,6 +38,8 @@
 #endif
     
     TFOPGLESDisplayView *_displayView;
+    
+    NSURL *_nextMedia;
 }
 
 /**
@@ -74,10 +76,17 @@
             }
         };
         
-        _playController->playStoped = [self](tfmpcore::PlayController *playController, int errCode){
+        _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
             
-            if (_state != TFMediaPlayerStateNone) {
+            if (reason == 0 && _state != TFMediaPlayerStateStoping) {
                 [self stop];
+            }else if (reason == 1 && self.state == TFMediaPlayerStateStoping){
+                self.state = TFMediaPlayerStateStoped;
+                if (_nextMedia) {  //a new media is waiting to play.
+                    _mediaURL = _nextMedia;
+                    _nextMedia = nil;
+                    [self preparePlay];
+                }
             }
         };
         
@@ -156,10 +165,12 @@
         return;
     }
     
+//    if (_state != TFMediaPlayerStateNone &&
+//        _state != TFMediaPlayerStateStoped) {
+//        [self switchToNewMedia:mediaURL];
+//    }
+    
     _mediaURL = mediaURL;
-    if (_state != TFMediaPlayerStateNone) {
-        [self stop];
-    }
 }
 
 -(void)setMediaType:(TFMPMediaType)mediaType{
@@ -191,6 +202,8 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{TFMPStateChangedKey:@(state)}];
     });
+    
+    myStateObserver.mark("play state", state);
 }
 
 -(BOOL)isPlaying{
@@ -312,7 +325,19 @@
     }
     
     _pauseMarked = false;
-    self.state = TFMediaPlayerStateNone;
+    self.state = TFMediaPlayerStateStoping;
+}
+
+-(void)switchToNewMedia:(NSURL *)mediaURL{
+    
+    if (_state == TFMediaPlayerStateNone ||
+        _state == TFMediaPlayerStateStoped) {
+        self.mediaURL = mediaURL;
+        [self play];
+    }else{
+        _nextMedia = mediaURL;
+        [self stop];
+    }
 }
 
 -(BOOL)configureAVSession{

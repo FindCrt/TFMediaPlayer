@@ -109,8 +109,11 @@ inline uint64_t channelLayoutForChannels(int channels){
 #define TFMPCondWait(cond, mutex) \
     pthread_mutex_lock(&mutex);\
     pthread_cond_wait(&cond, &mutex);\
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex);   \
 
-#define TFMPCondSignal(cond) pthread_cond_signal(&cond);
+#define TFMPCondSignal(cond, mutex) \
+    pthread_mutex_lock(&mutex);\
+    pthread_cond_signal(&cond);\
+    pthread_mutex_unlock(&mutex);   \
 
 #endif /* TFUtilities_h */

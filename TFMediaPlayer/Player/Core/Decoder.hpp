@@ -39,6 +39,7 @@ namespace tfmpcore {
         static void *decodeLoop(void *context);
         
         bool shouldDecode = false;
+        /** decode loop is running */
         bool isDecoding = false;
         
         bool pause = false;
@@ -50,6 +51,7 @@ namespace tfmpcore {
         pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
         
     public:
+        string name;
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
         

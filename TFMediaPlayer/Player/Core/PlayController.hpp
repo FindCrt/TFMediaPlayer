@@ -118,7 +118,11 @@ namespace tfmpcore {
         bool connectAndOpenMedia(std::string mediaPath);
         std::function<void(PlayController*)> connectCompleted;
         
-        /** callback which call when playing stoped. The second param is error code of the reason to stop. It's 0 when reason is reaching end of file.*/
+        /** callback which call when playing stoped. The second param is reason code of the reason to stop:
+         *  -1 error occur
+         *  0 reaching file end
+         *  1 stop by calling func stop()
+         */
         std::function<void(PlayController*, int)> playStoped;
         
         void play();
