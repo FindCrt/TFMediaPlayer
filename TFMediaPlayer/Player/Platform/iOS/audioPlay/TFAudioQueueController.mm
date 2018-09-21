@@ -9,8 +9,12 @@
 #import "TFAudioQueueController.h"
 #import <AudioToolbox/AudioToolbox.h>
 //#import <AVFoundation/AVFoundation.h>
+
+#if DEBUG
 #import "TFMPUtilities.h"
 #import "TFMPDebugFuncs.h"
+#import "TFStateObserver.hpp"
+#endif
 
 @interface TFAudioQueueController (){
     
@@ -122,14 +126,6 @@ void audioQueueListen(
         return;
     }
     
-//    NSError *error;
-    
-//    if ([[AVAudioSession sharedInstance] setActive:YES error:&error]) {
-//        NSLog(@"audio session active error: %@",error);
-//        [_lock unlock];
-//        return;
-//    }
-    
     UInt32 isRuning = NO;
     UInt32 size = sizeof(isRuning);
     AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
@@ -144,10 +140,9 @@ void audioQueueListen(
     
     AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
     NSLog(@"isRuning2: %d",isRuning);
-    
 
-    
     _state = TFAudioQueueStatePlaying;
+    myStateObserver.labelMark("audio player", "play");
     
     [_lock unlock];
 }
@@ -163,7 +158,7 @@ void audioQueueListen(
     OSStatus status = AudioQueuePause(_audioQueue);
     NSLog(@"AudioQueuePause %d\n",status);
     _state = TFAudioQueueStatePaused;
-    
+    myStateObserver.labelMark("audio player", "pause");
     [_lock unlock];
 }
 
@@ -177,7 +172,7 @@ void audioQueueListen(
     
     AudioQueueStop(_audioQueue, YES);
     _state = TFAudioQueueStateUnplay;
-    
+    myStateObserver.labelMark("audio player", "stop");
     [_lock unlock];
 }
 

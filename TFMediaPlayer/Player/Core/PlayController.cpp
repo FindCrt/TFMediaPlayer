@@ -83,11 +83,21 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     }
     
     displayer->displayContext = displayContext;
-    if (videoStrem >= 0) displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
-    if (audioStream >= 0) displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
-    
-    if (videoStrem >= 0) displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
-    if (audioStream >= 0) displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
+    if (videoStrem >= 0) {
+        displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
+        displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
+#if DEBUG
+        videoDecoder->timebase = displayer->videoTimeBase;
+#endif
+    }
+    if (audioStream >= 0) {
+        displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
+        displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
+        
+#if DEBUG
+        audioDecoder->timebase = displayer->audioTimeBase;
+#endif
+    }
     
     calculateRealDisplayMediaType();
     setupSyncClock();
@@ -288,6 +298,10 @@ void PlayController::bufferDone(){
     
     if (prepareForSeeking) {
         return;
+    }
+    
+    if (bufferingStateChanged) {
+        bufferingStateChanged(this, false);
     }
     
     if (seeking) {

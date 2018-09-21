@@ -247,7 +247,11 @@ void *Decoder::decodeLoop(void *context){
                     av_frame_ref(refFrame, frame);
 //                    av_usleep(50000);
                     myStateObserver.mark(name, 8);
+                    if (decoder->frameBuffer.isEmpty()) {
+                        myStateObserver.labelMark("audio first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
+                    }
                     decoder->frameBuffer.blockInsert(refFrame);
+                    
                 }else{
                     av_frame_unref(frame);
                 }
@@ -299,6 +303,9 @@ void *Decoder::decodeLoop(void *context){
                 if (decoder->shouldDecode) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
+                    if (decoder->frameBuffer.isEmpty()) {
+                        myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
+                    }
                     decoder->frameBuffer.blockInsert(refFrame);
                     TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
                 }else{

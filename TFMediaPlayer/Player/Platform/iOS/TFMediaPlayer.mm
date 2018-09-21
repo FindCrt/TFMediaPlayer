@@ -100,11 +100,11 @@
         };
         
         _playController->bufferingStateChanged = [self](tfmpcore::PlayController *playController, bool isBuffering){
-            if (isBuffering) {
-                [_audioPlayer pause];
-            }else{
-                [_audioPlayer play];
-            }
+//            if (isBuffering) {
+//                [_audioPlayer pause];
+//            }else{
+//                [_audioPlayer play];
+//            }
         };
         
         _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
