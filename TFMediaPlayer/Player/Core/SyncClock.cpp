@@ -8,6 +8,7 @@
 
 #include "SyncClock.hpp"
 #include "TFMPDebugFuncs.h"
+#include "TFStateObserver.hpp"
 
 extern "C"{
 #include <libavutil/time.h>
@@ -18,7 +19,7 @@ using namespace tfmpcore;
 static double timeDen = 1000000;
 
 void SyncClock::reset(){
-    TFMPDLOG_C("reset sync\n");
+    myStateObserver.mark("ptsCorrection", -1);
     ptsCorrection = -1;
 }
 
@@ -50,6 +51,8 @@ double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     }
     
     if (ptsCorrection < 0) {
+        myStateObserver.labelMark("sync audio", to_string(sourcePts));
+        myStateObserver.timeMark("sync audio dis");
         return av_gettime_relative()/timeDen;
     }
     return ptsCorrection/timeDen+sourcePts;
@@ -66,7 +69,6 @@ double SyncClock::remainTimeForAudio(int64_t audioPts, AVRational timeBase){
 }
 
 void SyncClock::presentVideo(int64_t videoPts, AVRational timeBase){
-    TFMPDLOG_C("presentVideo: %.3f, %lld[%.6f]\n",ptsCorrection/timeDen,videoPts, videoPts*av_q2d(timeBase));
     if (isAudioMajor) {
         return;
     }
@@ -79,6 +81,6 @@ void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay
         return;
     }
     
-    TFMPDLOG_C("presentAudio: %.3f, %lld[%.6f]\n",ptsCorrection/timeDen,audioPts, audioPts*av_q2d(timeBase));
     ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
+    myStateObserver.mark("ptsCorrection", ptsCorrection);
 }

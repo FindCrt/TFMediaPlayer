@@ -58,6 +58,8 @@ namespace tfmpcore {
         /*** A lot of controls and states ***/
         
         //0. prepare
+        static int connectFail(void *opque);
+        bool abortConnecting = false;
         bool prapareOK = false;
         //real audio format
         void resolveAudioStreamFormat();
@@ -101,6 +103,9 @@ namespace tfmpcore {
         pthread_t freeThread;
         static void * freeResources(void *context);
         void resetStatus();
+        bool reading = false;
+        pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
 
     public:
         
@@ -116,7 +121,7 @@ namespace tfmpcore {
         /** controls **/
         
         bool connectAndOpenMedia(std::string mediaPath);
-        std::function<void(PlayController*)> connectCompleted;
+        void cancelConnecting();
         
         /** callback which call when playing stoped. The second param is reason code of the reason to stop:
          *  -1 error occur

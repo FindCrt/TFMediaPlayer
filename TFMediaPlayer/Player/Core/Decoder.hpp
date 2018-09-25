@@ -70,6 +70,7 @@ namespace tfmpcore {
         void startDecode();
         void stopDecode();
         
+        void activeBlock(bool flag);
         void flush();
         void freeResources();
         

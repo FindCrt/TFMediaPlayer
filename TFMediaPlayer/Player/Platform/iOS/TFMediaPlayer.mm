@@ -65,17 +65,6 @@
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
         
-        _playController->connectCompleted = [self](tfmpcore::PlayController *playController){
-            
-            if (self.state == TFMediaPlayerStateConnecting) {
-                self.state = TFMediaPlayerStateReady;
-            }
-            
-            if (_innerPlayWhenReady || _autoPlayWhenReady) {
-                [self play];
-            }
-        };
-        
         _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
             
             if (reason == 0 && _state != TFMediaPlayerStateStoping) {
@@ -227,6 +216,12 @@
         if (!succeed) {
             TFMPDLog(@"play media open error");
             self.state = TFMediaPlayerStateNone;
+        }else{
+            self.state = TFMediaPlayerStateReady;
+            
+            if (_innerPlayWhenReady || _autoPlayWhenReady) {
+                [self play];
+            }
         }
     });
 }
@@ -310,7 +305,7 @@
         case TFMediaPlayerStateConnecting:
             _autoPlayWhenReady = false;
             _innerPlayWhenReady = false;
-            _playController->stop();
+            _playController->cancelConnecting();
             break;
         case TFMediaPlayerStateReady:
             _autoPlayWhenReady = false;

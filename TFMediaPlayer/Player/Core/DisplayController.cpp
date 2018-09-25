@@ -57,9 +57,9 @@ void DisplayController::pause(bool flag){
     }
     TFMPDLOG_C("DisplayController pause: %s\n",flag?"true":"false");
     paused = flag;
-    if (paused) {
-        syncClock->reset();
-    }else{
+    syncClock->reset();
+    
+    if (!paused) {
         TFMPCondSignal(video_pause_cond, video_pause_mutex)
     }
 }
@@ -199,14 +199,14 @@ void *DisplayController::displayLoop(void *context){
             myStateObserver.mark("video display", 7);
             displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
 
-            if (!displayer->syncClock->isAudioMajor) {
-                
-                displayer->lastPts = videoFrame->pts;
-                displayer->lastIsAudio = false;
-                
-            }
             myStateObserver.mark("video display", 8);
-            if(!displayer->paused) displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
+            if(!displayer->paused) {
+                if (!displayer->syncClock->isAudioMajor) {
+                    displayer->lastPts = videoFrame->pts;
+                    displayer->lastIsAudio = false;
+                }
+                displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
+            }
         }
         
         av_frame_free(&videoFrame);
@@ -272,6 +272,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->shareAudioBuffer->blockGetOut(&frame);
                 
                 displayer->displayingAudio = frame;
+                
             }
             
             //TODO: need more calm way to wait
@@ -309,13 +310,14 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             double preBufferDuration = (filledSize/destBytesPerChannel)/destSampleRate;
             
             //update sync clock
-            if (displayer->syncClock->isAudioMajor) {
-                displayer->lastPts = frame->pts;
-                displayer->lastIsAudio = true;
-                
-            }
             myStateObserver.mark("display audio", 10);
-            if(!displayer->paused) displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
+            if(!displayer->paused) {
+                if (displayer->syncClock->isAudioMajor) {
+                    displayer->lastPts = frame->pts;
+                    displayer->lastIsAudio = true;
+                }
+                displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
+            }
             
             if (needReadSize >= linesize) {
                 

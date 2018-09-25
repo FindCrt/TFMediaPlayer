@@ -129,7 +129,9 @@ void audioQueueListen(
     UInt32 isRuning = NO;
     UInt32 size = sizeof(isRuning);
     AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
-    NSLog(@"isRuning1: %d",isRuning);
+    if (isRuning) {
+        AudioQueueFlush(_audioQueue);
+    }
     
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
     TFMPDLOG_C("AudioQueueStart %d\n",status);
@@ -137,9 +139,6 @@ void audioQueueListen(
         [_lock unlock];
         return;
     })
-    
-    AudioQueueGetProperty(_audioQueue, kAudioQueueProperty_IsRunning, &isRuning, &size);
-    NSLog(@"isRuning2: %d",isRuning);
 
     _state = TFAudioQueueStatePlaying;
     myStateObserver.labelMark("audio player", "play");
@@ -178,7 +177,7 @@ void audioQueueListen(
 
 static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer){
     TFAudioQueueController *controller = (__bridge TFAudioQueueController *)(inUserData);
-    
+    NSLog(@"AudioQueue1\n");
     if (!controller) {
         return;
     }
@@ -190,6 +189,7 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
     uint8_t **buffers = (uint8_t**)malloc(count*sizeof(uint8_t*));
     buffers[0] = (uint8_t*)inBuffer->mAudioData;
     
+    NSLog(@"AudioQueue2\n");
     if (controller.fillStruct.fillFunc) {
         int retval = controller.fillStruct.fillFunc(buffers,count, inBuffer->mAudioDataByteSize, controller.fillStruct.context);
         if (retval < 0) {
@@ -197,7 +197,7 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
         }
         
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);
-//        NSLog(@"AudioQueueEnqueueBuffer\n");
+        
         
 //        TFMPPrintBuffer(buffers[0], 100, 100);
         

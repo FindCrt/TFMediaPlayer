@@ -82,6 +82,11 @@ void Decoder::stopDecode(){
     shouldDecode = false;
 }
 
+void Decoder::activeBlock(bool flag){
+    pktBuffer.disableIO(!flag);
+    frameBuffer.disableIO(!flag);
+}
+
 void Decoder::flush(){
     
     string stateName = name+" flush";
@@ -140,19 +145,20 @@ void Decoder::freeResources(){
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
     //3. wait for the end of current loop
+    myStateObserver.mark(name+" free", 1);
     pthread_mutex_lock(&waitLoopMutex);
     if (isDecoding) {
         pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-        myStateObserver.labelMark(name+" isDecoding", "true");
+        myStateObserver.mark(name+" free", 2);
     }else{
-        myStateObserver.labelMark(name+" isDecoding", "false");
+        myStateObserver.mark(name+" free", 3);
     }
     pthread_mutex_unlock(&waitLoopMutex);
-    
+    myStateObserver.mark(name+" free", 4);
     //4. flush all reserved buffers
     pktBuffer.flush();
     frameBuffer.flush();
-    
+    myStateObserver.mark(name+" free", 5);
     if (codecCtx) avcodec_free_context(&codecCtx);
     
     fmtCtx = nullptr;
