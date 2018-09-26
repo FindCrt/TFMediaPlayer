@@ -116,4 +116,20 @@ inline uint64_t channelLayoutForChannels(int channels){
     pthread_cond_signal(&cond);\
     pthread_mutex_unlock(&mutex);   \
 
+
+#pragma mark - bytes funcs
+
+inline static uint8_t extractbits(uint8_t num, short start, short end){
+    if (start == 1) {
+        uint8_t result = num;
+        result >>= 8-end;
+        return result;
+    }else{
+        uint8_t result = (1<<(9-start))-(1<<(8-end));
+        result &= num;
+        result >>= 8-end;
+        return result;
+    }
+}
+
 #endif /* TFUtilities_h */

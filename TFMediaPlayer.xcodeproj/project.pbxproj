@@ -53,6 +53,8 @@
 		1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
 		18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18706DC3215396EA009C21BE /* TFDebugStateShower.mm */; };
 		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
+		18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */; };
+		18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */; };
 		188AA8AE20E248CE00F36DCD /* ninja.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 188AA8AD20E2487600F36DCD /* ninja.mp4 */; };
 		18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 18946DCD2068F8F1004BDF96 /* t1.mp4 */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
@@ -158,6 +160,10 @@
 		18706DC3215396EA009C21BE /* TFDebugStateShower.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFDebugStateShower.mm; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
+		18887A0B215B26E700DD6BBA /* TFHardDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecoder.h; sourceTree = "<group>"; };
+		18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFHardDecoder.mm; sourceTree = "<group>"; };
+		18887A0E215B2A3B00DD6BBA /* TFHardDecodeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecodeViewController.h; sourceTree = "<group>"; };
+		18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFHardDecodeViewController.m; sourceTree = "<group>"; };
 		188AA8AD20E2487600F36DCD /* ninja.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = ninja.mp4; sourceTree = "<group>"; };
 		18946DCD2068F8F1004BDF96 /* t1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = t1.mp4; sourceTree = "<group>"; };
 		18C66D951FF0F1F6002BFBBC /* TFMediaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TFMediaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -401,6 +407,7 @@
 		18415A201FF6130D007095AC /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				18887A0A215B26D500DD6BBA /* hardDecode */,
 				18415A361FF64126007095AC /* TFMediaPlayer.h */,
 				18415A371FF64126007095AC /* TFMediaPlayer.mm */,
 				899A4D4F20359DC100E26AF6 /* playControl */,
@@ -506,6 +513,15 @@
 			name = subViews;
 			sourceTree = "<group>";
 		};
+		18887A0A215B26D500DD6BBA /* hardDecode */ = {
+			isa = PBXGroup;
+			children = (
+				18887A0B215B26E700DD6BBA /* TFHardDecoder.h */,
+				18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */,
+			);
+			path = hardDecode;
+			sourceTree = "<group>";
+		};
 		18C66D8C1FF0F1F6002BFBBC = {
 			isa = PBXGroup;
 			children = (
@@ -537,6 +553,8 @@
 				18C66DD11FF0F96F002BFBBC /* TFNetMp4PlayViewController.m */,
 				184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */,
 				184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */,
+				18887A0E215B2A3B00DD6BBA /* TFHardDecodeViewController.h */,
+				18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */,
 				18C66DC21FF0F253002BFBBC /* Player */,
 				892C12962003B63A0081CF79 /* FFmpeg */,
 				1856F0471FFB804D00B4F2A7 /* x264 */,
@@ -994,8 +1012,10 @@
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,
 				1853B373206DD607002DA5BF /* MediaTimeFilter.cpp in Sources */,
+				18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */,
 				18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */,
 				18415A2C1FF6130D007095AC /* TFGLView.m in Sources */,
+				18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */,
 				18554537202A9B1B0014D7CE /* TFAudioUnitPlayer.mm in Sources */,
 				18C66DCF1FF0F84B002BFBBC /* ExampleMenuViewController.m in Sources */,
 				18415A2E1FF6130D007095AC /* TFOPGLProgram.cpp in Sources */,
