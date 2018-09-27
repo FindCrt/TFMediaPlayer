@@ -11,7 +11,7 @@
 
 /*** debug flags ***/
 
-#define DisableRenderVideo 1
+#define DisableRenderVideo 0
 
 /** log */
 
