@@ -10,6 +10,7 @@
 #import <OpenGLES/ES3/gl.h>
 #import "TFOPGLProgram.hpp"
 #import "TFMPDebugFuncs.h"
+#import "TFMPUtilities.h"
 
 //texture对齐和裁剪 http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html
 
@@ -191,6 +192,57 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
 //    
 //    [self rendering];
 //}
+
+-(void)displayPixelBuffer:(CVPixelBufferRef)pixelBuffer{
+    
+    if (CVPixelBufferGetBaseAddress(pixelBuffer) == nil) {
+        return;
+    }
+    
+    TFMPVideoFrameBuffer frame = [self TFMPFrameBufferFromPixelBuffer:pixelBuffer];
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    [self displayFrameBuffer:&frame];
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    CVPixelBufferRelease(pixelBuffer);
+}
+
+-(TFMPVideoFrameBuffer)TFMPFrameBufferFromPixelBuffer:(CVPixelBufferRef)pixelBuffer{
+    TFMPVideoFrameBuffer frame;
+    frame.width = (int)CVPixelBufferGetWidth(pixelBuffer);
+    frame.height = (int)CVPixelBufferGetHeight(pixelBuffer);
+    
+    OSType pixelType = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
+        pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange){
+        
+        uint8_t *buffer = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+        uint8_t *yuv420p = (uint8_t*)malloc(frame.width*frame.height*3/2.0f);
+        yuv420sp_to_yuv420p(buffer, yuv420p, frame.width, frame.height);
+        
+        frame.format = TFMP_VIDEO_PIX_FMT_YUV420P;
+        frame.planes = 3;
+        uint32_t ysize = frame.width*frame.height;
+        frame.pixels[0] = yuv420p;
+        frame.pixels[1] = yuv420p+ysize;
+        frame.pixels[2] = yuv420p+(5/4)*ysize;
+        frame.linesize[0] = frame.width;
+        frame.linesize[1] = frame.width/2;
+        frame.linesize[2] = frame.width/2;
+        
+    }else{
+        frame.format = TFMP_VIDEO_PIX_FMT_YUV420P;
+        frame.planes = 3;
+        
+        frame.pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+        frame.pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);;
+        frame.pixels[2] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 2);
+        frame.linesize[0] = frame.width;
+        frame.linesize[1] = frame.width/2;
+        frame.linesize[2] = frame.width/2;
+    }
+    
+    return frame;
+}
 
 -(void)displayFrameBuffer:(TFMPVideoFrameBuffer *)frameBuf{
     

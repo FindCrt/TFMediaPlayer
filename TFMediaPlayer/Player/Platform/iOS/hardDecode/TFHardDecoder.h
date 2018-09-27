@@ -7,11 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreVideo/CoreVideo.h>
+
+typedef void (^TFHDDecodeFrameHandler)(CVPixelBufferRef pixelBuffer);
 
 @interface TFHardDecoder : NSObject
 
 @property (nonatomic) NSURL *mediaUrl;
 
--(void)test;
+@property (nonatomic) TFHDDecodeFrameHandler frameHandler;
+
+-(void)startWithFrameHandler:(TFHDDecodeFrameHandler)frameHandler;
 
 @end

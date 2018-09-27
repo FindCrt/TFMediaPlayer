@@ -119,6 +119,7 @@ inline uint64_t channelLayoutForChannels(int channels){
 
 #pragma mark - bytes funcs
 
+/** 提取一个字节中指定区域的数值 */
 inline static uint8_t extractbits(uint8_t num, short start, short end){
     if (start == 1) {
         uint8_t result = num;
@@ -131,5 +132,76 @@ inline static uint8_t extractbits(uint8_t num, short start, short end){
         return result;
     }
 }
+
+#pragma mark - color space funcs
+
+/**
+ yyyy yyyy
+ uv    uv
+ ->
+ yyyy yyyy
+ uu
+ vv
+ */
+inline void yuv420sp_to_yuv420p(unsigned char* yuv420sp, unsigned char* yuv420p, int width, int height)
+{
+    int i, j;
+    int y_size = width * height;
+    
+    unsigned char* y = yuv420sp;
+    unsigned char* uv = yuv420sp + y_size;
+    
+    unsigned char* y_tmp = yuv420p;
+    unsigned char* u_tmp = yuv420p + y_size;
+    unsigned char* v_tmp = yuv420p + y_size * 5 / 4;
+    
+    // y
+    memcpy(y_tmp, y, y_size);
+    
+    // u
+    for (j = 0, i = 0; j < y_size/2; j+=2, i++)
+    {
+        u_tmp[i] = uv[j];
+        v_tmp[i] = uv[j+1];
+    }
+}
+
+/**
+ yyyy yyyy
+ uu
+ vv
+ ->
+ yyyy yyyy
+ uv    uv
+ */
+inline void yuv420p_to_yuv420sp(unsigned char* yuv420p, unsigned char* yuv420sp, int width, int height)
+{
+    int i, j;
+    int y_size = width * height;
+    
+    unsigned char* y = yuv420p;
+    unsigned char* u = yuv420p + y_size;
+    unsigned char* v = yuv420p + y_size * 5 / 4;
+    
+    unsigned char* y_tmp = yuv420sp;
+    unsigned char* uv_tmp = yuv420sp + y_size;
+    
+    // y
+    memcpy(y_tmp, y, y_size);
+    
+    // u
+    for (j = 0, i = 0; j < y_size/2; j+=2, i++)
+    {
+        // 此处可调整U、V的位置，变成NV12或NV21
+#if 01
+        uv_tmp[j] = u[i];
+        uv_tmp[j+1] = v[i];
+#else
+        uv_tmp[j] = v[i];
+        uv_tmp[j+1] = u[i];
+#endif
+    }
+}
+
 
 #endif /* TFUtilities_h */

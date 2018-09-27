@@ -8,10 +8,13 @@
 
 #import "TFHardDecodeViewController.h"
 #import "TFHardDecoder.h"
+#import "TFOPGLESDisplayView.h"
 
 @interface TFHardDecodeViewController (){
     TFHardDecoder *_hardDecoder;
 }
+
+@property (nonatomic) TFOPGLESDisplayView *displayView;
 
 @end
 
@@ -20,11 +23,20 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"cocosvideo" ofType:@"mp4"];
+    _displayView = [[TFOPGLESDisplayView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:_displayView];
+    
+    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"Wizard" ofType:@"h264"];
     _hardDecoder = [[TFHardDecoder alloc] init];
     _hardDecoder.mediaUrl = [NSURL fileURLWithPath:filePath];
     
-    [_hardDecoder test];
+    __weak typeof(self) weakSelf = self;
+    [_hardDecoder startWithFrameHandler:^(CVPixelBufferRef pixelBuffer) {
+        CVPixelBufferRef copy = CVPixelBufferRetain(pixelBuffer);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.displayView displayPixelBuffer:copy];
+        });
+    }];
 }
 
 @end

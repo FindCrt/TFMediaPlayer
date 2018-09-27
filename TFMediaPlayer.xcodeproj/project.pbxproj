@@ -52,6 +52,7 @@
 		1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */; };
 		1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
 		18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18706DC3215396EA009C21BE /* TFDebugStateShower.mm */; };
+		1870E462215C929F00EB1CD8 /* Wizard.h264 in Resources */ = {isa = PBXBuildFile; fileRef = 1870E461215C928400EB1CD8 /* Wizard.h264 */; };
 		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
 		18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */; };
 		18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */; };
@@ -158,6 +159,7 @@
 		18706DC0215392EB009C21BE /* TFStateObserver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TFStateObserver.hpp; sourceTree = "<group>"; };
 		18706DC2215396EA009C21BE /* TFDebugStateShower.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFDebugStateShower.h; sourceTree = "<group>"; };
 		18706DC3215396EA009C21BE /* TFDebugStateShower.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFDebugStateShower.mm; sourceTree = "<group>"; };
+		1870E461215C928400EB1CD8 /* Wizard.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Wizard.h264; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18887A0B215B26E700DD6BBA /* TFHardDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecoder.h; sourceTree = "<group>"; };
@@ -442,6 +444,7 @@
 				1868B99E206A45FA00C5D0DB /* momei.mp4 */,
 				1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */,
 				184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */,
+				1870E461215C928400EB1CD8 /* Wizard.h264 */,
 				184C8E11200B481D0063EAC3 /* pure1.caf */,
 				183434172008AB3B00ED9B05 /* LuckyDay.mp3 */,
 				187DFBC620084BEF002BDCB3 /* AACTest.m4a */,
@@ -961,6 +964,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1870E462215C929F00EB1CD8 /* Wizard.h264 in Resources */,
 				1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */,
 				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
 				1863F3C321072BB00006D513 /* 111.mp3 in Resources */,

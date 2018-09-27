@@ -12,10 +12,26 @@
 #include "TFMPUtilities.h"
 #import <VideoToolbox/VideoToolbox.h>
 
+extern "C"{
+    #import <libavutil/time.h>
+}
+
+#define TFHDOutWidth    800
+#define TFHDOutHeight   600
+
 @interface TFHardDecoder (){
     dispatch_queue_t _readQueue;
     BOOL _shouldRead;
     NSInputStream *_readStream;
+    
+    uint8_t *_sps;
+    uint8_t *_pps;
+    
+    size_t _spsSize;
+    size_t _ppsSize;
+    
+    CMVideoFormatDescriptionRef _videoFmtDesc;
+    VTDecompressionSessionRef _decodeSession;
 }
 
 @end
@@ -31,10 +47,20 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
     return true;
 }
 
--(void)test{
+#define resetNalu \
+[nalu resetBytesInRange:NSMakeRange(0, nalu.length)];\
+nalu.length = 0;\
+[nalu appendBytes:startCode length:4];\
+
+-(void)startWithFrameHandler:(TFHDDecodeFrameHandler)frameHandler{
+    
+    self.frameHandler = frameHandler;
+    
     NSMutableData *nalu = [[NSMutableData alloc] init];
     __block int endState = 0;
     __weak typeof(self) weakSelf = self;
+    
+    const void *startCode = "\x00\x00\x00\x01";
     
     [self startReadWithHandler:^(uint8_t *buffer, NSUInteger validSize) {
         int cur = 0;
@@ -45,17 +71,13 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
             if (endState < 3 && bytesComp(buffer, head1+endState, 3-endState)) {
                 nalu.length -= endState;
                 [weakSelf processNALU:nalu];
-                
-                nalu.length = 0;
-//                [nalu appendBytes:head1 length:3];
+                resetNalu
                 cur += 3-endState;
                 
             }else if (bytesComp(buffer, head2+endState, 4-endState)){
                 nalu.length -= endState;
                 [weakSelf processNALU:nalu];
-                
-                nalu.length = 0;
-//                [nalu appendBytes:head2 length:4];
+                resetNalu
                 cur += 4-endState;
             }
             
@@ -64,7 +86,6 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
 
         int start = 0;
         while (cur < validSize) {
-//            printf("%x ",buffer[cur]);
             if (buffer[cur] == 0) {
                 if (cur+1 == validSize) {
                     endState = 1;
@@ -77,8 +98,9 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
                     }
                     if (buffer[cur+2] == 1) {
                         [nalu appendBytes:buffer+start length:cur-start];
-                        [weakSelf processNALU:[nalu copy]];
-                        nalu.length = 0;
+                        [weakSelf processNALU:nalu];
+                        resetNalu
+                        
                         start = cur+3;
                         cur = start;
                         continue;
@@ -89,8 +111,9 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
                         }
                         if (buffer[cur+3] == 1) {
                             [nalu appendBytes:buffer+start length:cur-start];
-                            [weakSelf processNALU:[nalu copy]];
-                            nalu.length = 0;
+                            [weakSelf processNALU:nalu];
+                            resetNalu
+                            
                             start = cur+4;
                             cur = start;
                             continue;
@@ -128,7 +151,7 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
     });
 }
 
--(void)processNALU:(NSData *)nalu{
+-(void)processNALU:(NSMutableData *)nalu{
     if (nalu.length == 0) {
         return;
     }
@@ -136,37 +159,122 @@ inline static bool bytesComp(uint8_t *bytes1, uint8_t *bytes2, int len){
     uint8_t *bytes = (uint8_t*)nalu.bytes;
     
     //第1位为禁止位，为1代表语法错误；2-3为参考级别；4-8为类型
-    uint8_t level = extractbits(bytes[0], 2, 3);
-    uint8_t type = extractbits(bytes[0], 4, 8);
+//    uint8_t level = extractbits(bytes[0], 2, 3);
+    uint8_t type = extractbits(bytes[4], 4, 8);
     
-    if (type ==0 || (type>=16 && type<=18) || type>20) {
-//        printf(">>>>>>>>>>> [%d,%d], len %ld\n",type,bytes[0],nalu.length);
-        return;
-    }
+//    if (type ==0 || (type>=16 && type<=18) || type>20) {  //备用的值
+//        return;
+//    }
+    
     if (type == 7) { //sps
         NSLog(@"sps");
+        _spsSize = nalu.length - 4;
+        _sps = (uint8_t*)malloc(_spsSize);
+        memcpy(_sps, bytes+4, _spsSize);
+        [self initDecoder];
     }else if (type == 8){ //pps
         NSLog(@"pps");
-    }else if (type == 1){
-        NSLog(@"p帧");
+        _ppsSize = nalu.length - 4;
+        _pps = (uint8_t*)malloc(_ppsSize);
+        memcpy(_pps, bytes+4, _ppsSize);
+        [self initDecoder];
     }else if (type == 5){
         NSLog(@"i帧");
+        if (_decodeSession) {
+            uint32_t len = CFSwapInt32BigToHost((uint32_t)nalu.length-4);
+            [nalu replaceBytesInRange:NSMakeRange(0, 4) withBytes:&len];
+            [self decodeFrame:bytes size:nalu.length];
+        }
     }else if (type == 9){
         NSLog(@"************************分界符*************************");
-    }else if (type == 10 || type == 11){
-        NSLog(@"结束%d",type);
-    }else if (type == 2 || type == 3 || type == 4){
-        NSLog(@"分片%d",type);
     }else{
         NSLog(@"其他%d",type);
+        if (_decodeSession) {
+            uint32_t len = CFSwapInt32BigToHost((uint32_t)nalu.length-4);
+            [nalu replaceBytesInRange:NSMakeRange(0, 4) withBytes:&len];
+            [self decodeFrame:bytes size:nalu.length];
+            
+            
+        }
     }
-//
-//    printf("\n[%d,%d], len %ld ",type,bytes[0],nalu.length);
-//    for (int i = 0; i<10; i++) {
-//        printf("%x ",((uint8_t*)nalu.bytes)[i]);
-//    }
-    printf("\n");
+    
+//    printf("\n");
 }
 
+-(BOOL)initDecoder{
+    
+    if (_decodeSession) {
+        return YES;
+    }
+    
+    if (_spsSize == 0 || _ppsSize == 0) {
+        return NO;
+    }
+    
+    const uint8_t * params[2] = {_sps, _pps};
+    const size_t paramSize[2] = {_spsSize, _ppsSize};
+    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault, 2, params, paramSize, 4, &_videoFmtDesc);
+    if (status != 0) {
+        NSLog(@"create video desc failed!");
+        return NO;
+    }
+    //硬解必须是 kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+    //                                                           或者是kCVPixelFormatType_420YpCbCr8Planar
+    //因为iOS是  nv12  其他是nv21
+    NSDictionary *destImageAttris = @{
+                                      (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange),
+                                      (id)kCVPixelBufferWidthKey : @(TFHDOutHeight),
+                                      (id)kCVPixelBufferHeightKey : @(TFHDOutWidth),
+                                      //这里款高和编码反的
+                                      (id)kCVPixelBufferOpenGLCompatibilityKey : @(YES)
+                                      };
+    VTDecompressionOutputCallbackRecord callback = {decodeCallback, (__bridge void*)self};
+    
+    status = VTDecompressionSessionCreate(
+                                 kCFAllocatorDefault,
+                                 _videoFmtDesc,
+                                 NULL,
+                                 (__bridge CFDictionaryRef)destImageAttris,
+                                 &callback,
+                                 &_decodeSession);
+    
+    return status == 0;
+}
+
+-(void)decodeFrame:(uint8_t *)frame size:(size_t)size{
+    
+    CMBlockBufferRef buffer;
+    OSStatus status = CMBlockBufferCreateWithMemoryBlock(NULL, frame, size, kCFAllocatorNull, NULL, 0, size, 0, &buffer);
+    if (status) {
+        NSLog(@"create block buffer error!");
+        return;
+    }
+    
+    CMSampleBufferRef sample;
+    const size_t sampleSize[] = {size};
+    status = CMSampleBufferCreateReady(kCFAllocatorDefault,
+                                       buffer,
+                                       _videoFmtDesc,
+                                       1,0,NULL, 1, sampleSize, &sample);
+    if (status || sample == nil) {
+        NSLog(@"create sample buffer error!");
+        return;
+    }
+    
+    CVPixelBufferRef pixelBuffer;
+    VTDecodeInfoFlags outFlags;
+    status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, &pixelBuffer, &outFlags);
+    if (status) {
+        NSLog(@"decode frame error: %d",status);
+    }
+}
+
+void decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration ){
+    
+    TFHardDecoder *decoder = (__bridge TFHardDecoder *)decompressionOutputRefCon;
+    decoder.frameHandler(imageBuffer);
+    
+    av_usleep(1/3.0*100);
+}
 
 @end
