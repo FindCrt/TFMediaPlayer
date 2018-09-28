@@ -27,17 +27,17 @@ double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
     
     double sourcePts = videoPts *av_q2d(timeBase);
     
-    TFMPDLOG_C("video sourcePts: %.3f, minMediaTime: %.3f\n",sourcePts,minMediaTime);
+    
     if (sourcePts < minMediaTime) {
         return 0;  //discard this frame
     }
     
     if (ptsCorrection < 0) {
-        TFMPDLOG_C("ptsCorrection < 0 \n");
+        
         return av_gettime_relative()/timeDen;
     }
     
-    TFMPDLOG_C("sync: %.6f, %.6f\n",ptsCorrection/timeDen, sourcePts);
+    
     return ptsCorrection/timeDen+sourcePts;
 }
 
@@ -45,7 +45,7 @@ double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     
     double sourcePts = audioPts *av_q2d(timeBase);
     
-    TFMPDLOG_C("audio sourcePts: %.3f, minPtsLimit: %.3f\n",sourcePts,minMediaTime);
+    
     if (sourcePts < minMediaTime) {
         return 0; //discard this frame
     }

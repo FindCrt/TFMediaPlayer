@@ -191,8 +191,6 @@ void PlayController::pause(bool flag){
 
 void PlayController::stop(){
     
-    TFMPDLOG_C("play stop");
-    
     stoping = true;
     paused = false;
     
@@ -218,8 +216,6 @@ void *PlayController::seekOperation(void *context){
     double time = params->seekTime;
     PlayController *playController = params->playController;
     
-    TFMPDLOG_C("seekTo: %d:%d\n",(int)time/60,(int)time%60);
-    
     if (time > playController->duration) {
         time = playController->duration-0.1;
     }
@@ -229,7 +225,7 @@ void *PlayController::seekOperation(void *context){
     playController->seeking = true;
     playController->markTime = time;
     
-    TFMPDLOG_C("seeking true\n");
+    
     
     //Flushing all old frames and packets. Firstly, stop reading new packets.
     //1. turn off inlet
@@ -286,7 +282,7 @@ void *PlayController::seekOperation(void *context){
     playController->displayer->pause(true);
     playController->displayer->resetPlayTime();
     
-    TFMPDLOG_C("flush all end!\n");
+    
     
     //4. seek stream to new position
     int retval = -1;
@@ -320,7 +316,7 @@ void *PlayController::seekOperation(void *context){
     
     playController->prepareForSeeking = false;
     playController->displayer->pause(false);
-    TFMPDLOG_C("seek prepare end! %.3f\n",time);
+    
     
     free(context);
     
@@ -357,7 +353,7 @@ void PlayController::bufferDone(){
     
     if (seeking) {
         seeking = false;
-        TFMPDLOG_C("seeking false\n");
+        
         if (seekingEndNotify) {
             seekingEndNotify(this);
         }
@@ -442,7 +438,7 @@ void PlayController::resetStatus(){
     seeking = false;
     prepareForSeeking = false;
     markTime = 0;
-    TFMPDLOG_C("player stoped!\n");
+    
 }
 
 #pragma mark - properties
@@ -459,7 +455,7 @@ double PlayController::getDuration(){
 }
 
 double PlayController::getCurrentTime(){
-//    TFMPDLOG_C("seeking is %s\n",seeking?"true":"false");
+
     
     double playTime = displayer->getPlayTime();
     if (seeking || paused || playTime < 0) {  //invalid time
@@ -582,7 +578,6 @@ void * PlayController::readFrame(void *context){
             }
         }
         myStateObserver.mark("reading", 7);
-        TFMPDLOG_C("\n\nread frame[%s]: %lld,%.3f\n",packet->stream_index==0?"video":"audio",packet->pts, packet->pts*av_q2d(controller->fmtCtx->streams[packet->stream_index]->time_base));
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
@@ -605,7 +600,7 @@ void * PlayController::readFrame(void *context){
         av_packet_unref(packet);
     }
     myStateObserver.mark("reading", 9);
-    TFMPDLOG_C("readFrame thread end!\n");
+    
     controller->reading = false;
     TFMPCondSignal(controller->waitLoopCond, controller->waitLoopMutex);
     
@@ -649,7 +644,7 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
             if (controller->prepareForSeeking) {
                 return false;
             }
-            TFMPDLOG_C("buffer runs out, stop playing\n");
+            
             //buffer has ran out.We must stop playing until buffer is full again.
             if (controller->bufferingStateChanged) {
                 controller->bufferingStateChanged(controller, true);
@@ -657,12 +652,6 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curS
         }
 
     }else if (curSize >= playResumeSize){
-        
-        if (buffer == controller->videoDecoder->sharedFrameBuffer()) {
-            TFMPDLOG_C("video: frame buffer size has be greater than 20\n");
-        }else{
-            TFMPDLOG_C("audio: frame buffer size has be greater than 20\n");
-        }
         
         controller->bufferDone();
         

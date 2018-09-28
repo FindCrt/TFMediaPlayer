@@ -24,6 +24,8 @@
     [super viewDidLoad];
     
     _displayView = [[TFOPGLESDisplayView alloc] initWithFrame:self.view.bounds];
+    _displayView.contentMode = UIViewContentModeScaleAspectFit;
+    _displayView.backgroundColor = [UIColor blackColor];
     [self.view addSubview:_displayView];
     
     NSString *filePath = [[NSBundle mainBundle] pathForResource:@"Wizard" ofType:@"h264"];

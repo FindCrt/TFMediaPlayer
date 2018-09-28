@@ -50,7 +50,7 @@ void AudioResampler::freeResources(){
     
     resampleSize = 0;
     adoptedAudioDesc = {};
-    TFMPDLOG_C("nil lastSourceAudioDesc\n");
+    
 }
 
 void AudioResampler::initResampleContext(AVFrame *sourceFrame){
@@ -58,7 +58,7 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     if (sourceFrame->sample_rate == 0 ||
         sourceFrame->channel_layout == 0 ||
         sourceFrame->format == 0) {
-        TFMPDLOG_C("init swr_context with error frame\n");
+        
         return;
     }
     
@@ -79,10 +79,10 @@ void AudioResampler::initResampleContext(AVFrame *sourceFrame){
     
     TFCheckRetval("swr init");
     
-    TFMPDLOG_C("lastSourceAudioDesc: %d",lastSourceAudioDesc == nullptr);
+    
     
     if (lastSourceAudioDesc != nullptr) free(lastSourceAudioDesc);
-    TFMPDLOG_C("new lastSourceAudioDesc\n");
+    
     lastSourceAudioDesc = new TFMPAudioStreamDescription();
     lastSourceAudioDesc->sampleRate = sourceFrame->sample_rate;
     lastSourceAudioDesc->formatFlags = formatFlagsFromFFmpegAudioFormat(sourceFmt);
@@ -118,7 +118,7 @@ bool AudioResampler::reampleAudioFrame(AVFrame *inFrame, int *outSamples, int *l
     int actualOutSamples = swr_convert(swrCtx, outBuffer, nb_samples, (const uint8_t **)inFrame->extended_data, inFrame->nb_samples);
     
     if (actualOutSamples == 0) {
-        TFMPDLOG_C("memory alloc resample buffer error!\n");
+        
         return false;
     }
     

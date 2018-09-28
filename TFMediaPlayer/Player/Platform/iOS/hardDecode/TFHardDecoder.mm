@@ -16,8 +16,8 @@ extern "C"{
     #import <libavutil/time.h>
 }
 
-#define TFHDOutWidth    800
-#define TFHDOutHeight   600
+#define TFHDOutWidth    640
+#define TFHDOutHeight   360
 
 @interface TFHardDecoder (){
     dispatch_queue_t _readQueue;
@@ -178,24 +178,17 @@ nalu.length = 0;\
         _pps = (uint8_t*)malloc(_ppsSize);
         memcpy(_pps, bytes+4, _ppsSize);
         [self initDecoder];
-    }else if (type == 5){
-        NSLog(@"i帧");
+    }else if (type == 5 || type == 1){
+        NSLog(@"%@帧",type==5?@"i":@"p");
         if (_decodeSession) {
-            uint32_t len = CFSwapInt32BigToHost((uint32_t)nalu.length-4);
-            [nalu replaceBytesInRange:NSMakeRange(0, 4) withBytes:&len];
+//            uint32_t len = CFSwapInt32BigToHost((uint32_t)nalu.length-4);
+//            [nalu replaceBytesInRange:NSMakeRange(0, 4) withBytes:&len];
             [self decodeFrame:bytes size:nalu.length];
         }
     }else if (type == 9){
         NSLog(@"************************分界符*************************");
     }else{
         NSLog(@"其他%d",type);
-        if (_decodeSession) {
-            uint32_t len = CFSwapInt32BigToHost((uint32_t)nalu.length-4);
-            [nalu replaceBytesInRange:NSMakeRange(0, 4) withBytes:&len];
-            [self decodeFrame:bytes size:nalu.length];
-            
-            
-        }
     }
     
 //    printf("\n");
@@ -243,19 +236,26 @@ nalu.length = 0;\
 
 -(void)decodeFrame:(uint8_t *)frame size:(size_t)size{
     
-    CMBlockBufferRef buffer;
+    CMBlockBufferRef buffer = NULL;
     OSStatus status = CMBlockBufferCreateWithMemoryBlock(NULL, frame, size, kCFAllocatorNull, NULL, 0, size, 0, &buffer);
     if (status) {
         NSLog(@"create block buffer error!");
         return;
     }
     
-    CMSampleBufferRef sample;
-    const size_t sampleSize[] = {size};
-    status = CMSampleBufferCreateReady(kCFAllocatorDefault,
-                                       buffer,
-                                       _videoFmtDesc,
-                                       1,0,NULL, 1, sampleSize, &sample);
+    uint32_t len = CFSwapInt32BigToHost((uint32_t)size-4);
+    status = CMBlockBufferReplaceDataBytes(&len, buffer, 0, 4);
+    if (status != 0) {
+        NSLog(@"replace buffer header error!");
+    }
+    
+    CMSampleBufferRef sample = NULL;
+//    const size_t sampleSize[] = {size};
+    status = CMSampleBufferCreate(kCFAllocatorDefault,
+                                  buffer,
+                                  true, 0, 0,
+                                  _videoFmtDesc,
+                                  1,0,NULL, 0, NULL, &sample);
     if (status || sample == nil) {
         NSLog(@"create sample buffer error!");
         return;
@@ -267,14 +267,22 @@ nalu.length = 0;\
     if (status) {
         NSLog(@"decode frame error: %d",status);
     }
+    status = av_usleep(1000000);
+    
 }
 
 void decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration ){
     
+    if (status != 0) {
+        NSLog(@"status: %d",status);
+        return;
+    }
+    
+    if (status == 0) {
+        NSLog(@">>>>>>>>>>>");
+    }
     TFHardDecoder *decoder = (__bridge TFHardDecoder *)decompressionOutputRefCon;
     decoder.frameHandler(imageBuffer);
-    
-    av_usleep(1/3.0*100);
 }
 
 @end

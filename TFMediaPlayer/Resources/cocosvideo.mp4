@@ -1,1 +1,1 @@
-ffmpeg -i cocosvideo.mp4 -codec copy -f h264 tmp.264
+ffmpeg -i game.mp4 -codec copy -f h264 tmp.h264

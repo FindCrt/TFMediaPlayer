@@ -27,7 +27,7 @@
     _exampleInfos = @[
                       /*@{@"title": @"本地mp4视频", @"actionVC": @"TFLocalMp4ViewController"},*/
                       @{@"title": @"播放网络视频", @"actionVC": @"TFNetMp4PlayViewController"},
-                      @{@"title": @"h264硬解", @"actionVC": @"TFHardDecodeViewController"}
+//                      @{@"title": @"h264硬解", @"actionVC": @"TFHardDecodeViewController"}
                       ];
     
     [TFDebugStateShower startDebuging];

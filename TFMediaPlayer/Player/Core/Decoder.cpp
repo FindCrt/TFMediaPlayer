@@ -131,7 +131,7 @@ void Decoder::flush(){
     TFMPCondSignal(pauseCond, pauseMutex);
     myStateObserver.mark(stateName, 10);
     
-    TFMPDLOG_C("flush end %s\n",frameBuffer.name);
+    
 }
 
 bool Decoder::bufferIsEmpty(){
@@ -209,7 +209,7 @@ void *Decoder::decodeLoop(void *context){
         decoder->pktBuffer.blockGetOut(&pkt);
         myStateObserver.mark(name, 3);
         if (pkt == nullptr) {
-            TFMPDLOG_C("pkt null");
+            
         }
         if (pkt == nullptr) continue;
         
@@ -217,7 +217,7 @@ void *Decoder::decodeLoop(void *context){
         int retval = avcodec_send_packet(decoder->codecCtx, pkt);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
-            TFMPDLOG_C("pkt: %x\n",pkt);
+            
             av_packet_free(&pkt);
             continue;
         }
@@ -269,12 +269,12 @@ void *Decoder::decodeLoop(void *context){
             
             int releaseTime = 0;
             do {
-                TFMPDLOG_C("delayFramesReleasing\n");
+                
                 releaseTime++;
                 retval = avcodec_receive_frame(decoder->codecCtx, frame);
                 
                 if (retval == AVERROR(EAGAIN)) {  //encounter B-frame
-                    TFMPDLOG_C("encounter B-frame\n");
+                    
                     frameDelay = true;
                     delayFramesReleasing = false;
                     av_frame_unref(frame);
@@ -287,12 +287,12 @@ void *Decoder::decodeLoop(void *context){
                 }
                 
                 if (frameDelay) {
-                    TFMPDLOG_C("delayFramesReleasing\n");
+                    
                     delayFramesReleasing = true;
                     frameDelay = false;
                 }
                 
-//                TFMPDLOG_C("[%d]frame Type: %d",releaseTime,frame->pict_type);
+
                 
                 if (frame->extended_data == nullptr) {
                     printf("video frame data is null\n");
@@ -301,7 +301,7 @@ void *Decoder::decodeLoop(void *context){
                 }
                 
                 if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
-                    TFMPDLOG_C("video checkFrame\n");
+                    
                     av_frame_unref(frame);
                     continue;
                 }
@@ -313,7 +313,7 @@ void *Decoder::decodeLoop(void *context){
                         myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
                     decoder->frameBuffer.blockInsert(refFrame);
-                    TFMPDLOG_C("insert video frame2: %lld,%lld\n",pkt->pts,refFrame->pts);
+                    
                 }else{
                     av_frame_unref(frame);
                 }

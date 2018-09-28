@@ -36,7 +36,7 @@ void DisplayController::startDisplay(){
     
     shouldDisplay = true;
     
-    TFMPDLOG_C("shouldDisplay to true\n");
+    
     
     bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
     
@@ -55,7 +55,7 @@ void DisplayController::pause(bool flag){
     if (paused == flag) {
         return;
     }
-    TFMPDLOG_C("DisplayController pause: %s\n",flag?"true":"false");
+    
     paused = flag;
     syncClock->reset();
     
@@ -75,20 +75,20 @@ double DisplayController::getPlayTime(){
 void DisplayController::flush(){
     
     paused = true;
-    TFMPDLOG_C("DisplayController::flush\n");
+    
     
     bool handleVideo = processingVideo, handleAudio = fillingAudio;
     if (handleVideo) {
-        TFMPDLOG_C("sem wait video\n");
+        
         shareVideoBuffer->disableIO(true);
         sem_wait(wait_display_sem);
     }
     if (handleAudio) {
-        TFMPDLOG_C("sem wait audio\n");
+        
         shareAudioBuffer->disableIO(true);
         sem_wait(wait_display_sem);
     }
-    TFMPDLOG_C("DisplayController::flush wait end\n");
+    
     
     remainingAudioBuffers.validSize = 0;
     remainingAudioBuffers.readIndex = 0;
@@ -159,6 +159,12 @@ void *DisplayController::displayLoop(void *context){
         if (videoFrame == nullptr) continue;
         myStateObserver.mark("video display", 4);
         
+        if (videoFrame->key_frame) {
+            TFMPDLOG_C("i帧\n");
+        }else{
+            TFMPDLOG_C("p帧\n");
+        }
+        
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
         myStateObserver.labelMark("video remain", to_string(remainTime)+" pts: "+to_string(videoFrame->pts*av_q2d(displayer->videoTimeBase)));
         
@@ -166,7 +172,7 @@ void *DisplayController::displayLoop(void *context){
             av_frame_free(&videoFrame);
             continue;
         }else if (remainTime > minExeTime) {
-            TFMPDLOG_C("video sleep: %.3f\n",remainTime);
+            
             av_usleep(remainTime*1000000);
         }
         
@@ -282,7 +288,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             myStateObserver.labelMark("audio remain", to_string(remainTime)+" pts "+to_string(frame->pts*av_q2d(displayer->audioTimeBase)));
             if (remainTime < -minExeTime){
                 av_frame_free(&frame);
-                TFMPDLOG_C("discard audio frame\n");
+                
                 continue;
             }
             myStateObserver.mark("display audio", 8);
@@ -359,7 +365,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     if (displayer->paused) {
         displayer->fillingAudio = false;
         sem_post(displayer->wait_display_sem);
-        TFMPDLOG_C("sem post audio\n");
+        
     }
     
     myStateObserver.mark("display audio", 12);

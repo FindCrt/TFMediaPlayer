@@ -123,7 +123,7 @@
 		18415A361FF64126007095AC /* TFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFMediaPlayer.h; sourceTree = "<group>"; };
 		18415A371FF64126007095AC /* TFMediaPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFMediaPlayer.mm; sourceTree = "<group>"; };
 		1847D87A206B827A00A7CFE8 /* meipai-two.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "meipai-two.mp4"; sourceTree = "<group>"; };
-		184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocosvideo.mp4; sourceTree = "<group>"; };
+		184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = text; path = cocosvideo.mp4; sourceTree = "<group>"; };
 		184C8E11200B481D0063EAC3 /* pure1.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = pure1.caf; sourceTree = "<group>"; };
 		184CF3642019D2C30067742E /* TFGLUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFGLUtility.h; sourceTree = "<group>"; };
 		184FF74B1FF48B22007D5826 /* TFLocalMp4ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLocalMp4ViewController.h; sourceTree = "<group>"; };

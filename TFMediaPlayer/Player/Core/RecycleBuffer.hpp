@@ -16,7 +16,7 @@
 
 #include "TFStateObserver.hpp"
 
-#define RecycleBufferLog(fmt,...) printf(fmt,##__VA_ARGS__)
+#define RecycleBufferLog(fmt,...) //printf(fmt,##__VA_ARGS__)
 
 /* |->--front-----back------>|  The range of [front, back] contains all valid nodes */
 

@@ -134,7 +134,7 @@ void audioQueueListen(
     }
     
     OSStatus status = AudioQueueStart(_audioQueue, NULL);
-    TFMPDLOG_C("AudioQueueStart %d\n",status);
+    
     TFCheckStatusToDo(status, @"AudioQueue start failed!", {
         [_lock unlock];
         return;
@@ -177,7 +177,7 @@ void audioQueueListen(
 
 static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer){
     TFAudioQueueController *controller = (__bridge TFAudioQueueController *)(inUserData);
-    NSLog(@"AudioQueue1\n");
+//    NSLog(@"AudioQueue1\n");
     if (!controller) {
         return;
     }
@@ -189,7 +189,7 @@ static void TFAudioQueueHasEmptyBufferCallBack(void *inUserData, AudioQueueRef i
     uint8_t **buffers = (uint8_t**)malloc(count*sizeof(uint8_t*));
     buffers[0] = (uint8_t*)inBuffer->mAudioData;
     
-    NSLog(@"AudioQueue2\n");
+//    NSLog(@"AudioQueue2\n");
     if (controller.fillStruct.fillFunc) {
         int retval = controller.fillStruct.fillFunc(buffers,count, inBuffer->mAudioDataByteSize, controller.fillStruct.context);
         if (retval < 0) {
