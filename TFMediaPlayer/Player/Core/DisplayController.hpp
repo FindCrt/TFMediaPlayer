@@ -17,6 +17,8 @@
 #include "AudioResampler.hpp"
 #include <functional>
 #include <semaphore.h>
+#include "TFMPDebugFuncs.h"
+#include "VTBDecoder.hpp"
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -45,6 +47,7 @@ namespace tfmpcore {
         
         pthread_t dispalyThread;
         static void *displayLoop(void *context);
+        static void *VTBDisplayLoop(void *context);
         
         bool shouldDisplay = false;
         bool paused = false;
@@ -87,6 +90,7 @@ namespace tfmpcore {
             this->audioResampler = audioResampler;
         }
         
+        RecycleBuffer<VTBFrame*> *shareVTBVideoBuffer;
         RecycleBuffer<AVFrame*> *shareVideoBuffer;
         RecycleBuffer<AVFrame*> *shareAudioBuffer;
         

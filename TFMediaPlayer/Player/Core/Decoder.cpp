@@ -164,7 +164,7 @@ void Decoder::freeResources(){
     fmtCtx = nullptr;
 }
 
-void Decoder::decodePacket(AVPacket *packet){
+void Decoder::insertPacket(AVPacket *packet){
     
     AVPacket *refPkt = av_packet_alloc();
     av_packet_ref(refPkt, packet);

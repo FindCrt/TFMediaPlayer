@@ -70,13 +70,15 @@ namespace tfmpcore {
         void startDecode();
         void stopDecode();
         
+        void insertPacket(AVPacket *packet);
+        
         void activeBlock(bool flag);
         void flush();
         void freeResources();
         
         bool bufferIsEmpty();
         
-        void decodePacket(AVPacket *packet);
+        
         
 #if DEBUG
         AVRational timebase;

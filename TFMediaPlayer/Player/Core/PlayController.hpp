@@ -17,11 +17,13 @@ extern "C"{
 #include <stdio.h>
 #include <string>
 #include "Decoder.hpp"
+#include "VTBDecoder.hpp"
 #include <pthread.h>
 #include <functional>
 #include "DisplayController.hpp"
 #include "TFMPAVFormat.h"
 #include "AudioResampler.hpp"
+#include "TFMPDebugFuncs.h"
 
 namespace tfmpcore {
     
@@ -42,7 +44,11 @@ namespace tfmpcore {
         int audioStream = -1;
         int subTitleStream = -1;
         
+#if EnableVTBDecode
+        VTBDecoder *videoDecoder = nullptr;
+#else
         Decoder *videoDecoder = nullptr;
+#endif
         Decoder *audioDecoder = nullptr;
         Decoder *subtitleDecoder = nullptr;
         

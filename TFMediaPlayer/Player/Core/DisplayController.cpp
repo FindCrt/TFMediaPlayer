@@ -36,13 +36,16 @@ void DisplayController::startDisplay(){
     
     shouldDisplay = true;
     
-    
-    
     bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
     
     if (showVideo) {
+#if EnableVTBDecode
+        pthread_create(&dispalyThread, nullptr, VTBDisplayLoop, this);
+        pthread_detach(dispalyThread);
+#else
         pthread_create(&dispalyThread, nullptr, displayLoop, this);
         pthread_detach(dispalyThread);
+#endif
     }
 }
 
@@ -379,5 +382,78 @@ TFMPFillAudioBufferStruct DisplayController::getFillAudioBufferStruct(){
 }
 
 
+#pragma mark - VTB display
 
+void *DisplayController::VTBDisplayLoop(void *context){
+    DisplayController *displayer = (DisplayController *)context;
+    
+    VTBFrame *videoFrame = nullptr;
+    
+    myStateObserver.mark("video display", 1);
+    while (displayer->shouldDisplay) {
+        
+        videoFrame = nullptr; //reset it
+        displayer->processingVideo = true;
+        
+        if (displayer->paused) {
+            
+            pthread_mutex_lock(&displayer->video_pause_mutex);
+            displayer->processingVideo = false;
+            if (displayer->paused) {  //must put condition inside the lock.
+                sem_post(displayer->wait_display_sem);
+                myStateObserver.mark("video display", 2);
+                pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
+            }
+            displayer->processingVideo = true;
+            myStateObserver.mark("video display", 20);
+            pthread_mutex_unlock(&displayer->video_pause_mutex);
+        }
+        
+        myStateObserver.mark("video display", 3);
+        
+        displayer->shareVTBVideoBuffer->blockGetOut(&videoFrame);
+        if (videoFrame == nullptr) continue;
+        myStateObserver.mark("video display", 4);
+        
+        if (videoFrame->key_frame) {
+            TFMPDLOG_C("i帧\n");
+        }else{
+            TFMPDLOG_C("p帧\n");
+        }
+        
+        double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
+        myStateObserver.labelMark("video remain", to_string(remainTime)+" pts: "+to_string(videoFrame->pts*av_q2d(displayer->videoTimeBase)));
+        
+        if (remainTime < -minExeTime){
+            VTBFrame::free(&videoFrame);
+            continue;
+        }else if (remainTime > minExeTime) {
+            
+            av_usleep(remainTime*1000000);
+        }
+        
+        myStateObserver.mark("video display", 5);
+        TFMPVideoFrameBuffer *interimBuffer = videoFrame->convertToTFMPBuffer();
+        
+        
+        myStateObserver.mark("video display", 6);
+        if (displayer->shouldDisplay){
+            myStateObserver.mark("video display", 7);
+            displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
+            
+            myStateObserver.mark("video display", 8);
+            if(!displayer->paused) {
+                if (!displayer->syncClock->isAudioMajor) {
+                    displayer->lastPts = videoFrame->pts;
+                    displayer->lastIsAudio = false;
+                }
+                displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
+            }
+        }
+        
+        VTBFrame::free(&videoFrame);
+    }
+    
+    return 0;
+}
 

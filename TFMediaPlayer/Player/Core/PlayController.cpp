@@ -57,9 +57,13 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
+#if EnableVTBDecode
+            videoDecoder = new VTBDecoder();
+#else
             videoDecoder = new Decoder(fmtCtx, i, type);
-            videoDecoder->name = "videoDecoder";
+#endif
             videoDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
+            videoDecoder->name = "videoDecoder";
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
@@ -103,19 +107,16 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     displayer->displayContext = displayContext;
     if (videoStrem >= 0) {
+#if EnableVTBDecode
+        displayer->shareVTBVideoBuffer = videoDecoder->sharedFrameBuffer();
+#else
         displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
-        displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
-#if DEBUG
-        videoDecoder->timebase = displayer->videoTimeBase;
 #endif
+        displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
     }
     if (audioStream >= 0) {
         displayer->shareAudioBuffer = audioDecoder->sharedFrameBuffer();
         displayer->audioTimeBase = fmtCtx->streams[audioStream]->time_base;
-        
-#if DEBUG
-        audioDecoder->timebase = displayer->audioTimeBase;
-#endif
     }
     
     calculateRealDisplayMediaType();
@@ -167,12 +168,13 @@ void PlayController::play(){
     Decoder *checkDecoder = nullptr;
     
     if (realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) {
-        checkDecoder = audioDecoder;
+        audioDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
+        audioDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
     }else if(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO){
-        checkDecoder = videoDecoder;
+//        videoDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
+//        videoDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
     }
-    checkDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
-    checkDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
+    
 }
 
 
@@ -582,19 +584,19 @@ void * PlayController::readFrame(void *context){
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
             
-            controller->videoDecoder->decodePacket(packet);
+            controller->videoDecoder->insertPacket(packet);
             myStateObserver.timeMark("video frame in");
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
             
-            controller->audioDecoder->decodePacket(packet);
+            controller->audioDecoder->insertPacket(packet);
             myStateObserver.timeMark("audio frame in");
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
                   packet->stream_index == controller->subTitleStream){
             
-            controller->subtitleDecoder->decodePacket(packet);
+            controller->subtitleDecoder->insertPacket(packet);
         }
         myStateObserver.mark("reading", 8);
         av_packet_unref(packet);
@@ -627,6 +629,7 @@ void *PlayController::signalPlayFinished(void *context){
 }
 
 #pragma mark -
+
 
 bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer){
     
