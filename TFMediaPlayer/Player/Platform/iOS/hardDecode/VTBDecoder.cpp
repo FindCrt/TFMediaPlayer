@@ -95,7 +95,7 @@ TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
         uint32_t ysize = frame->width*frame->height;
         frame->pixels[0] = yuv420p;
         frame->pixels[1] = yuv420p+ysize;
-        frame->pixels[2] = yuv420p+(5/4)*ysize;
+        frame->pixels[2] = yuv420p+ysize/4*5;
         frame->linesize[0] = frame->width;
         frame->linesize[1] = frame->width/2;
         frame->linesize[2] = frame->width/2;

@@ -235,7 +235,7 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         frame.planes = 3;
         
         frame.pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-        frame.pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);;
+        frame.pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
         frame.pixels[2] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 2);
         frame.linesize[0] = frame.width;
         frame.linesize[1] = frame.width/2;
