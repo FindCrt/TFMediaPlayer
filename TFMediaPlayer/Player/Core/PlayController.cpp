@@ -58,7 +58,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
 #if EnableVTBDecode
-            videoDecoder = new VTBDecoder();
+            videoDecoder = new VTBDecoder(fmtCtx, i, type);
 #else
             videoDecoder = new Decoder(fmtCtx, i, type);
 #endif

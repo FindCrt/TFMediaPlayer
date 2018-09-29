@@ -12,6 +12,14 @@
 
 using namespace tfmpcore;
 
+inline void freePacket(AVPacket **pkt){
+    av_packet_free(pkt);
+}
+
+inline void freeFrame(VTBFrame **frame){
+    VTBFrame::free(frame);
+}
+
 static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef key, SInt32 numberSInt32)
 {
     CFNumberRef number;
@@ -23,6 +31,22 @@ static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef
 static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRef key, bool value)
 {
     CFDictionarySetValue(dictionary, key, value ? kCFBooleanTrue : kCFBooleanFalse);
+}
+
+static void CFDictionarySetString(CFMutableDictionaryRef dictionary, CFStringRef key, const char *chars)
+{
+    CFStringRef string;
+    string = CFStringCreateWithCString(kCFAllocatorDefault, chars, kCFStringEncodingUTF8);
+    CFDictionarySetValue(dictionary, key, string);
+    CFRelease(string);
+}
+
+static void CFDictionarySetData(CFMutableDictionaryRef dict, CFStringRef key, uint8_t * value, uint64_t length)
+{
+    CFDataRef data;
+    data = CFDataCreate(NULL, value, (CFIndex)length);
+    CFDictionarySetValue(dict, key, data);
+    CFRelease(data);
 }
 
 void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration ){
@@ -42,6 +66,8 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
     
     if (decoder->shouldDecode) {
         VTBFrame *frame = new VTBFrame(imageBuffer);
+        AVPacket *pkt = (AVPacket*)sourceFrameRefCon;
+        frame->pts = pkt->pts;
         decoder->frameBuffer.blockInsert(frame);
     }
 }
@@ -51,6 +77,7 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
 TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
     
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
     frame->height = (int)CVPixelBufferGetHeight(pixelBuffer);
     
@@ -58,9 +85,10 @@ TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
     if (pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
         pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange){
         
-        uint8_t *buffer = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+        uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+        uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
         uint8_t *yuv420p = (uint8_t*)malloc(frame->width*frame->height*3/2.0f);
-        yuv420sp_to_yuv420p(buffer, yuv420p, frame->width, frame->height);
+        nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame->width, frame->height);
         
         frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
         frame->planes = 3;
@@ -84,56 +112,121 @@ TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
         frame->linesize[2] = frame->width/2;
     }
     
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    
     return frame;
 }
 
 #pragma mark -
 
-bool VTBDecoder::initDecoder(){
-    if (_decodeSession) {
-        return true;
+static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(CMVideoCodecType format_id, int width, int height, const uint8_t *extradata, int extradata_size, uint32_t atom)
+{
+    CMFormatDescriptionRef fmt_desc = NULL;
+    OSStatus status;
+    
+    CFMutableDictionaryRef par = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
+    CFMutableDictionaryRef atoms = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
+    CFMutableDictionaryRef extensions = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    
+    /* CVPixelAspectRatio dict */
+    CFDictionarySetSInt32(par, CFSTR ("HorizontalSpacing"), 0);
+    CFDictionarySetSInt32(par, CFSTR ("VerticalSpacing"), 0);
+    
+    /* SampleDescriptionExtensionAtoms dict */
+    switch (format_id) {
+        case kCMVideoCodecType_H264:
+            CFDictionarySetData(atoms, CFSTR ("avcC"), (uint8_t *)extradata, extradata_size);
+            break;
+        case kCMVideoCodecType_HEVC:
+            CFDictionarySetData(atoms, CFSTR ("hvcC"), (uint8_t *)extradata, extradata_size);
+            break;
+        default:
+            break;
     }
     
-    if (_spsSize == 0 || _ppsSize == 0) {
+    
+    /* Extensions dict */
+    CFDictionarySetString(extensions, CFSTR ("CVImageBufferChromaLocationBottomField"), "left");
+    CFDictionarySetString(extensions, CFSTR ("CVImageBufferChromaLocationTopField"), "left");
+    CFDictionarySetBoolean(extensions, CFSTR("FullRangeVideo"), FALSE);
+    CFDictionarySetValue(extensions, CFSTR ("CVPixelAspectRatio"), (CFTypeRef *) par);
+    CFDictionarySetValue(extensions, CFSTR ("SampleDescriptionExtensionAtoms"), (CFTypeRef *) atoms);
+    status = CMVideoFormatDescriptionCreate(NULL, format_id, width, height, extensions, &fmt_desc);
+    
+    CFRelease(extensions);
+    CFRelease(atoms);
+    CFRelease(par);
+    
+    if (status == 0)
+        return fmt_desc;
+    else
+        return NULL;
+}
+
+bool VTBDecoder::prepareDecode(){
+    
+    AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
+    if (codec == nullptr) {
+        printf("find codec type: %d error\n",type);
         return false;
     }
     
-    const uint8_t * params[2] = {_sps, _pps};
-    const size_t paramSize[2] = {_spsSize, _ppsSize};
-    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault, 2, params, paramSize, 4, &_videoFmtDesc);
-    if (status != 0) {
-        TFMPDLOG_C("create video desc failed!");
+    codecCtx = avcodec_alloc_context3(codec);
+    if (codecCtx == nullptr) {
+        printf("alloc codecContext type: %d error\n",type);
         return false;
     }
-    //硬解必须是 kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-    //                                                           或者是kCVPixelFormatType_420YpCbCr8Planar
-    //因为iOS是  nv12  其他是nv21
+    
+    avcodec_parameters_to_context(codecCtx, fmtCtx->streams[steamIndex]->codecpar);
+    
+    AVCodecParameters *codecpar = fmtCtx->streams[steamIndex]->codecpar;
+    uint8_t *extradata = codecpar->extradata;
+    
+    if (extradata[0] == 1) {
+        TFMPDLOG_C("nalu start with nalu length");
+        _videoFmtDesc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, codecpar->width, codecpar->height, codecpar->extradata, codecpar->extradata_size, 0);
+    }else{
+        TFMPDLOG_C("nalu start with start code");
+        return false;
+    }
+    
     CFMutableDictionaryRef destImageAttris = CFDictionaryCreateMutable(NULL,0,&kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
     CFDictionarySetSInt32(destImageAttris,
                           kCVPixelBufferPixelFormatTypeKey, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
-//    CFDictionarySetSInt32(destImageAttris,
-//                          kCVPixelBufferWidthKey, width);
-//    CFDictionarySetSInt32(destImageAttris,
-//                          kCVPixelBufferHeightKey, height);
+    //    CFDictionarySetSInt32(destImageAttris,
+    //                          kCVPixelBufferWidthKey, width);
+    //    CFDictionarySetSInt32(destImageAttris,
+    //                          kCVPixelBufferHeightKey, height);
     CFDictionarySetBoolean(destImageAttris,
                            kCVPixelBufferOpenGLESCompatibilityKey, false);
     
     VTDecompressionOutputCallbackRecord callback = {decodeCallback, this};
     
-    status = VTDecompressionSessionCreate(
-                                          kCFAllocatorDefault,
-                                          _videoFmtDesc,
-                                          NULL,
-                                          destImageAttris,
-                                          &callback,
-                                          &_decodeSession);
-    
-    return status == 0;
-}
-
-bool VTBDecoder::prepareDecode(){
+    VTDecompressionSessionCreate(
+                                  kCFAllocatorDefault,
+                                  _videoFmtDesc,
+                                  NULL,
+                                  destImageAttris,
+                                  &callback,
+                                  &_decodeSession);
     
     shouldDecode = true;
+    
+#if DEBUG
+    if (type == AVMEDIA_TYPE_AUDIO) {
+        strcpy(frameBuffer.name, "audio_frame");
+        strcpy(pktBuffer.name, "audio_packet");
+    }else if (type == AVMEDIA_TYPE_VIDEO){
+        strcpy(frameBuffer.name, "video_frame");
+        strcpy(pktBuffer.name, "video_packet");
+    }else{
+        strcpy(frameBuffer.name, "subtitle_frame");
+        strcpy(pktBuffer.name, "subtitle_packet");
+    }
+#endif
+    
+    pktBuffer.valueFreeFunc = freePacket;
+    frameBuffer.valueFreeFunc = freeFrame;
     
     return true;
 }
@@ -188,29 +281,8 @@ void *VTBDecoder::decodeLoop(void *context){
         if (pkt == nullptr) continue;
         
         myStateObserver.mark(name, 4);
-        
-        
-        uint8_t type = pkt->data[3] & 0x1F;
-        if (type == 7) {
-            int spsSize = pkt->size - 4;
-            uint8_t *sps = (uint8_t*)malloc(spsSize);
-            memcpy(sps, pkt->data+4, spsSize);
-            
-            decoder->_spsSize = spsSize;
-            decoder->_sps = sps;
-            decoder->initDecoder();
-        }else if (type == 8){
-            int ppsSize = pkt->size - 4;
-            uint8_t *pps = (uint8_t*)malloc(ppsSize);
-            memcpy(pps, pkt->data+4, ppsSize);
-            
-            decoder->_ppsSize = ppsSize;
-            decoder->_pps = pps;
-            decoder->initDecoder();
-        }else if (type == 1 || type == 5){
-            if (decoder->_decodeSession) {
-                decoder->decodePacket(pkt);
-            }
+        if (decoder->_decodeSession) {
+            decoder->decodePacket(pkt);
         }
         
         if (pkt != nullptr)  av_packet_free(&pkt);
@@ -250,9 +322,8 @@ void VTBDecoder::decodePacket(AVPacket *pkt){
         return;
     }
     
-    CVPixelBufferRef pixelBuffer;
     VTDecodeInfoFlags outFlags;
-    status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, &pixelBuffer, &outFlags);
+    status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, pkt, &outFlags);
     if (status) {
         TFMPDLOG_C("decode frame error: %d",status);
     }

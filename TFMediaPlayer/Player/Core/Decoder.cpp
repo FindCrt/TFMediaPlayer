@@ -66,10 +66,6 @@ bool Decoder::prepareDecode(){
     pktBuffer.valueFreeFunc = freePacket;
     frameBuffer.valueFreeFunc = freeFrame;
     
-    RecycleBuffer<TFMPMediaType> intBuffer;
-    TFMPMediaType a;
-    intBuffer.getOut(&a);
-    
     return true;
 }
 

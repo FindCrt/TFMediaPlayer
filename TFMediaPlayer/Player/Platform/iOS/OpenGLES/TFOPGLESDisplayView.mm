@@ -215,9 +215,10 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     if (pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
         pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange){
         
-        uint8_t *buffer = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+        uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+        uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
         uint8_t *yuv420p = (uint8_t*)malloc(frame.width*frame.height*3/2.0f);
-        yuv420sp_to_yuv420p(buffer, yuv420p, frame.width, frame.height);
+        nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame.width, frame.height);
         
         frame.format = TFMP_VIDEO_PIX_FMT_YUV420P;
         frame.planes = 3;

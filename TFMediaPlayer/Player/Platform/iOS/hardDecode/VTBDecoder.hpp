@@ -33,18 +33,26 @@ namespace tfmpcore {
         CVPixelBufferRef pixelBuffer = nullptr;
         
     public:
-        VTBFrame(CVPixelBufferRef pixelBuffer):pixelBuffer(pixelBuffer){};
+        VTBFrame(CVPixelBufferRef pixelBuffer):pixelBuffer(pixelBuffer){
+            CVPixelBufferRetain(pixelBuffer);
+        };
         bool key_frame;
         uint64_t pts;
         
-        static void free(VTBFrame **frame){
-            
+        static void free(VTBFrame **frameP){
+            VTBFrame *frame = *frameP;
+            CVPixelBufferRelease(frame->pixelBuffer);
         }
         
         TFMPVideoFrameBuffer *convertToTFMPBuffer();
     };
     
     class VTBDecoder{
+        
+        AVFormatContext *fmtCtx;
+        int steamIndex;
+        AVCodecContext *codecCtx;
+        AVRational timebase;
         
         RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, true);
         RecycleBuffer<VTBFrame*> frameBuffer = RecycleBuffer<VTBFrame*>(50, true);
@@ -73,7 +81,6 @@ namespace tfmpcore {
         uint32_t _spsSize = 0;
         uint32_t _ppsSize = 0;
         
-        bool initDecoder();
         void decodePacket(AVPacket *pkt);
         
         void static decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration );
@@ -84,6 +91,10 @@ namespace tfmpcore {
     public:
         string name;
         AVMediaType type;
+        VTBDecoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){
+            timebase = fmtCtx->streams[steamIndex]->time_base;
+        };
+        
         RecycleBuffer<VTBFrame*> * sharedFrameBuffer(){
             return &frameBuffer;
         };
