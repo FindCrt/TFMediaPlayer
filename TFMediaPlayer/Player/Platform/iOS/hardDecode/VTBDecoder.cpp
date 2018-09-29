@@ -17,7 +17,7 @@ inline void freePacket(AVPacket **pkt){
 }
 
 inline void freeFrame(VTBFrame **frame){
-    VTBFrame::free(frame);
+    VTBFrame::frameFree(frame);
 }
 
 static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef key, SInt32 numberSInt32)
@@ -74,8 +74,23 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
 
 #pragma mark -
 
+void VTBFrame::freeTfmpBuffer(){
+    if (!tfmpBuffer) {
+        return;
+    }
+    
+    if (bufferCopied) {
+        free(tfmpBuffer->pixels[0]);
+    }
+    
+    delete tfmpBuffer;
+}
+
 TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
+    
+    freeTfmpBuffer();
+    tfmpBuffer = frame;
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
@@ -100,6 +115,8 @@ TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
         frame->linesize[1] = frame->width/2;
         frame->linesize[2] = frame->width/2;
         
+        bufferCopied = true;
+        
     }else{
         frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
         frame->planes = 3;
@@ -110,6 +127,8 @@ TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
         frame->linesize[0] = frame->width;
         frame->linesize[1] = frame->width/2;
         frame->linesize[2] = frame->width/2;
+        
+        bufferCopied = false;
     }
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);

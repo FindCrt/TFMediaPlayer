@@ -425,7 +425,7 @@ void *DisplayController::VTBDisplayLoop(void *context){
         myStateObserver.labelMark("video remain", to_string(remainTime)+" pts: "+to_string(videoFrame->pts*av_q2d(displayer->videoTimeBase)));
         
         if (remainTime < -minExeTime){
-            VTBFrame::free(&videoFrame);
+            VTBFrame::frameFree(&videoFrame);
             continue;
         }else if (remainTime > minExeTime) {
             
@@ -451,7 +451,7 @@ void *DisplayController::VTBDisplayLoop(void *context){
             }
         }
         
-        VTBFrame::free(&videoFrame);
+        VTBFrame::frameFree(&videoFrame);
     }
     
     return 0;

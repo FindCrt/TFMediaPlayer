@@ -32,16 +32,27 @@ namespace tfmpcore {
     class VTBFrame{
         CVPixelBufferRef pixelBuffer = nullptr;
         
+        bool bufferCopied = false;
+        TFMPVideoFrameBuffer *tfmpBuffer = nullptr;
+        void freeTfmpBuffer();
+        
     public:
         VTBFrame(CVPixelBufferRef pixelBuffer):pixelBuffer(pixelBuffer){
             CVPixelBufferRetain(pixelBuffer);
+            myStateObserver.mark("VTBFrame", 1, true);
         };
         bool key_frame;
         uint64_t pts;
         
-        static void free(VTBFrame **frameP){
+        static void frameFree(VTBFrame **frameP){
             VTBFrame *frame = *frameP;
             CVPixelBufferRelease(frame->pixelBuffer);
+            
+            frame->freeTfmpBuffer();
+            delete frame;
+            
+            *frameP = nullptr;
+            myStateObserver.mark("VTBFrame", -1, true);
         }
         
         TFMPVideoFrameBuffer *convertToTFMPBuffer();
