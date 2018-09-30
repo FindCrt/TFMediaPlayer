@@ -24,10 +24,11 @@ extern "C"{
 #include "TFMPAVFormat.h"
 #include "AudioResampler.hpp"
 #include "TFMPDebugFuncs.h"
+#include "TFMPFrame.h"
 
 namespace tfmpcore {
     
-    bool videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
+    bool videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
     static int playResumeSize = 20;
@@ -122,7 +123,7 @@ namespace tfmpcore {
         
         friend void frameEmpty(Decoder *decoder, void* context);
         
-        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
+        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
         
         /** controls **/
         

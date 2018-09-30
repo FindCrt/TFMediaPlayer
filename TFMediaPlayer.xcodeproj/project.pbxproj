@@ -101,6 +101,7 @@
 		180FA5021FF4D16800AFB5F9 /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
 		180FA5031FF4D16800AFB5F9 /* Decoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Decoder.hpp; sourceTree = "<group>"; };
 		180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RecycleBuffer.hpp; sourceTree = "<group>"; };
+		181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPFrame.h; sourceTree = "<group>"; };
 		1834340C200851E300ED9B05 /* TFAudioFileReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioFileReader.h; sourceTree = "<group>"; };
 		1834340D200851E300ED9B05 /* TFAudioFileReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFAudioFileReader.m; sourceTree = "<group>"; };
 		183434102008535500ED9B05 /* TFAudioBufferData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFAudioBufferData.h; sourceTree = "<group>"; };
@@ -163,7 +164,6 @@
 		1870E461215C928400EB1CD8 /* Wizard.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Wizard.h264; sourceTree = "<group>"; };
 		18736734215DC88D0045E0D8 /* VTBDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VTBDecoder.cpp; sourceTree = "<group>"; };
 		18736735215DC88D0045E0D8 /* VTBDecoder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VTBDecoder.hpp; sourceTree = "<group>"; };
-		1873673A215DE2A00045E0D8 /* TFMPConst.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPConst.h; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18887A0B215B26E700DD6BBA /* TFHardDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecoder.h; sourceTree = "<group>"; };
@@ -616,7 +616,7 @@
 				18415A2F1FF61B90007095AC /* TFMPAVFormat.h */,
 				1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */,
 				1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */,
-				1873673A215DE2A00045E0D8 /* TFMPConst.h */,
+				181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */,
 			);
 			path = Core;
 			sourceTree = "<group>";

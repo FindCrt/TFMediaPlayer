@@ -107,11 +107,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     displayer->displayContext = displayContext;
     if (videoStrem >= 0) {
-#if EnableVTBDecode
-        displayer->shareVTBVideoBuffer = videoDecoder->sharedFrameBuffer();
-#else
         displayer->shareVideoBuffer = videoDecoder->sharedFrameBuffer();
-#endif
         displayer->videoTimeBase = fmtCtx->streams[videoStrem]->time_base;
     }
     if (audioStream >= 0) {
@@ -631,7 +627,7 @@ void *PlayController::signalPlayFinished(void *context){
 #pragma mark -
 
 
-bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer){
+bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer){
     
     PlayController *controller = (PlayController *)observer;
     

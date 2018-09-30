@@ -19,6 +19,7 @@
 #include <semaphore.h>
 #include "TFMPDebugFuncs.h"
 #include "VTBDecoder.hpp"
+#include "TFMPFrame.h"
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -58,8 +59,8 @@ namespace tfmpcore {
         bool fillingAudio = false;
         bool processingVideo = false;
         
-        AVFrame *displayingVideo = nullptr;
-        AVFrame *displayingAudio = nullptr;
+        TFMPFrame *displayingVideo = nullptr;
+        TFMPFrame *displayingAudio = nullptr;
         
         TFMPRemainingBuffer remainingAudioBuffers;
         
@@ -90,9 +91,8 @@ namespace tfmpcore {
             this->audioResampler = audioResampler;
         }
         
-        RecycleBuffer<VTBFrame*> *shareVTBVideoBuffer;
-        RecycleBuffer<AVFrame*> *shareVideoBuffer;
-        RecycleBuffer<AVFrame*> *shareAudioBuffer;
+        RecycleBuffer<TFMPFrame*> *shareVideoBuffer;
+        RecycleBuffer<TFMPFrame*> *shareAudioBuffer;
         
         AVRational videoTimeBase;
         AVRational audioTimeBase;
@@ -116,6 +116,7 @@ namespace tfmpcore {
         //release
         void flush();
         void freeResources();
+        
     };
 }
 

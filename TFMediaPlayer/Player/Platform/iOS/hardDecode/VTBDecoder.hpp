@@ -22,41 +22,12 @@ extern "C"{
 #include "RecycleBuffer.hpp"
 #include "MediaTimeFilter.hpp"
 #include "TFMPAVFormat.h"
+#include "TFMPFrame.h"
 
 using namespace std;
 
 //An video & audio decoder based on VideoToolBox and ffmpeg.
-
 namespace tfmpcore {
-    
-    class VTBFrame{
-        CVPixelBufferRef pixelBuffer = nullptr;
-        
-        bool bufferCopied = false;
-        TFMPVideoFrameBuffer *tfmpBuffer = nullptr;
-        void freeTfmpBuffer();
-        
-    public:
-        VTBFrame(CVPixelBufferRef pixelBuffer):pixelBuffer(pixelBuffer){
-            CVPixelBufferRetain(pixelBuffer);
-            myStateObserver.mark("VTBFrame", 1, true);
-        };
-        bool key_frame;
-        uint64_t pts;
-        
-        static void frameFree(VTBFrame **frameP){
-            VTBFrame *frame = *frameP;
-            CVPixelBufferRelease(frame->pixelBuffer);
-            
-            frame->freeTfmpBuffer();
-            delete frame;
-            
-            *frameP = nullptr;
-            myStateObserver.mark("VTBFrame", -1, true);
-        }
-        
-        TFMPVideoFrameBuffer *convertToTFMPBuffer();
-    };
     
     class VTBDecoder{
         
@@ -66,7 +37,7 @@ namespace tfmpcore {
         AVRational timebase;
         
         RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, true);
-        RecycleBuffer<VTBFrame*> frameBuffer = RecycleBuffer<VTBFrame*>(50, true);
+        RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame*>(50, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
@@ -106,7 +77,7 @@ namespace tfmpcore {
             timebase = fmtCtx->streams[steamIndex]->time_base;
         };
         
-        RecycleBuffer<VTBFrame*> * sharedFrameBuffer(){
+        RecycleBuffer<TFMPFrame*> * sharedFrameBuffer(){
             return &frameBuffer;
         };
         

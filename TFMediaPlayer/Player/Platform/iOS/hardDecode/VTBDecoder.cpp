@@ -12,12 +12,57 @@
 
 using namespace tfmpcore;
 
+#pragma mark - VTB frame funcs
+
+
+
+
+#pragma mark -
+
 inline void freePacket(AVPacket **pkt){
     av_packet_free(pkt);
 }
 
-inline void freeFrame(VTBFrame **frame){
-    VTBFrame::frameFree(frame);
+inline void freeFrame(TFMPFrame **frameP){
+    TFMPFrame *frame = *frameP;
+    
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->opaque;
+    CVPixelBufferRelease(pixelBuffer);
+    
+    delete frame;
+    *frameP = nullptr;
+    myStateObserver.mark("VTBFrame", -1, true);
+}
+
+inline TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame){
+    
+    TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
+    frame->shouldFreePixels = true;
+    
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)tfmpFrame->opaque;
+    frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
+    frame->height = (int)CVPixelBufferGetHeight(pixelBuffer);
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    
+    uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+    uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+    uint8_t *yuv420p = (uint8_t*)malloc(frame->width*frame->height*3/2.0f);
+    nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame->width, frame->height);
+    
+    frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
+    frame->planes = 3;
+    uint32_t ysize = frame->width*frame->height;
+    frame->pixels[0] = yuv420p;
+    frame->pixels[1] = yuv420p+ysize;
+    frame->pixels[2] = yuv420p+ysize/4*5;
+    frame->linesize[0] = frame->width;
+    frame->linesize[1] = frame->width/2;
+    frame->linesize[2] = frame->width/2;
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    
+    return frame;
 }
 
 static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef key, SInt32 numberSInt32)
@@ -58,82 +103,23 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
     
     VTBDecoder *decoder = (VTBDecoder *)decompressionOutputRefCon;
     
-//    if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
-//        
-//        av_frame_unref(frame);
-//        continue;
-//    }
-    
     if (decoder->shouldDecode) {
-        VTBFrame *frame = new VTBFrame(imageBuffer);
         AVPacket *pkt = (AVPacket*)sourceFrameRefCon;
-        frame->pts = pkt->pts;
-        decoder->frameBuffer.blockInsert(frame);
+        
+        TFMPFrame *tfmpFrame = new TFMPFrame();
+        tfmpFrame->type = TFMPFrameTypeVTBVideo;
+        tfmpFrame->pts = pkt->pts;
+        tfmpFrame->opaque = CVPixelBufferRetain(imageBuffer);
+        tfmpFrame->freeFrameFunc = freeFrame;
+        tfmpFrame->convertToDisplayBuffer = displayBufferFromFrame;
+        
+//        if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
+//            av_frame_unref(frame);
+//            return;
+//        }
+        myStateObserver.mark("VTBFrame", 1, true);
+        decoder->frameBuffer.blockInsert(tfmpFrame);
     }
-}
-
-#pragma mark -
-
-void VTBFrame::freeTfmpBuffer(){
-    if (!tfmpBuffer) {
-        return;
-    }
-    
-    if (bufferCopied) {
-        free(tfmpBuffer->pixels[0]);
-    }
-    
-    delete tfmpBuffer;
-}
-
-TFMPVideoFrameBuffer * VTBFrame::convertToTFMPBuffer(){
-    TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
-    
-    freeTfmpBuffer();
-    tfmpBuffer = frame;
-    
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
-    frame->height = (int)CVPixelBufferGetHeight(pixelBuffer);
-    
-    OSType pixelType = CVPixelBufferGetPixelFormatType(pixelBuffer);
-    if (pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
-        pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange){
-        
-        uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-        uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-        uint8_t *yuv420p = (uint8_t*)malloc(frame->width*frame->height*3/2.0f);
-        nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame->width, frame->height);
-        
-        frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
-        frame->planes = 3;
-        uint32_t ysize = frame->width*frame->height;
-        frame->pixels[0] = yuv420p;
-        frame->pixels[1] = yuv420p+ysize;
-        frame->pixels[2] = yuv420p+ysize/4*5;
-        frame->linesize[0] = frame->width;
-        frame->linesize[1] = frame->width/2;
-        frame->linesize[2] = frame->width/2;
-        
-        bufferCopied = true;
-        
-    }else{
-        frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
-        frame->planes = 3;
-        
-        frame->pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-        frame->pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);;
-        frame->pixels[2] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 2);
-        frame->linesize[0] = frame->width;
-        frame->linesize[1] = frame->width/2;
-        frame->linesize[2] = frame->width/2;
-        
-        bufferCopied = false;
-    }
-    
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-    
-    return frame;
 }
 
 #pragma mark -
@@ -265,10 +251,6 @@ void *VTBDecoder::decodeLoop(void *context){
     decoder->isDecoding = true;
     
     AVPacket *pkt = nullptr;
-    VTBFrame *frame;
-    
-    bool frameDelay = false;
-    bool delayFramesReleasing = false;
     
     string name = decoder->name;
     while (decoder->shouldDecode) {

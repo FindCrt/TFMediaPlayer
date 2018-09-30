@@ -16,6 +16,7 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
+#include "TFMPFrame.h"
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
@@ -33,7 +34,7 @@ namespace tfmpcore {
         
         RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, true);
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(50, true);
+        RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(50, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
@@ -59,7 +60,7 @@ namespace tfmpcore {
             freeResources();
         }
         
-        RecycleBuffer<AVFrame*> *sharedFrameBuffer(){
+        RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };
         

@@ -23,8 +23,52 @@ inline void freePacket(AVPacket **pkt){
     av_packet_free(pkt);
 }
 
-inline void freeFrame(AVFrame **frame){
-    av_frame_free(frame);
+inline void freeFrame(TFMPFrame **tfmpFrameP){
+    TFMPFrame *tfmpFrame = *tfmpFrameP;
+    av_frame_free(&tfmpFrame->frame);
+    
+    delete tfmpFrame;
+    *tfmpFrameP = nullptr;
+}
+
+inline TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame){
+    TFMPVideoFrameBuffer *displayFrame = new TFMPVideoFrameBuffer();
+    
+    AVFrame *frame = tfmpFrame->frame;
+    displayFrame->width = frame->width;
+    //TODO: when should i cut one line of data to avoid the green data-empty zone in bottom?
+    displayFrame->height = frame->height-1;
+    
+    for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
+        
+        displayFrame->pixels[i] = frame->data[i]+frame->linesize[i];
+        displayFrame->linesize[i] = frame->linesize[i];
+    }
+    
+    //TODO: unsupport format
+    if (frame->format == AV_PIX_FMT_YUV420P) {
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
+    }else if (frame->format == AV_PIX_FMT_NV12){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_NV12;
+    }else if (frame->format == AV_PIX_FMT_NV21){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_NV21;
+    }else if (frame->format == AV_PIX_FMT_RGB32){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_RGB32;
+    }
+    
+    return displayFrame;
+}
+
+inline TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
+    TFMPFrame *tfmpFrame = new TFMPFrame();
+    
+    tfmpFrame->frame  = frame;
+    tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
+    tfmpFrame->freeFrameFunc = freeFrame;
+    tfmpFrame->pts = frame->pts;
+    tfmpFrame->convertToDisplayBuffer = displayBufferFromFrame;
+    
+    return tfmpFrame;
 }
 
 bool Decoder::prepareDecode(){
@@ -252,7 +296,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("audio first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
-                    decoder->frameBuffer.blockInsert(refFrame);
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true));
                     
                 }else{
                     av_frame_unref(frame);
@@ -308,7 +352,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
-                    decoder->frameBuffer.blockInsert(refFrame);
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false));
                     
                 }else{
                     av_frame_unref(frame);

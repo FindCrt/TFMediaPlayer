@@ -286,6 +286,11 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     [self rendering:frameBuf->format];
     
     [EAGLContext setCurrentContext:preContex];
+    
+    if (frameBuf->shouldFreePixels) {
+        free(frameBuf->pixels[0]); //多个pixel是一起分配的内存
+    }
+    free(frameBuf);
 }
 
 -(void)rendering:(TFMPVideoPixelFormat)format{
