@@ -18,7 +18,7 @@
 #include <functional>
 #include <semaphore.h>
 #include "TFMPDebugFuncs.h"
-#include "VTBDecoder.hpp"
+#include "VTBDecoder.h"
 #include "TFMPFrame.h"
 
 extern "C"{

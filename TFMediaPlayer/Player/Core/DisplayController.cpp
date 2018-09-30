@@ -170,7 +170,6 @@ void *DisplayController::displayLoop(void *context){
             videoFrame->freeFrameFunc(&videoFrame);
             continue;
         }else if (remainTime > minExeTime) {
-            
             av_usleep(remainTime*1000000);
         }
         

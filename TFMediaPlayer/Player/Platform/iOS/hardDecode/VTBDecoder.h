@@ -67,6 +67,23 @@ namespace tfmpcore {
         
         void static decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration );
         
+        inline static void freePacket(AVPacket **pkt){
+            av_packet_free(pkt);
+        }
+        
+        inline static void freeFrame(TFMPFrame **frameP){
+            TFMPFrame *frame = *frameP;
+            
+            CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->opaque;
+            CVPixelBufferRelease(pixelBuffer);
+            
+            delete frame;
+            *frameP = nullptr;
+            myStateObserver.mark("VTBFrame", -1, true);
+        }
+        
+        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
+        
     protected:
         void flushContext();
         

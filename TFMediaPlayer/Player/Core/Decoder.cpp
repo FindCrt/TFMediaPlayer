@@ -19,19 +19,7 @@
 
 using namespace tfmpcore;
 
-inline void freePacket(AVPacket **pkt){
-    av_packet_free(pkt);
-}
-
-inline void freeFrame(TFMPFrame **tfmpFrameP){
-    TFMPFrame *tfmpFrame = *tfmpFrameP;
-    av_frame_free(&tfmpFrame->frame);
-    
-    delete tfmpFrame;
-    *tfmpFrameP = nullptr;
-}
-
-inline TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame){
+TFMPVideoFrameBuffer * Decoder::displayBufferFromFrame(TFMPFrame *tfmpFrame){
     TFMPVideoFrameBuffer *displayFrame = new TFMPVideoFrameBuffer();
     
     AVFrame *frame = tfmpFrame->frame;
@@ -59,12 +47,12 @@ inline TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame){
     return displayFrame;
 }
 
-inline TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
+TFMPFrame * Decoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
     TFMPFrame *tfmpFrame = new TFMPFrame();
     
     tfmpFrame->frame  = frame;
     tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
-    tfmpFrame->freeFrameFunc = freeFrame;
+    tfmpFrame->freeFrameFunc = Decoder::freeFrame;
     tfmpFrame->pts = frame->pts;
     tfmpFrame->convertToDisplayBuffer = displayBufferFromFrame;
     

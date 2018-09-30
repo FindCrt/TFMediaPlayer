@@ -51,6 +51,21 @@ namespace tfmpcore {
         pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
         
+        inline static void freePacket(AVPacket **pkt){
+            av_packet_free(pkt);
+        }
+        
+        inline static void freeFrame(TFMPFrame **tfmpFrameP){
+            TFMPFrame *tfmpFrame = *tfmpFrameP;
+            av_frame_free(&tfmpFrame->frame);
+            
+            delete tfmpFrame;
+            *tfmpFrameP = nullptr;
+        }
+        
+        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
+        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio);
+        
     public:
         string name;
         AVMediaType type;

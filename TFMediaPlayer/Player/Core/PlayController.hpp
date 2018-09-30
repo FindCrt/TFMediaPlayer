@@ -17,7 +17,7 @@ extern "C"{
 #include <stdio.h>
 #include <string>
 #include "Decoder.hpp"
-#include "VTBDecoder.hpp"
+#include "VTBDecoder.h"
 #include <pthread.h>
 #include <functional>
 #include "DisplayController.hpp"

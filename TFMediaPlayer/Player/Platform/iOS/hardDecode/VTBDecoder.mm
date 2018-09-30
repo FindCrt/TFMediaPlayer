@@ -6,35 +6,15 @@
 //  Copyright © 2018年 shiwei. All rights reserved.
 //
 
-#include "VTBDecoder.hpp"
+#include "VTBDecoder.h"
 #include "TFMPUtilities.h"
 #include "TFMPDebugFuncs.h"
 
 using namespace tfmpcore;
 
-#pragma mark - VTB frame funcs
-
-
-
-
 #pragma mark -
 
-inline void freePacket(AVPacket **pkt){
-    av_packet_free(pkt);
-}
-
-inline void freeFrame(TFMPFrame **frameP){
-    TFMPFrame *frame = *frameP;
-    
-    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->opaque;
-    CVPixelBufferRelease(pixelBuffer);
-    
-    delete frame;
-    *frameP = nullptr;
-    myStateObserver.mark("VTBFrame", -1, true);
-}
-
-inline TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame){
+TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromFrame(TFMPFrame *tfmpFrame){
     
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
     frame->shouldFreePixels = true;
@@ -110,8 +90,8 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
         tfmpFrame->type = TFMPFrameTypeVTBVideo;
         tfmpFrame->pts = pkt->pts;
         tfmpFrame->opaque = CVPixelBufferRetain(imageBuffer);
-        tfmpFrame->freeFrameFunc = freeFrame;
-        tfmpFrame->convertToDisplayBuffer = displayBufferFromFrame;
+        tfmpFrame->freeFrameFunc = VTBDecoder::freeFrame;
+        tfmpFrame->convertToDisplayBuffer = VTBDecoder::displayBufferFromFrame;
         
 //        if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
 //            av_frame_unref(frame);
@@ -336,6 +316,8 @@ void VTBDecoder::insertPacket(AVPacket *packet){
     av_packet_ref(refPkt, packet);
     
     pktBuffer.blockInsert(refPkt);
+    
+    myStateObserver.mark("video packet", 1, true);
 }
 
 void VTBDecoder::activeBlock(bool flag){
