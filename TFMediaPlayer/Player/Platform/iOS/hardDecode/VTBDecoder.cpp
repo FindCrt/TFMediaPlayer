@@ -323,11 +323,11 @@ void VTBDecoder::decodePacket(AVPacket *pkt){
         return;
     }
     
-    uint32_t len = CFSwapInt32BigToHost((uint32_t)size-4);
-    status = CMBlockBufferReplaceDataBytes(&len, buffer, 0, 4);
-    if (status != 0) {
-        TFMPDLOG_C("replace buffer header error!");
-    }
+//    uint32_t len = CFSwapInt32BigToHost((uint32_t)size-4);
+//    status = CMBlockBufferReplaceDataBytes(&len, buffer, 0, 4);
+//    if (status != 0) {
+//        TFMPDLOG_C("replace buffer header error!");
+//    }
     
     CMSampleBufferRef sample = NULL;
     //    const size_t sampleSize[] = {size};
