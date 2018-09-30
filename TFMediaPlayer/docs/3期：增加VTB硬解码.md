@@ -59,4 +59,6 @@
 2. 硬解码的pixelBuffer的释放
  * pixelBuffer的内存用`CVPixelBufferRetain`和`CVPixelBufferRelease`来控制，逻辑应该还是引用只是那一套。
  * nv12不能直接播放，转到yuv420会复制内存，这部分内存需要释放
+
+3. 解码器的函数重名inline函数，最后都会定位到同一个函数，并不会保留不同的版本。函数定义成decoder的静态成员函数，带上decoder的命名空间，不会导致重名。
  
