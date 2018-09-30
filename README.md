@@ -6,4 +6,4 @@ A media player based on FFmpeg.
 
 * v1.1 memmory leak fixed
 
-* v1.2 Hard decode by VideoToolBox initially completed
+* v1.2 Hard decoder based on VideoToolBox and ffmpeg initially completed
