@@ -54,7 +54,7 @@ TFMPFrame * Decoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
     tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
     tfmpFrame->freeFrameFunc = Decoder::freeFrame;
     tfmpFrame->pts = frame->pts;
-    tfmpFrame->convertToDisplayBuffer = displayBufferFromFrame;
+    tfmpFrame->displayBuffer = displayBufferFromFrame(tfmpFrame);
     
     return tfmpFrame;
 }
@@ -340,6 +340,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
+                    TFMPDLOG_C("pts2: %lld\n",frame->pts);
                     decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false));
                     
                 }else{

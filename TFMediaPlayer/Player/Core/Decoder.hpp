@@ -59,6 +59,8 @@ namespace tfmpcore {
             TFMPFrame *tfmpFrame = *tfmpFrameP;
             av_frame_free(&tfmpFrame->frame);
             
+            delete tfmpFrame->displayBuffer;
+            
             delete tfmpFrame;
             *tfmpFrameP = nullptr;
         }

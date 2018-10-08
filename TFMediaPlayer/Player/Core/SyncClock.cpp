@@ -19,7 +19,6 @@ using namespace tfmpcore;
 static double timeDen = 1000000;
 
 void SyncClock::reset(){
-    myStateObserver.mark("ptsCorrection", -1);
     ptsCorrection = -1;
 }
 
@@ -51,8 +50,6 @@ double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
     }
     
     if (ptsCorrection < 0) {
-        myStateObserver.labelMark("sync audio", to_string(sourcePts));
-        myStateObserver.timeMark("sync audio dis");
         return av_gettime_relative()/timeDen;
     }
     return ptsCorrection/timeDen+sourcePts;
@@ -82,5 +79,4 @@ void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay
     }
     
     ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
-    myStateObserver.mark("ptsCorrection", ptsCorrection);
 }

@@ -14,12 +14,9 @@ using namespace tfmpcore;
 
 #pragma mark -
 
-TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromFrame(TFMPFrame *tfmpFrame){
+TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer){
     
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
-    frame->shouldFreePixels = true;
-    
-    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)tfmpFrame->opaque;
     frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
     frame->height = (int)CVPixelBufferGetHeight(pixelBuffer);
     
@@ -89,14 +86,14 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
         TFMPFrame *tfmpFrame = new TFMPFrame();
         tfmpFrame->type = TFMPFrameTypeVTBVideo;
         tfmpFrame->pts = pkt->pts;
-        tfmpFrame->opaque = CVPixelBufferRetain(imageBuffer);
         tfmpFrame->freeFrameFunc = VTBDecoder::freeFrame;
-        tfmpFrame->convertToDisplayBuffer = VTBDecoder::displayBufferFromFrame;
+        tfmpFrame->displayBuffer = VTBDecoder::displayBufferFromPixelBuffer(imageBuffer);
         
 //        if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
 //            av_frame_unref(frame);
 //            return;
 //        }
+        TFMPDLOG_C("pts2: %lld \n",pkt->pts);
         myStateObserver.mark("VTBFrame", 1, true);
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }
@@ -212,6 +209,7 @@ bool VTBDecoder::prepareDecode(){
     
     pktBuffer.valueFreeFunc = freePacket;
     frameBuffer.valueFreeFunc = freeFrame;
+    frameBuffer.valueCompFunc = frameCompare;
     
     return true;
 }
@@ -256,9 +254,6 @@ void *VTBDecoder::decodeLoop(void *context){
         myStateObserver.mark(name, 2);
         decoder->pktBuffer.blockGetOut(&pkt);
         myStateObserver.mark(name, 3);
-        if (pkt == nullptr) {
-            
-        }
         if (pkt == nullptr) continue;
         
         myStateObserver.mark(name, 4);
@@ -302,7 +297,6 @@ void VTBDecoder::decodePacket(AVPacket *pkt){
         TFMPDLOG_C("create sample buffer error!");
         return;
     }
-    
     VTDecodeInfoFlags outFlags;
     status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, pkt, &outFlags);
     if (status) {

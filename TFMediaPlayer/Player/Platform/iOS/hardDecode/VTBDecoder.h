@@ -36,8 +36,8 @@ namespace tfmpcore {
         AVCodecContext *codecCtx;
         AVRational timebase;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, true);
-        RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame*>(50, true);
+        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(30, true);
+        RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame*>(30, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
@@ -74,15 +74,23 @@ namespace tfmpcore {
         inline static void freeFrame(TFMPFrame **frameP){
             TFMPFrame *frame = *frameP;
             
-            CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->opaque;
-            CVPixelBufferRelease(pixelBuffer);
+            free(frame->displayBuffer->pixels[0]);
+            delete frame->displayBuffer;
             
             delete frame;
             *frameP = nullptr;
             myStateObserver.mark("VTBFrame", -1, true);
         }
         
-        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
+        inline static int frameCompare(TFMPFrame *&frame1, TFMPFrame *&frame2){
+            if (frame1->pts < frame2->pts) {
+                return -1;
+            }else{
+                return 1;
+            }
+        }
+        
+        static TFMPVideoFrameBuffer *displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer);
         
     protected:
         void flushContext();

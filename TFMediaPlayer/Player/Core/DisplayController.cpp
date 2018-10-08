@@ -131,6 +131,9 @@ void *DisplayController::displayLoop(void *context){
     
     TFMPFrame *videoFrame = nullptr;
     
+    double time = 0;
+    uint64_t lastpts = 0;
+    
     myStateObserver.mark("video display", 1);
     while (displayer->shouldDisplay) {
         
@@ -156,18 +159,15 @@ void *DisplayController::displayLoop(void *context){
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
         myStateObserver.mark("video display", 4);
+        myStateObserver.mark("video show5", 1, true);
         
-//        if (videoFrame->key_frame) {
-//            TFMPDLOG_C("i帧\n");
-//        }else{
-//            TFMPDLOG_C("p帧\n");
-//        }
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
-        myStateObserver.labelMark("video remain", to_string(remainTime)+" pts: "+to_string(videoFrame->pts*av_q2d(displayer->videoTimeBase)));
         
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
+            
+            myStateObserver.mark("video lost", 1, true);
             continue;
         }else if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
@@ -175,12 +175,13 @@ void *DisplayController::displayLoop(void *context){
         
         myStateObserver.mark("video display", 5);
         
-        TFMPVideoFrameBuffer *displayBuffer = videoFrame->convertToDisplayBuffer(videoFrame);
+        TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
         
         myStateObserver.mark("video display", 6);
         if (displayer->shouldDisplay){
             myStateObserver.mark("video display", 7);
             displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
+            myStateObserver.mark("video show6", 1, true);
 
             myStateObserver.mark("video display", 8);
             if(!displayer->paused) {
