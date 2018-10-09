@@ -51,7 +51,7 @@
                   moduleName = "TFMediaPlayer"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-                  timestampString = "538981109.461978"
+                  timestampString = "560739864.920296"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "64"
@@ -91,12 +91,27 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             symbolName = "buffer_pool_free"
             moduleName = "">
             <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "buffer_pool_free"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
+                  timestampString = "560739864.93094"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "261"
+                  endingLineNumber = "261"
+                  offsetFromSymbolStart = "28">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -117,7 +132,7 @@
                   moduleName = "TFMediaPlayer"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-                  timestampString = "552191282.935701"
+                  timestampString = "560739864.948048"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "291"
@@ -152,7 +167,7 @@
                   moduleName = "TFMediaPlayer"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-                  timestampString = "538993970.79917"
+                  timestampString = "560739864.964151"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "339"
@@ -521,6 +536,130 @@
                   startingLineNumber = "360"
                   endingLineNumber = "360"
                   offsetFromSymbolStart = "16">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = "h264_parse"
+            moduleName = "">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "h264_parse"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavcodec/h264_parser.c"
+                  timestampString = "560748133.499992"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "567"
+                  endingLineNumber = "567"
+                  offsetFromSymbolStart = "52">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = "mov_read_default"
+            moduleName = "">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "mov_read_default"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavformat/mov.c"
+                  timestampString = "560744775.501083"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "6104"
+                  endingLineNumber = "6104"
+                  offsetFromSymbolStart = "68">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../AVLibraries/ffmpeg-3.4/libavformat/mov.c"
+            timestampString = "560768709.065004"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "6733"
+            endingLineNumber = "6733"
+            landmarkName = "mov_read_header"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = "mov_read_glbl"
+            moduleName = "">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "mov_read_glbl"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavformat/mov.c"
+                  timestampString = "560748133.518617"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1873"
+                  endingLineNumber = "1873"
+                  offsetFromSymbolStart = "40">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = "ff_h264_decode_seq_parameter_set"
+            moduleName = "">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ff_h264_decode_seq_parameter_set"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavcodec/h264_ps.c"
+                  timestampString = "560771143.845823"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "344"
+                  endingLineNumber = "344"
+                  offsetFromSymbolStart = "48">
                </Location>
             </Locations>
          </BreakpointContent>

@@ -126,6 +126,8 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(CMVideoCodecT
             break;
     }
     
+    NSData *data = [[NSData alloc] initWithBytes:extradata length:extradata_size];
+    NSLog(@"[%d, %d]avcC: %@",width,height,data);
     
     /* Extensions dict */
     CFDictionarySetString(extensions, CFSTR ("CVImageBufferChromaLocationBottomField"), "left");
@@ -134,6 +136,7 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(CMVideoCodecT
     CFDictionarySetValue(extensions, CFSTR ("CVPixelAspectRatio"), (CFTypeRef *) par);
     CFDictionarySetValue(extensions, CFSTR ("SampleDescriptionExtensionAtoms"), (CFTypeRef *) atoms);
     status = CMVideoFormatDescriptionCreate(NULL, format_id, width, height, extensions, &fmt_desc);
+    
     
     CFRelease(extensions);
     CFRelease(atoms);
