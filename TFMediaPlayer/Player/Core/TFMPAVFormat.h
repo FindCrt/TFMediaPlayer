@@ -40,7 +40,7 @@ typedef struct{
     uint8_t *pixels[8];
     int linesize[8];
     
-//    bool shouldFreePixels;
+    void *opaque;
     
 }TFMPVideoFrameBuffer;
 

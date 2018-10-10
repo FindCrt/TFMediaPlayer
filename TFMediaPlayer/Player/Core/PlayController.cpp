@@ -582,7 +582,6 @@ void * PlayController::readFrame(void *context){
             
             controller->videoDecoder->insertPacket(packet);
             myStateObserver.timeMark("video frame in");
-            TFMPDLOG_C("pts1: %lld \n",packet->pts);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){

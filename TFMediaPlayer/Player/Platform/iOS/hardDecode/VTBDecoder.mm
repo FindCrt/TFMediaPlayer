@@ -17,25 +17,20 @@ using namespace tfmpcore;
 TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer){
     
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
+    frame->opaque = CVPixelBufferRetain(pixelBuffer);
+    
     frame->width = (int)CVPixelBufferGetWidth(pixelBuffer);
     frame->height = (int)CVPixelBufferGetHeight(pixelBuffer);
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     
-    uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-    uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-    uint8_t *yuv420p = (uint8_t*)malloc(frame->width*frame->height*3/2.0f);
-    nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame->width, frame->height);
+    frame->format = TFMP_VIDEO_PIX_FMT_NV12;
+    frame->planes = 2;
+    frame->pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+    frame->pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
     
-    frame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
-    frame->planes = 3;
-    uint32_t ysize = frame->width*frame->height;
-    frame->pixels[0] = yuv420p;
-    frame->pixels[1] = yuv420p+ysize;
-    frame->pixels[2] = yuv420p+ysize/4*5;
-    frame->linesize[0] = frame->width;
-    frame->linesize[1] = frame->width/2;
-    frame->linesize[2] = frame->width/2;
+    frame->linesize[0] = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+    frame->linesize[1] = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1);
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
     
@@ -93,7 +88,7 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
 //            av_frame_unref(frame);
 //            return;
 //        }
-        TFMPDLOG_C("pts2: %lld \n",pkt->pts);
+        
         myStateObserver.mark("VTBFrame", 1, true);
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }

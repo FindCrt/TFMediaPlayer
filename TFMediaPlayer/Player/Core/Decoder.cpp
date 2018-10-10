@@ -340,7 +340,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
-                    TFMPDLOG_C("pts2: %lld\n",frame->pts);
+                    
                     decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false));
                     
                 }else{

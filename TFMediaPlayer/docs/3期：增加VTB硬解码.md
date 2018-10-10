@@ -30,6 +30,7 @@
 如果是调试时，还一种选择，就是只有视频流的h264文件。这样就略去了demux的操作了。
 
 拿到AVPacket之后，会有多种情况，因为h264的NALU有两种不同的格式：
+
  * 开头3或4个字节的数值是后面数据的长度
  * 开头是0x001或0x0001,也就是只是一个标识。
 
@@ -74,3 +75,4 @@
     CFDictionaryRef extensions = CMFormatDescriptionGetExtensions(fmtDesc);
  ```
 2. `avcC`的格式是明确的，可以从里面拿到sps跟pps,这样其实也就可以用另外的函数构建formatDesc了。
+3. 使用`GL_LUMINANCE_ALPHA`可以构建双通道的texture,但是对于某些视频会错乱，还需要再查。

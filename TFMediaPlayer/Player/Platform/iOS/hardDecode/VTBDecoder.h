@@ -74,7 +74,9 @@ namespace tfmpcore {
         inline static void freeFrame(TFMPFrame **frameP){
             TFMPFrame *frame = *frameP;
             
-            free(frame->displayBuffer->pixels[0]);
+            CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->displayBuffer->opaque;
+            CVPixelBufferRelease(pixelBuffer);
+            
             delete frame->displayBuffer;
             
             delete frame;
