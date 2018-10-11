@@ -33,7 +33,6 @@ namespace tfmpcore {
         void *opaque;
         void (*freeFrameFunc)(TFMPFrame **frame);
         
-//        TFMPVideoFrameBuffer *(*convertToDisplayBuffer)(TFMPFrame *frame);
         TFMPVideoFrameBuffer *displayBuffer;
     };
 }

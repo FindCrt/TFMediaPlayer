@@ -193,11 +193,7 @@ void Decoder::freeResources(){
 }
 
 void Decoder::insertPacket(AVPacket *packet){
-    
-    AVPacket *refPkt = av_packet_alloc();
-    av_packet_ref(refPkt, packet);
-    
-    pktBuffer.blockInsert(refPkt);
+    pktBuffer.blockInsert(packet);
 }
 
 void *Decoder::decodeLoop(void *context){
@@ -236,9 +232,7 @@ void *Decoder::decodeLoop(void *context){
         myStateObserver.mark(name, 2);
         decoder->pktBuffer.blockGetOut(&pkt);
         myStateObserver.mark(name, 3);
-        if (pkt == nullptr) {
-            
-        }
+
         if (pkt == nullptr) continue;
         
         myStateObserver.mark(name, 4);

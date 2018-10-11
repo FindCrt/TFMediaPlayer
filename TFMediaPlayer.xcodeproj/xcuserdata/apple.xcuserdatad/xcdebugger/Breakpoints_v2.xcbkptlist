@@ -665,18 +665,45 @@
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            symbolName = "read_frame_internal"
+            moduleName = "">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "read_frame_internal"
+                  moduleName = "TFMediaPlayer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/apple/AVLibraries/ffmpeg-3.4/libavformat/utils.c"
+                  timestampString = "560937392.584627"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1530"
+                  endingLineNumber = "1530"
+                  offsetFromSymbolStart = "56">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Platform/iOS/OpenGLES/TFOPGLESDisplayView.mm"
-            timestampString = "560858492.687479"
+            filePath = "TFMediaPlayer/Player/Core/PlayController.cpp"
+            timestampString = "560939562.548649"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
-            landmarkName = "-displayFrameBuffer:"
+            startingLineNumber = "565"
+            endingLineNumber = "565"
+            landmarkName = "PlayController::readFrame(void *context)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

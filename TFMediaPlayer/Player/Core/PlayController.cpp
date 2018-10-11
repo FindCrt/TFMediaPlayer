@@ -535,7 +535,7 @@ void * PlayController::readFrame(void *context){
     
     PlayController *controller = (PlayController *)context;
     
-    AVPacket *packet = av_packet_alloc();
+    AVPacket *packet = nullptr;
     
     bool endFile = false;
     controller->reading = true;
@@ -562,6 +562,7 @@ void * PlayController::readFrame(void *context){
         }
         
         myStateObserver.mark("reading", 5);
+        packet = av_packet_alloc();
         int retval = av_read_frame(controller->fmtCtx, packet);
 
         if(retval < 0){
@@ -572,6 +573,7 @@ void * PlayController::readFrame(void *context){
                 myStateObserver.mark("reading", 6);
                 TFMPCondWait(controller->read_cond, controller->read_mutex)
             }else{
+                av_packet_free(&packet);
                 continue;
             }
         }
@@ -595,7 +597,6 @@ void * PlayController::readFrame(void *context){
             controller->subtitleDecoder->insertPacket(packet);
         }
         myStateObserver.mark("reading", 8);
-        av_packet_unref(packet);
     }
     myStateObserver.mark("reading", 9);
     
