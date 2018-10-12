@@ -144,6 +144,8 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     
     TFMPVideoPixelFormat pixelFormat;
     int texturesCount;
+    
+    CVOpenGLESTextureCacheRef CVTextureCache;
 }
 
 @end
@@ -199,11 +201,11 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     if (pixelFormat == TFMP_VIDEO_PIX_FMT_YUV420P) {
         _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_yuv420_fs);
         texturesCount = 3;
-    }else if (pixelFormat == TFMP_VIDEO_PIX_FMT_NV12){
+    }else if (pixelFormat == TFMP_VIDEO_PIX_FMT_NV12 ||
+              pixelFormat == TFMP_VIDEO_PIX_FMT_NV12_VTB){
         _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_nv12_fs);
         texturesCount = 2;
     }
-    
     
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -345,6 +347,13 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
         genTextures_YUV420P(frameBuf, textures, width, height, frameBuf->linesize);
     }else if (frameBuf->format == TFMP_VIDEO_PIX_FMT_NV12){
         genTextures_NV12(frameBuf, textures, width, height, frameBuf->linesize);
+    }else if (frameBuf->format == TFMP_VIDEO_PIX_FMT_NV12_VTB){
+        if (!CVTextureCache) {
+            CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, self.context, NULL, &CVTextureCache);
+        }else{
+            CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
+        }
+        genTextures_NV12_CV(frameBuf, textures, width, height, frameBuf->linesize, CVTextureCache);
     }
     
     [self rendering:frameBuf->format];
@@ -361,7 +370,8 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     
     if (format == TFMP_VIDEO_PIX_FMT_YUV420P) {
         useTexturesForProgram_YUV420P(_frameProgram, textures);
-    }else if (format == TFMP_VIDEO_PIX_FMT_NV12){
+    }else if (format == TFMP_VIDEO_PIX_FMT_NV12 ||
+              format == TFMP_VIDEO_PIX_FMT_NV12_VTB){
         useTexturesForProgram_NV12(_frameProgram, textures);
     }
     
@@ -417,24 +427,45 @@ inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textur
 inline void genTextures_NV12(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize){
     //nv12 has 2 planes: y and interleaved u v. U plane and v plane have half width and height of y plane.
     
-    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frameBuf->opaque;
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    
     glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[0]);  //linesize may isn't equal to width.
     
     glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, CVPixelBufferGetBaseAddress(pixelBuffer)/*frameBuf->pixels[0]*/);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
 
 
     glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[1]);
 
+    //using GL_LUMINANCE_ALPHA to generate dual channel texture.
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width/2, height/2, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
 
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+}
+
+/** generate textures with color space NV12 by core video library's functions */
+inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize, CVOpenGLESTextureCacheRef textureCache){
+    //nv12 has 2 planes: y and interleaved u v. U plane and v plane have half width and height of y plane.
+    
+    CVOpenGLESTextureRef CVTextures[2];
+    
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frameBuf->opaque;
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    
+    CVReturn retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0, &CVTextures[0]);
+    textures[0] = CVOpenGLESTextureGetName(CVTextures[0]);
+    if (retval != kCVReturnSuccess) {
+        NSLog(@"create luma texture error: %d",retval);
+    }
+    
+    retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, width/2, height/2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 1, &CVTextures[1]);
+    textures[1] = CVOpenGLESTextureGetName(CVTextures[1]);
+    if (retval != kCVReturnSuccess) {
+        NSLog(@"create chroma texture error: %d",retval);
+    }
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 }
+
 
 inline void useTexturesForProgram_NV12(TFOPGLProgram *program, GLuint *textures){
     program->setTexture("yPlaneTex", GL_TEXTURE_2D, textures[0], 0);

@@ -158,3 +158,79 @@ unref是在`frame_queue_next`，而这个函数是在下一次读取frame的时�
 if (is->audio_buf_index >= is->audio_buf_size) {
     audio_size = audio_decode_frame(ffp);
 ```
+
+
+#####音视频的播放方式
+
+音频播放使用AudioQueue:
+
+* 构建AudioQueue：`AudioQueueNewOutput`
+* 开始`AudioQueueStart`,暂停`AudioQueuePause`,结束`AudioQueueStop`
+* 在回调函数`IJKSDLAudioQueueOuptutCallback`里，调用下层的填充函数来填充AudioQueue的buffer。
+* 使用`AudioQueueEnqueueBuffer`把装配完的AudioQueue Buffer入队，进入播放。
+
+上面这些都是AudioQueue的标准操作，特别的是构建`AudioStreamBasicDescription`的时候，也就是指定音频播放的格式。格式是由音频源的格式决定的，在`IJKSDLGetAudioStreamBasicDescriptionFromSpec`里看，除了格式固定为pcm之外，其他的都是从底层给的格式复制过来。这样就有了很大的自由，音频源只需要解码成pcm就可以了。
+
+而底层的格式是在`audio_open`里决定的，逻辑是：
+
+* 根据源文件，构建一个期望的格式`wanted_spec`,然后把这个期望的格式提供给上层，最后把上层的实际格式拿到作为结果返回。**一个类似沟通的操作，这种思维很值得借鉴**
+* 如果上传不接受这种格式，返回错误，底层修改channel数、采样率然后再继续沟通。 
+* 但是样本格式是固定为s16,即signed integer 16,有符号的int类型，位深为16比特的格式。位深指每个样本存储的内存大小，16个比特，加上有符号，所以范围是[-2^15, 2^15-1],2^15为32768，变化性足够了。
+
+因为都是pcm,是不压缩的音频，所以决定性的因素就只有：采样率、通道数和样本格式。样本格式固定s16，和上层沟通就是决定采样率和通道数。
+
+这里是一个很好的分层架构的例子，底层通用，上层根据平台各有不同。
+
+
+视频的播放：
+
+播放都是使用OpenGL ES，使用`IJKSDLGLView`,重写了`layerClass`,把layer类型修改为`CAEAGLLayer`可以显示OpenGL ES的渲染内容。所有类型的画面都使用这个显示，有区别的地方都抽象到`Render`这个角色里了，相关的方法有：
+
+ * `setupRenderer` 构建一个render
+ * `IJK_GLES2_Renderer_renderOverlay` 绘制overlay。
+
+render的构建包括：
+ 
+ * 使用不同的fragmnt shader和共通的vertex shader构建program
+ * 提供mvp矩阵
+ * 设置顶点和纹理坐标数据
+ 
+render的绘制包括：
+
+ * `func_uploadTexture`定位到不同的render,执行不同的纹理上传操作
+ * 绘制图形使用`glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); `,使用了图元GL_TRIANGLE_STRIP而不是GL_TRIANGLE，可以节省顶点。
+
+提供纹理的方法也是重点，区别在于颜色空间以及元素的排列方式：
+ 
+ * rgb类型的提供了3种：565、888和8888。rgb类型的元素都是混合在一起的，也就是只有一个层(plane)，565指是rgb3个元素分别占用的比特位数，同理888，8888是另外包含了alpha元素。所以每个像素565占2个字节，888占3个字节，8888占4个字节。
+
+ ```
+ glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     widths[plane],
+                     heights[plane],
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     pixels[plane]);
+ ```
+ 构建纹理的时候区别就在format跟type参数上。
+ 
+ * yuv420p的，这种指的是最常用的y、u、v3个元素全部开，分3层，然后数量比是4:1:1，所以u v的纹理大小高和宽都是y纹理的一半。然后因为每个分量各自一个纹理，所以每个纹理都是单通道的，使用的format为`GL_LUMINANCE`
+ * yuv420sp的，这种yuv的比例也是4:1:1，区别在于u v不是分开两层，而是混合在同一层里，分层是uuuuvvvv,混合是uvuvuvuv。所以构建两个纹理，y的纹理不变，uv的纹理使用双通道的格式`GL_RG_EXT`,大小也是y的1/4（高宽都为1/2）。这种在fragment shader里取值的时候会有区别:
+ 
+ ```
+ //3层的
+ yuv.y = (texture2D(us2_SamplerY, vv2_Texcoord).r - 0.5);
+        yuv.z = (texture2D(us2_SamplerZ, vv2_Texcoord).r - 0.5);
+ //双层的
+ yuv.yz = (texture2D(us2_SamplerY,  vv2_Texcoord).rg - vec2(0.5, 0.5));
+ ```
+ uv在同一个纹理里，texture2D直接取了rg两个分量。
+ 
+* yuv444p的不是很懂，看fragment shader貌似每个像素有两个版本的yuv，然后做了一个插值。
+* 最后是yuv420p_vtb,这个是VideoToolBox硬解出来的数据的显示，因为数据存储在CVPixelBuffer里，所以直接使用了iOS系统的纹理构建方法。
+
+
+ijkplayer里的的OpenGL ES是2.0版本，如果使用3.0版本，双通道可以使用`GL_LUMINANCE_ALPHA`。

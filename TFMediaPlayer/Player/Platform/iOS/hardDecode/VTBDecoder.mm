@@ -24,7 +24,7 @@ TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromPixelBuffer(CVPixelBufferRef
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     
-    frame->format = TFMP_VIDEO_PIX_FMT_NV12;
+    frame->format = TFMP_VIDEO_PIX_FMT_NV12_VTB;
     frame->planes = 2;
     frame->pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
     frame->pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
