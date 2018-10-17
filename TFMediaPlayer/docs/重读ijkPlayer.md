@@ -456,3 +456,46 @@ if (*c->queue_serial != c->serial)
 所以也就是到第一帧新数据播放后，`c->queue_serial != c->serial`这个才不成立。也就是即使`mp->seek_req`重置回0，取得值还是seek的目标值，还不是根据pts计算的，所以也不会闪回了。
 
 关于seek的东西太复杂了。
+
+#####stop时的资源释放
+
+从方法`shutdown`到核心释放方法`stream_close`。操作的流程如下：
+
+1. 停掉读取线程：
+ * `packet_queue_abort`把音视频的packetQueue停止读取
+ * `abort_request`标识为1,然后`SDL_WaitThread`等待线程结束
+
+2. 停掉解码器部分`stream_component_close`：
+
+ * `decoder_abort`停掉packetQueue，放开framequeue的阻塞，等待解码线程结束，然后清空packetQueue。
+ * `decoder_destroy` 销毁解码器
+ * 重置流数据为空
+
+3. 停掉显示线程：在显示线程里有判断数据流，视频`is->video_st`,音频`is->audio_st`,在上一步里把流重置为空，显示线程会结束。这里同样使用`SDL_WaitThread`等待线程结束。
+4. 清空缓冲区数据:`packet_queue_destroy`销毁packetQueue,`frame_queue_destory`销毁frameQueue。
+
+对比我写的，需要修改的地方：
+
+* 结束线程使用`pthread_join`的方式，而不是用锁
+* 解码器、缓冲区等全部摧毁，下次播放再重建，不要重用
+* 音频的停止通过停掉上层播放器，底层是被动的，而且没有循环线程；视频的停止也只需要等待线程结束。
+
+核心就是第一点，使用`pthread_join`等待线程结束。
+
+
+#####网络不好处理
+
+会自动暂停，等待。内部可以控制播放或暂停。
+
+#####使用VTB时架构的统一
+
+1. frame缓冲区使用自定义的数据结构Frame,通过他可以把各种样式进行统一。
+2. 下层拥有了Frame数据，上层的对接对象时Vout，边界就在这里。然后上层要的是overlay,所以问题就是怎么由frame转化成overlay,以及如何显示overlay。这两个操作由Vout提供的`create_overlay`和`display_overlay`来完成。
+3. 使用VTB之后，数据存在解码后获得的pixelBuffer里，而ffmpeg解码后的数据在AVFrame里，这个转化的区别就在不同的overlay创建函数里。
+
+总结：
+* 对于两个模块的连接处，为了统一，两边都需要封装统一的模型；
+* 在统一的模型内，又具有不同的操作细分；
+* 输入数据从A到B，那么细分操作由B来提供，应为B是接受者，它知道需要一个什么样的结果。
+* 这样在执行流程上一样的，能保持流程的稳定性；而实际执行时，在某些地方又有不同，从而又可以适应各种独特的需求。
+ 
