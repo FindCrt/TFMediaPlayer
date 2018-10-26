@@ -55,7 +55,7 @@ bool stateShowing = false;
     }
     
     CGFloat lineHeight = 20, width = [UIScreen mainScreen].bounds.size.width;
-    NSInteger count = 
+    NSInteger count = myStateObserver.getCounts().size() + myStateObserver.getTimeMarks().size() + myStateObserver.getLabels().size();
     
     CGFloat maxHeight = [UIScreen mainScreen].bounds.size.height-40;
     [statesView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];

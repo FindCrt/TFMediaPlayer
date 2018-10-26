@@ -154,36 +154,25 @@ void *DisplayController::displayLoop(void *context){
             pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
         
-        
-        
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
-        if (videoFrame == nullptr) continue;
-        
-        
-        
-        
+        if (videoFrame == nullptr ) continue;
+        if (videoFrame->serial != displayer->serial){
+            videoFrame->freeFrameFunc(&videoFrame);
+            continue;
+        }
+
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
         
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
-            
-            
             continue;
         }else if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }
-        
-        
-        
         TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
-        
-        
         if (displayer->shouldDisplay){
             
             displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
-            
-
-            
             if(!displayer->paused) {
                 if (!displayer->syncClock->isAudioMajor) {
                     displayer->lastPts = videoFrame->pts;
@@ -243,7 +232,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         
         while (needReadSize > 0) {
             
-            //TODO: do more thing for planar audio.
             audioFrame = nullptr;
             displayer->displayingAudio = nullptr;
             
@@ -252,15 +240,12 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memset(buffer+(oneLineSize - needReadSize), 0, needReadSize);
                 break;
             }else{
-                
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
-                
                 displayer->displayingAudio = audioFrame;
-                
             }
             
             //TODO: need more calm way to wait
-            if (audioFrame == nullptr) continue;
+            if (audioFrame == nullptr || audioFrame->serial != displayer->serial) continue;
             
             
             double remainTime = displayer->syncClock->remainTimeForAudio(audioFrame->pts, displayer->audioTimeBase);

@@ -47,9 +47,10 @@ TFMPVideoFrameBuffer * Decoder::displayBufferFromFrame(TFMPFrame *tfmpFrame){
     return displayFrame;
 }
 
-TFMPFrame * Decoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
+TFMPFrame * Decoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, int serial){
     TFMPFrame *tfmpFrame = new TFMPFrame();
     
+    tfmpFrame->serial = serial;
     tfmpFrame->frame  = frame;
     tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
     tfmpFrame->freeFrameFunc = Decoder::freeFrame;
@@ -260,7 +261,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         
                     }
-                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true));
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true, decoder->serial));
                     
                 }else{
                     av_frame_unref(frame);
@@ -317,7 +318,7 @@ void *Decoder::decodeLoop(void *context){
                         
                     }
                     
-                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false));
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false, decoder->serial));
                     
                 }else{
                     av_frame_unref(frame);

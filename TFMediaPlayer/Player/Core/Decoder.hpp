@@ -66,7 +66,7 @@ namespace tfmpcore {
         }
         
         static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
-        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio);
+        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, int serial);
         
     public:
         string name;

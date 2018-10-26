@@ -79,16 +79,11 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
         AVPacket *pkt = (AVPacket*)sourceFrameRefCon;
         
         TFMPFrame *tfmpFrame = new TFMPFrame();
+        tfmpFrame->serial = decoder->serial;
         tfmpFrame->type = TFMPFrameTypeVTBVideo;
         tfmpFrame->pts = pkt->pts;
         tfmpFrame->freeFrameFunc = VTBDecoder::freeFrame;
         tfmpFrame->displayBuffer = VTBDecoder::displayBufferFromPixelBuffer(imageBuffer);
-        
-//        if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
-//            av_frame_unref(frame);
-//            return;
-//        }
-        
         
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }

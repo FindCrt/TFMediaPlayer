@@ -25,6 +25,7 @@ namespace tfmpcore {
     class TFMPFrame{
         
     public:
+        int serial;
         AVFrame *frame;
         TFMPFrameType type;
         
