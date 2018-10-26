@@ -162,6 +162,7 @@
 		18706DC2215396EA009C21BE /* TFDebugStateShower.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFDebugStateShower.h; sourceTree = "<group>"; };
 		18706DC3215396EA009C21BE /* TFDebugStateShower.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFDebugStateShower.mm; sourceTree = "<group>"; };
 		1870E461215C928400EB1CD8 /* Wizard.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Wizard.h264; sourceTree = "<group>"; };
+		1871CF562183044E00AC638F /* TFMPPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPPacket.h; sourceTree = "<group>"; };
 		18736734215DC88D0045E0D8 /* VTBDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VTBDecoder.mm; sourceTree = "<group>"; };
 		18736735215DC88D0045E0D8 /* VTBDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VTBDecoder.h; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
@@ -617,6 +618,7 @@
 				1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */,
 				1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */,
 				181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */,
+				1871CF562183044E00AC638F /* TFMPPacket.h */,
 			);
 			path = Core;
 			sourceTree = "<group>";

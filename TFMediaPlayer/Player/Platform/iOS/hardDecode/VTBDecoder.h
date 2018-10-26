@@ -81,7 +81,7 @@ namespace tfmpcore {
             
             delete frame;
             *frameP = nullptr;
-            myStateObserver.mark("VTBFrame", -1, true);
+            
         }
         
         inline static int frameCompare(TFMPFrame *&frame1, TFMPFrame *&frame2){
@@ -100,6 +100,7 @@ namespace tfmpcore {
     public:
         string name;
         AVMediaType type;
+        int serial = 0;
         VTBDecoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){
             timebase = fmtCtx->streams[steamIndex]->time_base;
         };

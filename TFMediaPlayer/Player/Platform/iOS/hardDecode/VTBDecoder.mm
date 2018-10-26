@@ -89,7 +89,7 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
 //            return;
 //        }
         
-        myStateObserver.mark("VTBFrame", 1, true);
+        
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }
 }
@@ -232,29 +232,29 @@ void *VTBDecoder::decodeLoop(void *context){
     while (decoder->shouldDecode) {
         
         if (decoder->pause) {
-            myStateObserver.mark(name, 1);
+            
             decoder->isDecoding = false;
             TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
-            myStateObserver.mark(name, 11);
+            
             
             pthread_mutex_lock(&decoder->pauseMutex);
             if (decoder->pause) {
-                myStateObserver.mark(name, 12);
+                
                 pthread_cond_wait(&decoder->pauseCond, &decoder->pauseMutex);
             }else{
-                myStateObserver.mark(name, 13);
+                
             }
             pthread_mutex_unlock(&decoder->pauseMutex);
             decoder->isDecoding = true;
         }
         
         pkt = nullptr;
-        myStateObserver.mark(name, 2);
+        
         decoder->pktBuffer.blockGetOut(&pkt);
-        myStateObserver.mark(name, 3);
+        
         if (pkt == nullptr) continue;
         
-        myStateObserver.mark(name, 4);
+        
         if (decoder->_decodeSession) {
             decoder->decodePacket(pkt);
         }
@@ -262,10 +262,10 @@ void *VTBDecoder::decodeLoop(void *context){
         if (pkt != nullptr)  av_packet_free(&pkt);
     }
     
-    myStateObserver.mark(name, 9);
+    
     decoder->isDecoding = false;
     TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
-    myStateObserver.mark(name, 10);
+    
     return 0;
 }
 
@@ -309,7 +309,7 @@ void VTBDecoder::insertPacket(AVPacket *packet){
     
     pktBuffer.blockInsert(refPkt);
     
-    myStateObserver.mark("video packet", 1, true);
+    
 }
 
 void VTBDecoder::activeBlock(bool flag){
@@ -325,41 +325,41 @@ void VTBDecoder::flush(){
     pause = true;
     
     //2. disable buffer's in and out to invalid the frame or packet in current loop.
-    myStateObserver.mark(stateName, 1);
+    
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
-    myStateObserver.mark(stateName, 1);
+    
     
     //3. wait for the end of current loop
     pthread_mutex_lock(&waitLoopMutex);
     if (isDecoding) {
-        myStateObserver.mark(stateName, 3);
+        
         pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
     }else{
-        myStateObserver.mark(stateName, 4);
+        
     }
     pthread_mutex_unlock(&waitLoopMutex);
-    myStateObserver.mark(stateName, 5);
+    
     
     //4. flush all reserved buffers
     pktBuffer.flush();
-    myStateObserver.mark(stateName, 6);
+    
     frameBuffer.flush();
-    myStateObserver.mark(stateName, 7);
+    
     
     //5. flush FFMpeg's buffer.
     //If dont'f call this, there are some new packets which contains old frames.
     flushContext();
-    myStateObserver.mark(stateName, 8);
+    
     
     //6. resume the decode loop
     pktBuffer.disableIO(false);
     frameBuffer.disableIO(false);
     
     pause = false;
-    myStateObserver.mark(stateName, 9);
+    
     TFMPCondSignal(pauseCond, pauseMutex);
-    myStateObserver.mark(stateName, 10);
+    
 }
 
 void VTBDecoder::flushContext(){
@@ -377,20 +377,20 @@ void VTBDecoder::freeResources(){
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
     //3. wait for the end of current loop
-    myStateObserver.mark(name+" free", 1);
+    
     pthread_mutex_lock(&waitLoopMutex);
     if (isDecoding) {
         pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-        myStateObserver.mark(name+" free", 2);
+        
     }else{
-        myStateObserver.mark(name+" free", 3);
+        
     }
     pthread_mutex_unlock(&waitLoopMutex);
-    myStateObserver.mark(name+" free", 4);
+    
     //4. flush all reserved buffers
     pktBuffer.flush();
     frameBuffer.flush();
-    myStateObserver.mark(name+" free", 5);
+    
     flushContext();
 }
 

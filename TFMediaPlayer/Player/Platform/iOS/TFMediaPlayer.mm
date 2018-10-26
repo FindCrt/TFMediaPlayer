@@ -192,7 +192,7 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{TFMPStateChangedKey:@(state)}];
     });
     
-    myStateObserver.mark("play state", state);
+    
 }
 
 -(BOOL)isPlaying{

@@ -17,6 +17,7 @@ extern "C"{
 }
 
 #include "TFMPFrame.h"
+#include "TFMPPacket.h"
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
@@ -32,7 +33,7 @@ namespace tfmpcore {
         
         AVCodecContext *codecCtx;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(2000, true);
+        RecycleBuffer<TFMPPacket> pktBuffer = RecycleBuffer<TFMPPacket>(2000, true);
         
         RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(30, true);
         
@@ -43,16 +44,15 @@ namespace tfmpcore {
         /** decode loop is running */
         bool isDecoding = false;
         
-        bool pause = false;
-        
         pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
         
         pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
         
-        inline static void freePacket(AVPacket **pkt){
-            av_packet_free(pkt);
+        inline static void freePacket(TFMPPacket *packet){
+            av_packet_free(&(packet->pkt));
+            packet->pkt = nullptr;
         }
         
         inline static void freeFrame(TFMPFrame **tfmpFrameP){
@@ -82,6 +82,8 @@ namespace tfmpcore {
         };
         
         MediaTimeFilter *mediaTimeFilter;
+        
+        int serial = 0;
         
         bool prepareDecode();
         

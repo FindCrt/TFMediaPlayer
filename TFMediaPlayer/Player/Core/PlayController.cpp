@@ -14,19 +14,6 @@
 
 using namespace tfmpcore;
 
-typedef struct{
-    PlayController *playController;
-    double seekTime;
-}TFMPSeekOpParams;
-
-//int PlayController::connectFail(void *opaque){
-//    TFMPDLOG_C("connectFail ");
-//    PlayController *controller = (PlayController*)opaque;
-//    if (controller->abortConnecting) {
-//        return AVERROR_EOF;
-//    }
-//    return 0;
-//}
 
 bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
@@ -210,16 +197,10 @@ void PlayController::stop(){
 }
 
 void *PlayController::seekOperation(void *context){
-    TFMPSeekOpParams *params = (TFMPSeekOpParams *)context;
-    double time = params->seekTime;
-    PlayController *playController = params->playController;
-    
-    if (time > playController->duration) {
-        time = playController->duration-0.1;
-    }
+    double time;
+    PlayController *playController;
     
     playController->checkingEnd = false;
-    playController->prepareForSeeking = true;
     playController->seeking = true;
     playController->markTime = time;
     
@@ -239,9 +220,9 @@ void *PlayController::seekOperation(void *context){
     
     playController->readable = false;
     pthread_mutex_lock(&playController->waitLoopMutex);
-    if (playController->reading) {
-        pthread_cond_wait(&playController->waitLoopCond, &playController->waitLoopMutex);
-    }
+//    if (playController->reading) {
+//        pthread_cond_wait(&playController->waitLoopCond, &playController->waitLoopMutex);
+//    }
     pthread_mutex_unlock(&playController->waitLoopMutex);
     
     //2. flush all buffers
@@ -312,7 +293,7 @@ void *PlayController::seekOperation(void *context){
     playController->readable = true;
     TFMPCondSignal(playController->read_cond, playController->read_mutex);
     
-    playController->prepareForSeeking = false;
+    
     playController->displayer->pause(false);
     
     
@@ -324,12 +305,13 @@ void *PlayController::seekOperation(void *context){
 
 void PlayController::seekTo(double time){
     
-    auto param = new TFMPSeekOpParams();
-    param->playController = this;
-    param->seekTime = time;
+    if (time >= duration) {
+        time = duration-0.1;
+    }
     
-    pthread_create(&seekThread, nullptr, seekOperation, param);
-    pthread_detach(seekThread);
+    markTime = time;
+    seekPos = time;
+    seeking = true;
 }
 
 void PlayController::seekByForward(double interval){
@@ -340,10 +322,6 @@ void PlayController::seekByForward(double interval){
 }
 
 void PlayController::bufferDone(){
-    
-    if (prepareForSeeking) {
-        return;
-    }
     
     if (bufferingStateChanged) {
         bufferingStateChanged(this, false);
@@ -374,23 +352,23 @@ void *PlayController::freeResources(void *context){
     }
     
     //read thread
-    myStateObserver.labelMark("freeResources", "read thread");
+    
     TFMPCondSignal(playController->read_cond, playController->read_mutex);
     pthread_mutex_lock(&playController->waitLoopMutex);
-    if (playController->reading) {
-        pthread_cond_wait(&playController->waitLoopCond, &playController->waitLoopMutex);
-    }
+//    if (playController->reading) {
+//        pthread_cond_wait(&playController->waitLoopCond, &playController->waitLoopMutex);
+//    }
     pthread_mutex_unlock(&playController->waitLoopMutex);
     
     //decodes
     if (playController->videoDecoder) {
-        myStateObserver.labelMark("freeResources", "videoDecoder");
+        
         playController->videoDecoder->freeResources();
         free(playController->videoDecoder);
         playController->videoDecoder = nullptr;
     }
     if (playController->audioDecoder) {
-        myStateObserver.labelMark("freeResources", "audioDecoder");
+        
         playController->audioDecoder->freeResources();
         free(playController->audioDecoder);
         playController->audioDecoder = nullptr;
@@ -403,10 +381,10 @@ void *PlayController::freeResources(void *context){
     
     
     
-    myStateObserver.labelMark("freeResources", "display");
+    
     playController->displayer->freeResources();
     
-    myStateObserver.labelMark("freeResources", "ffmpeg");
+    
     //ffmpeg
     if (playController->fmtCtx) {
         avformat_close_input(&playController->fmtCtx);
@@ -434,7 +412,6 @@ void PlayController::resetStatus(){
     readable = false;
     checkingEnd = false;
     seeking = false;
-    prepareForSeeking = false;
     markTime = 0;
     
 }
@@ -538,30 +515,28 @@ void * PlayController::readFrame(void *context){
     AVPacket *packet = nullptr;
     
     bool endFile = false;
-    controller->reading = true;
     
     while (!controller->stoping) {
-        myStateObserver.mark("reading", 1);
-        if (!controller->readable) {
+        
+        if (controller->seeking) {
             
-            controller->reading = false;
-            TFMPCondSignal(controller->waitLoopCond, controller->waitLoopMutex);
-            myStateObserver.mark("reading", 2);
-            
-            pthread_mutex_lock(&controller->read_mutex);
-            if (!controller->readable) {
-                pthread_cond_wait(&controller->read_cond, &controller->read_mutex);
-                if (controller->stoping) {
-                    pthread_mutex_unlock(&controller->read_mutex);
-                    break;
-                }
-                myStateObserver.mark("reading", 3);
+            controller->pause(true);
+            int retval = avformat_seek_file(controller->fmtCtx, -1, INT64_MIN, controller->seekPos*AV_TIME_BASE, INT64_MAX, 0);
+            if (retval != 0) {
+                //TODO: seek error
             }
-            pthread_mutex_unlock(&controller->read_mutex);
-            controller->reading = true;
+            
+            if (controller->audioDecoder) {
+                controller->audioDecoder->serial++;
+            }
+            if (controller->videoDecoder) {
+                controller->videoDecoder->serial++;
+            }
+            controller->displayer->serial++;
+            
+            controller->seeking = false;
         }
         
-        myStateObserver.mark("reading", 5);
         packet = av_packet_alloc();
         int retval = av_read_frame(controller->fmtCtx, packet);
 
@@ -570,37 +545,34 @@ void * PlayController::readFrame(void *context){
                 endFile = true;
                 
                 controller->startCheckPlayFinish();
-                myStateObserver.mark("reading", 6);
+                
                 TFMPCondWait(controller->read_cond, controller->read_mutex)
             }else{
                 av_packet_free(&packet);
                 continue;
             }
         }
-        myStateObserver.mark("reading", 7);
+        
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
             
             controller->videoDecoder->insertPacket(packet);
-            myStateObserver.timeMark("video frame in");
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
             
             controller->audioDecoder->insertPacket(packet);
-            myStateObserver.timeMark("audio frame in");
+            
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
                   packet->stream_index == controller->subTitleStream){
             
             controller->subtitleDecoder->insertPacket(packet);
         }
-        myStateObserver.mark("reading", 8);
+        
     }
-    myStateObserver.mark("reading", 9);
     
-    controller->reading = false;
     TFMPCondSignal(controller->waitLoopCond, controller->waitLoopMutex);
     
     return 0;
@@ -641,9 +613,7 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int cu
             pthread_detach(controller->signalThread);
         }else{
             
-            if (controller->prepareForSeeking) {
-                return false;
-            }
+            
             
             //buffer has ran out.We must stop playing until buffer is full again.
             if (controller->bufferingStateChanged) {

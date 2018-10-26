@@ -180,7 +180,7 @@ namespace tfmpcore {
             frontNode = frontNode->pre;
             
             usedSize++;
-            myStateObserver.mark(name, usedSize, false);
+            
             if (usedSize > 1 && valueCompFunc) {
                 pthread_mutex_lock(&mutex);
                 RecycleNode *cur = frontNode->next;
@@ -250,7 +250,7 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-            myStateObserver.mark(name, usedSize, false);
+            
             
             RecycleBufferLog("getout: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
@@ -379,7 +379,7 @@ namespace tfmpcore {
             
             usedSize = 0;
             backNode = frontNode->pre;
-            myStateObserver.mark(name, usedSize);
+            
             
             ioDisable = false;
             RecycleBufferLog("ioDisable false\n");

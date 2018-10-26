@@ -79,6 +79,7 @@ namespace tfmpcore {
             delete syncClock;
         }
         
+        int serial = 0;
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
         void *displayContext = nullptr;

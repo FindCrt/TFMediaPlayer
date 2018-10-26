@@ -103,14 +103,13 @@ namespace tfmpcore {
          * And it becomes false when displayer find the first frame whose pts is greater than the seeking time, because now is time we can actually resume playing.
          */
         bool seeking = false;
-        bool prepareForSeeking = false;
+        double seekPos = 0;
         double markTime = 0;  //The media time that seek to or start to pause.
         
         //6. free
         pthread_t freeThread;
         static void * freeResources(void *context);
         void resetStatus();
-        bool reading = false;
         pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
 

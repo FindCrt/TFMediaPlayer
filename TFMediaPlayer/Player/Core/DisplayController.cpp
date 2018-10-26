@@ -134,7 +134,7 @@ void *DisplayController::displayLoop(void *context){
     double time = 0;
     uint64_t lastpts = 0;
     
-    myStateObserver.mark("video display", 1);
+    
     while (displayer->shouldDisplay) {
         
         videoFrame = nullptr; //reset it
@@ -146,20 +146,20 @@ void *DisplayController::displayLoop(void *context){
             displayer->processingVideo = false;
             if (displayer->paused) {  //must put condition inside the lock.
                 sem_post(displayer->wait_display_sem);
-                myStateObserver.mark("video display", 2);
+                
                 pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
             }
             displayer->processingVideo = true;
-            myStateObserver.mark("video display", 20);
+            
             pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
         
-        myStateObserver.mark("video display", 3);
+        
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
-        myStateObserver.mark("video display", 4);
-        myStateObserver.mark("video show5", 1, true);
+        
+        
         
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
@@ -167,23 +167,23 @@ void *DisplayController::displayLoop(void *context){
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
             
-            myStateObserver.mark("video lost", 1, true);
+            
             continue;
         }else if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }
         
-        myStateObserver.mark("video display", 5);
+        
         
         TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
         
-        myStateObserver.mark("video display", 6);
+        
         if (displayer->shouldDisplay){
-            myStateObserver.mark("video display", 7);
+            
             displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
-            myStateObserver.mark("video show6", 1, true);
+            
 
-            myStateObserver.mark("video display", 8);
+            
             if(!displayer->paused) {
                 if (!displayer->syncClock->isAudioMajor) {
                     displayer->lastPts = videoFrame->pts;
@@ -200,20 +200,20 @@ void *DisplayController::displayLoop(void *context){
 }
 
 int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
-    myStateObserver.timeMark("fillAudioBuffer");
+    
     DisplayController *displayer = (DisplayController *)context;
-    myStateObserver.mark("display audio", 1);
+    
     if (!displayer->shouldDisplay){
         return 0;
     }
-    myStateObserver.mark("display audio", 2);
+    
     uint8_t *buffer = buffersList[0];
     if (displayer->paused) {
         printf("display pause audio\n");
         memset(buffer, 0, oneLineSize);
         return 0;
     }
-    myStateObserver.mark("display audio", 3);
+    
     displayer->fillingAudio = true;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
@@ -223,7 +223,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
         
         remainingBuffer->readIndex += oneLineSize;
-        myStateObserver.mark("display audio", 4);
+        
         
     }else{
         int needReadSize = oneLineSize;
@@ -240,7 +240,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         bool resample = false;
         uint8_t *dataBuffer = nullptr;
         int linesize = 0, outSamples = 0;
-        myStateObserver.mark("display audio", 5);
+        
         while (needReadSize > 0) {
             
             //TODO: do more thing for planar audio.
@@ -252,7 +252,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memset(buffer+(oneLineSize - needReadSize), 0, needReadSize);
                 break;
             }else{
-                myStateObserver.mark("display audio", 6);
+                
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
                 
                 displayer->displayingAudio = audioFrame;
@@ -262,15 +262,15 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             //TODO: need more calm way to wait
             if (audioFrame == nullptr) continue;
             
-            myStateObserver.mark("display audio", 7);
+            
             double remainTime = displayer->syncClock->remainTimeForAudio(audioFrame->pts, displayer->audioTimeBase);
-            myStateObserver.labelMark("audio remain", to_string(remainTime)+" pts "+to_string(audioFrame->pts*av_q2d(displayer->audioTimeBase)));
+            
             if (remainTime < -minExeTime){
                 audioFrame->freeFrameFunc(&audioFrame);
                 
                 continue;
             }
-            myStateObserver.mark("display audio", 8);
+            
             AVFrame *frame = audioFrame->frame;
             if (displayer->audioResampler->isNeedResample(frame)) {
                 if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
@@ -284,7 +284,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 dataBuffer = frame->extended_data[0];
                 linesize = frame->linesize[0];
             }
-            myStateObserver.mark("display audio", 9);
+            
             if (dataBuffer == nullptr) {
                 audioFrame->freeFrameFunc(&audioFrame);
                 continue;
@@ -296,7 +296,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             double preBufferDuration = (filledSize/destBytesPerChannel)/destSampleRate;
             
             //update sync clock
-            myStateObserver.mark("display audio", 10);
+            
             if(!displayer->paused) {
                 if (displayer->syncClock->isAudioMajor) {
                     displayer->lastPts = frame->pts;
@@ -341,13 +341,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         }
     }
     
-    myStateObserver.mark("display audio", 11);
+    
     if (displayer->paused) {
         displayer->fillingAudio = false;
         sem_post(displayer->wait_display_sem);
     }
     
-    myStateObserver.mark("display audio", 12);
+    
     displayer->fillingAudio = false;
     
     return 0;

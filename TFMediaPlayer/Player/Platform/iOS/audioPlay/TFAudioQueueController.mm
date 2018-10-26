@@ -141,7 +141,7 @@ void audioQueueListen(
     })
 
     _state = TFAudioQueueStatePlaying;
-    myStateObserver.labelMark("audio player", "play");
+    
     
     [_lock unlock];
 }
@@ -157,7 +157,7 @@ void audioQueueListen(
     OSStatus status = AudioQueuePause(_audioQueue);
     NSLog(@"AudioQueuePause %d\n",status);
     _state = TFAudioQueueStatePaused;
-    myStateObserver.labelMark("audio player", "pause");
+    
     [_lock unlock];
 }
 
@@ -171,7 +171,7 @@ void audioQueueListen(
     
     AudioQueueStop(_audioQueue, YES);
     _state = TFAudioQueueStateUnplay;
-    myStateObserver.labelMark("audio player", "stop");
+    
     [_lock unlock];
 }
 
