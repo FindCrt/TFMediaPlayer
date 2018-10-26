@@ -19,12 +19,44 @@
 
 using namespace tfmpcore;
 
-inline void freePacket(AVPacket **pkt){
-    av_packet_free(pkt);
+TFMPVideoFrameBuffer * Decoder::displayBufferFromFrame(TFMPFrame *tfmpFrame){
+    TFMPVideoFrameBuffer *displayFrame = new TFMPVideoFrameBuffer();
+    
+    AVFrame *frame = tfmpFrame->frame;
+    displayFrame->width = frame->width;
+    //TODO: when should i cut one line of data to avoid the green data-empty zone in bottom?
+    displayFrame->height = frame->height-1;
+    
+    for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
+        
+        displayFrame->pixels[i] = frame->data[i]+frame->linesize[i];
+        displayFrame->linesize[i] = frame->linesize[i];
+    }
+    
+    //TODO: unsupport format
+    if (frame->format == AV_PIX_FMT_YUV420P) {
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_YUV420P;
+    }else if (frame->format == AV_PIX_FMT_NV12){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_NV12;
+    }else if (frame->format == AV_PIX_FMT_NV21){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_NV21;
+    }else if (frame->format == AV_PIX_FMT_RGB32){
+        displayFrame->format = TFMP_VIDEO_PIX_FMT_RGB32;
+    }
+    
+    return displayFrame;
 }
 
-inline void freeFrame(AVFrame **frame){
-    av_frame_free(frame);
+TFMPFrame * Decoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio){
+    TFMPFrame *tfmpFrame = new TFMPFrame();
+    
+    tfmpFrame->frame  = frame;
+    tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
+    tfmpFrame->freeFrameFunc = Decoder::freeFrame;
+    tfmpFrame->pts = frame->pts;
+    tfmpFrame->displayBuffer = displayBufferFromFrame(tfmpFrame);
+    
+    return tfmpFrame;
 }
 
 bool Decoder::prepareDecode(){
@@ -65,10 +97,6 @@ bool Decoder::prepareDecode(){
     
     pktBuffer.valueFreeFunc = freePacket;
     frameBuffer.valueFreeFunc = freeFrame;
-    
-    RecycleBuffer<TFMPMediaType> intBuffer;
-    TFMPMediaType a;
-    intBuffer.getOut(&a);
     
     return true;
 }
@@ -164,12 +192,8 @@ void Decoder::freeResources(){
     fmtCtx = nullptr;
 }
 
-void Decoder::decodePacket(AVPacket *packet){
-    
-    AVPacket *refPkt = av_packet_alloc();
-    av_packet_ref(refPkt, packet);
-    
-    pktBuffer.blockInsert(refPkt);
+void Decoder::insertPacket(AVPacket *packet){
+    pktBuffer.blockInsert(packet);
 }
 
 void *Decoder::decodeLoop(void *context){
@@ -208,9 +232,7 @@ void *Decoder::decodeLoop(void *context){
         myStateObserver.mark(name, 2);
         decoder->pktBuffer.blockGetOut(&pkt);
         myStateObserver.mark(name, 3);
-        if (pkt == nullptr) {
-            
-        }
+
         if (pkt == nullptr) continue;
         
         myStateObserver.mark(name, 4);
@@ -256,7 +278,7 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("audio first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
-                    decoder->frameBuffer.blockInsert(refFrame);
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true));
                     
                 }else{
                     av_frame_unref(frame);
@@ -312,7 +334,8 @@ void *Decoder::decodeLoop(void *context){
                     if (decoder->frameBuffer.isEmpty()) {
                         myStateObserver.labelMark("video first", to_string(refFrame->pts*av_q2d(decoder->timebase)));
                     }
-                    decoder->frameBuffer.blockInsert(refFrame);
+                    
+                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false));
                     
                 }else{
                     av_frame_unref(frame);

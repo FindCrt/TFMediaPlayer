@@ -21,6 +21,12 @@
 using namespace std;
 class TFStateObserver {
     
+    map<string, int> counts;
+    map<string, double> timeMarks;
+    map<string, string> labels;
+    
+public:
+    
     double currentTime(){
         uint64_t cur = mach_absolute_time();
         
@@ -29,12 +35,6 @@ class TFStateObserver {
         
         return cur*1e-9*(double)timebase.numer/timebase.denom;
     }
-    
-    map<string, int> counts;
-    map<string, double> timeMarks;
-    map<string, string> labels;
-    
-public:
     
     static TFStateObserver* shareInstance(){
         

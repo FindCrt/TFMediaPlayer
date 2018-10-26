@@ -12,6 +12,7 @@
 /*** debug flags ***/
 
 #define DisableRenderVideo 0
+#define EnableVTBDecode 1
 
 /** log */
 

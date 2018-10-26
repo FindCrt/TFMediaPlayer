@@ -36,8 +36,6 @@ void DisplayController::startDisplay(){
     
     shouldDisplay = true;
     
-    
-    
     bool showVideo = displayMediaType & TFMP_MEDIA_TYPE_VIDEO;
     
     if (showVideo) {
@@ -131,7 +129,10 @@ void *DisplayController::displayLoop(void *context){
     
     DisplayController *displayer = (DisplayController *)context;
     
-    AVFrame *videoFrame = nullptr;
+    TFMPFrame *videoFrame = nullptr;
+    
+    double time = 0;
+    uint64_t lastpts = 0;
     
     myStateObserver.mark("video display", 1);
     while (displayer->shouldDisplay) {
@@ -158,52 +159,29 @@ void *DisplayController::displayLoop(void *context){
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr) continue;
         myStateObserver.mark("video display", 4);
+        myStateObserver.mark("video show5", 1, true);
         
-        if (videoFrame->key_frame) {
-            TFMPDLOG_C("i帧\n");
-        }else{
-            TFMPDLOG_C("p帧\n");
-        }
         
         double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
-        myStateObserver.labelMark("video remain", to_string(remainTime)+" pts: "+to_string(videoFrame->pts*av_q2d(displayer->videoTimeBase)));
         
         if (remainTime < -minExeTime){
-            av_frame_free(&videoFrame);
+            videoFrame->freeFrameFunc(&videoFrame);
+            
+            myStateObserver.mark("video lost", 1, true);
             continue;
         }else if (remainTime > minExeTime) {
-            
             av_usleep(remainTime*1000000);
         }
         
         myStateObserver.mark("video display", 5);
-        TFMPVideoFrameBuffer *interimBuffer = new TFMPVideoFrameBuffer();
-        interimBuffer->width = videoFrame->width;
-        //TODO: when should i cut one line of data to avoid the green data-empty zone in bottom?
-        interimBuffer->height = videoFrame->height-1;
         
-        for (int i = 0; i<AV_NUM_DATA_POINTERS; i++) {
-            
-            interimBuffer->pixels[i] = videoFrame->data[i]+videoFrame->linesize[i];
-            interimBuffer->linesize[i] = videoFrame->linesize[i];
-        }
-        
-        //TODO: unsupport format
-        if (videoFrame->format == AV_PIX_FMT_YUV420P) {
-            interimBuffer->format = TFMP_VIDEO_PIX_FMT_YUV420P;
-        }else if (videoFrame->format == AV_PIX_FMT_NV12){
-            interimBuffer->format = TFMP_VIDEO_PIX_FMT_NV12;
-        }else if (videoFrame->format == AV_PIX_FMT_NV21){
-            interimBuffer->format = TFMP_VIDEO_PIX_FMT_NV21;
-        }else if (videoFrame->format == AV_PIX_FMT_RGB32){
-            interimBuffer->format = TFMP_VIDEO_PIX_FMT_RGB32;
-        }
-        
+        TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
         
         myStateObserver.mark("video display", 6);
         if (displayer->shouldDisplay){
             myStateObserver.mark("video display", 7);
-            displayer->displayVideoFrame(interimBuffer, displayer->displayContext);
+            displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
+            myStateObserver.mark("video show6", 1, true);
 
             myStateObserver.mark("video display", 8);
             if(!displayer->paused) {
@@ -215,7 +193,7 @@ void *DisplayController::displayLoop(void *context){
             }
         }
         
-        av_frame_free(&videoFrame);
+        videoFrame->freeFrameFunc(&videoFrame);
     }
     
     return 0;
@@ -257,7 +235,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             remainingBuffer->validSize = 0;
         }
         
-        AVFrame *frame = nullptr;
+        TFMPFrame *audioFrame = nullptr;
         
         bool resample = false;
         uint8_t *dataBuffer = nullptr;
@@ -266,7 +244,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         while (needReadSize > 0) {
             
             //TODO: do more thing for planar audio.
-            frame = nullptr;
+            audioFrame = nullptr;
             displayer->displayingAudio = nullptr;
             
             if (displayer->shareAudioBuffer->isEmpty() || displayer->paused) {
@@ -275,23 +253,25 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 break;
             }else{
                 myStateObserver.mark("display audio", 6);
-                displayer->shareAudioBuffer->blockGetOut(&frame);
+                displayer->shareAudioBuffer->blockGetOut(&audioFrame);
                 
-                displayer->displayingAudio = frame;
+                displayer->displayingAudio = audioFrame;
                 
             }
             
             //TODO: need more calm way to wait
-            if (frame == nullptr) continue;
+            if (audioFrame == nullptr) continue;
+            
             myStateObserver.mark("display audio", 7);
-            double remainTime = displayer->syncClock->remainTimeForAudio(frame->pts, displayer->audioTimeBase);
-            myStateObserver.labelMark("audio remain", to_string(remainTime)+" pts "+to_string(frame->pts*av_q2d(displayer->audioTimeBase)));
+            double remainTime = displayer->syncClock->remainTimeForAudio(audioFrame->pts, displayer->audioTimeBase);
+            myStateObserver.labelMark("audio remain", to_string(remainTime)+" pts "+to_string(audioFrame->pts*av_q2d(displayer->audioTimeBase)));
             if (remainTime < -minExeTime){
-                av_frame_free(&frame);
+                audioFrame->freeFrameFunc(&audioFrame);
                 
                 continue;
             }
             myStateObserver.mark("display audio", 8);
+            AVFrame *frame = audioFrame->frame;
             if (displayer->audioResampler->isNeedResample(frame)) {
                 if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
                     dataBuffer = displayer->audioResampler->resampledBuffers;
@@ -306,7 +286,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             }
             myStateObserver.mark("display audio", 9);
             if (dataBuffer == nullptr) {
-                av_frame_free(&frame);
+                audioFrame->freeFrameFunc(&audioFrame);
                 continue;
             }
             
@@ -331,7 +311,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memcpy(buffer+(oneLineSize - needReadSize), dataBuffer, linesize);
                 needReadSize -= linesize;
                 
-                av_frame_free(&frame);
+                audioFrame->freeFrameFunc(&audioFrame);
                 
             }else{
                 
@@ -354,7 +334,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memcpy(buffer+(oneLineSize - needReadSize), dataBuffer, needReadSize);
                 needReadSize = 0;
                 
-                av_frame_free(&frame);
+                audioFrame->freeFrameFunc(&audioFrame);
             }
             
             displayer->displayingAudio = nullptr;
@@ -365,7 +345,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     if (displayer->paused) {
         displayer->fillingAudio = false;
         sem_post(displayer->wait_display_sem);
-        
     }
     
     myStateObserver.mark("display audio", 12);
@@ -377,7 +356,3 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
 TFMPFillAudioBufferStruct DisplayController::getFillAudioBufferStruct(){
     return {fillAudioBuffer, this};
 }
-
-
-
-

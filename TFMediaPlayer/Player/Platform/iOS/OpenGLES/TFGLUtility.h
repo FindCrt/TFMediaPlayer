@@ -9,6 +9,8 @@
 #ifndef TFGLUtility_h
 #define TFGLUtility_h
 
+#define KAdoptES2 0
+
 #define TFGLShaderSource_sharp(s) "#"#s
 #define TFGLShaderSource(s) #s
 

@@ -7,8 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <OpenGLES/ES3/gl.h>
 #import "TFGLUtility.h"
+#if KAdoptES2
+#include <OpenGLES/ES2/gl.h>
+#else
+#include <OpenGLES/ES3/gl.h>
+#endif
+
 
 @interface TFGLView : UIView
 

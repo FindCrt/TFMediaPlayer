@@ -7,10 +7,17 @@
 //
 
 #import "TFOPGLESDisplayView.h"
-#import <OpenGLES/ES3/gl.h>
+#import "TFMPUtilities.h"
+#if KAdoptES2
+#include <OpenGLES/ES2/gl.h>
+#else
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#endif
+
 #import "TFOPGLProgram.hpp"
 #import "TFMPDebugFuncs.h"
-#import "TFMPUtilities.h"
+
 
 //texture对齐和裁剪 http://www.zwqxin.com/archives/opengl/opengl-api-memorandum-2.html
 
@@ -38,16 +45,12 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
  version 300 es
  
  precision mediump float;
- 
  in vec2 texcoord;
- 
  out vec4 FragColor;
  
  uniform sampler2D yPlaneTex;
  uniform sampler2D uPlaneTex;
  uniform sampler2D vPlaneTex;
- 
- 
  void main()
 {
     // (1) y - 16 (2) rgb * 1.164
@@ -60,28 +63,89 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
                       0, -0.34414, 1.772,
                       1.402, -0.71414, 0
                       );
+    FragColor = vec4(trans*yuv, 1.0);
+}
+ );
+
+const GLchar *TFVideoDisplay_nv12_fs = TFGLShaderSource_sharp
+(
+ version 300 es
+ 
+ precision mediump float;
+ in vec2 texcoord;
+ out vec4 FragColor;
+ 
+ uniform sampler2D yPlaneTex;
+ uniform sampler2D uvPlaneTex;
+ void main()
+{
+    // (1) y - 16 (2) rgb * 1.164
+    vec3 yuv;
+    yuv.x = texture(yPlaneTex, texcoord).r;
+    yuv.yz = texture(uvPlaneTex, texcoord).ra - vec2(0.5f, 0.5f);
     
+    mat3 trans = mat3(1, 1 ,1,
+                      0, -0.34414, 1.772,
+                      1.402, -0.71414, 0
+                      );
     FragColor = vec4(trans*yuv, 1.0);
 }
  );
 
 
-#pragma mark -
+const GLchar *TFVideoDisplay_common_vs_es2 = TFGLShaderSource
+(
+ precision highp float;
+ varying   highp vec2 vv2_Texcoord;
+ attribute highp vec4 av4_Position;
+ attribute highp vec2 av2_Texcoord;
+ uniform         mat4 um4_ModelViewProjection;
+ 
+ void main()
+ {
+     gl_Position  = um4_ModelViewProjection * av4_Position;
+     vv2_Texcoord = av2_Texcoord.xy;
+ }
+);
 
-#define TFMAX_TEXTURE_COUNT     3
+const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
+(
+ precision highp float;
+ varying   highp vec2 vv2_Texcoord;
+ uniform         mat3 um3_ColorConversion;
+ uniform   lowp  sampler2D us2_SamplerX;
+ uniform   lowp  sampler2D us2_SamplerY;
+ 
+ void main()
+ {
+     mediump vec3 yuv;
+     lowp    vec3 rgb;
+     
+     yuv.x  = (texture2D(us2_SamplerX,  vv2_Texcoord).r  - (16.0 / 255.0));
+     yuv.yz = (texture2D(us2_SamplerY,  vv2_Texcoord).rg - vec2(0.5, 0.5));
+     rgb = um3_ColorConversion * yuv;
+     gl_FragColor = vec4(rgb, 1);
+ }
+);
+
+
+#pragma mark -
 
 @interface TFOPGLESDisplayView (){
     
     TFOPGLProgram *_frameProgram;
     GLuint VAO;
     GLuint VBO;
-    GLuint textures[TFMAX_TEXTURE_COUNT];
+    GLuint textures[3];
     
     BOOL _renderConfiged;
     
-    BOOL _needReallocRenderBuffer;
-    
     CGSize _lastFrameSize;
+    
+    TFMPVideoPixelFormat pixelFormat;
+    int texturesCount;
+    
+    CVOpenGLESTextureCacheRef CVTextureCache;
 }
 
 @end
@@ -133,7 +197,15 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         1.0f, 1.0f, 0.0f, 1.0f, 0.0f,   //right top
         1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  //right bottom
     };
-    _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_yuv420_fs);
+    
+    if (pixelFormat == TFMP_VIDEO_PIX_FMT_YUV420P) {
+        _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_yuv420_fs);
+        texturesCount = 3;
+    }else if (pixelFormat == TFMP_VIDEO_PIX_FMT_NV12 ||
+              pixelFormat == TFMP_VIDEO_PIX_FMT_NV12_VTB){
+        _frameProgram = new TFOPGLProgram(TFVideoDisplay_common_vs, TFVideoDisplay_nv12_fs);
+        texturesCount = 2;
+    }
     
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -153,8 +225,8 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     
     
     //gen textures
-    glGenTextures(TFMAX_TEXTURE_COUNT, textures);
-    for (int i = 0; i<TFMAX_TEXTURE_COUNT; i++) {
+    glGenTextures(texturesCount, textures);
+    for (int i = 0; i<texturesCount; i++) {
         glBindTexture(GL_TEXTURE_2D, textures[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -215,9 +287,10 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     if (pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
         pixelType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange){
         
-        uint8_t *buffer = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+        uint8_t *yPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+        uint8_t *uvPlane = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
         uint8_t *yuv420p = (uint8_t*)malloc(frame.width*frame.height*3/2.0f);
-        yuv420sp_to_yuv420p(buffer, yuv420p, frame.width, frame.height);
+        nv12_to_yuv420p(yPlane, uvPlane, yuv420p, frame.width, frame.height);
         
         frame.format = TFMP_VIDEO_PIX_FMT_YUV420P;
         frame.planes = 3;
@@ -234,7 +307,7 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         frame.planes = 3;
         
         frame.pixels[0] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-        frame.pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);;
+        frame.pixels[1] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
         frame.pixels[2] = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 2);
         frame.linesize[0] = frame.width;
         frame.linesize[1] = frame.width/2;
@@ -253,19 +326,11 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         return;
     }
     
-//    if (!self.context) {
-//        [self setupOpenGLContext];
-//    }
     EAGLContext *preContex = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:self.context];
     
-    if (_needReallocRenderBuffer) {
-//        [self reallocRenderBuffer];
-        
-        _needReallocRenderBuffer = NO;
-    }
-    
     if (!_renderConfiged) {
+        pixelFormat = frameBuf->format;
         [self configRenderData];
     }
     
@@ -280,6 +345,15 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
 
     if (frameBuf->format == TFMP_VIDEO_PIX_FMT_YUV420P) {
         genTextures_YUV420P(frameBuf, textures, width, height, frameBuf->linesize);
+    }else if (frameBuf->format == TFMP_VIDEO_PIX_FMT_NV12){
+        genTextures_NV12(frameBuf, textures, width, height, frameBuf->linesize);
+    }else if (frameBuf->format == TFMP_VIDEO_PIX_FMT_NV12_VTB){
+        if (!CVTextureCache) {
+            CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, self.context, NULL, &CVTextureCache);
+        }else{
+            CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
+        }
+        genTextures_NV12_CV(frameBuf, textures, width, height, frameBuf->linesize, CVTextureCache);
     }
     
     [self rendering:frameBuf->format];
@@ -296,6 +370,9 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
     
     if (format == TFMP_VIDEO_PIX_FMT_YUV420P) {
         useTexturesForProgram_YUV420P(_frameProgram, textures);
+    }else if (format == TFMP_VIDEO_PIX_FMT_NV12 ||
+              format == TFMP_VIDEO_PIX_FMT_NV12_VTB){
+        useTexturesForProgram_NV12(_frameProgram, textures);
     }
     
     glBindVertexArray(VAO);
@@ -312,7 +389,7 @@ const GLchar *TFVideoDisplay_yuv420_fs = TFGLShaderSource_sharp
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         
-        glDeleteTextures(TFMAX_TEXTURE_COUNT, textures);
+        glDeleteTextures(texturesCount, textures);
     }
 }
 
@@ -345,6 +422,54 @@ inline void useTexturesForProgram_YUV420P(TFOPGLProgram *program, GLuint *textur
     program->setTexture("yPlaneTex", GL_TEXTURE_2D, textures[0], 0);
     program->setTexture("uPlaneTex", GL_TEXTURE_2D, textures[1], 1);
     program->setTexture("vPlaneTex", GL_TEXTURE_2D, textures[2], 2);
+}
+
+inline void genTextures_NV12(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize){
+    //nv12 has 2 planes: y and interleaved u v. U plane and v plane have half width and height of y plane.
+    
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[0]);  //linesize may isn't equal to width.
+    
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frameBuf->pixels[0]);
+
+
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, linesize[1]);
+
+    //using GL_LUMINANCE_ALPHA to generate dual channel texture.
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width/2, height/2, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, frameBuf->pixels[1]);
+
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+}
+
+/** generate textures with color space NV12 by core video library's functions */
+inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize, CVOpenGLESTextureCacheRef textureCache){
+    //nv12 has 2 planes: y and interleaved u v. U plane and v plane have half width and height of y plane.
+    
+    CVOpenGLESTextureRef CVTextures[2];
+    
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frameBuf->opaque;
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    
+    CVReturn retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0, &CVTextures[0]);
+    textures[0] = CVOpenGLESTextureGetName(CVTextures[0]);
+    if (retval != kCVReturnSuccess) {
+        NSLog(@"create luma texture error: %d",retval);
+    }
+    
+    retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, width/2, height/2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 1, &CVTextures[1]);
+    textures[1] = CVOpenGLESTextureGetName(CVTextures[1]);
+    if (retval != kCVReturnSuccess) {
+        NSLog(@"create chroma texture error: %d",retval);
+    }
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+}
+
+
+inline void useTexturesForProgram_NV12(TFOPGLProgram *program, GLuint *textures){
+    program->setTexture("yPlaneTex", GL_TEXTURE_2D, textures[0], 0);
+    program->setTexture("uvPlaneTex", GL_TEXTURE_2D, textures[1], 1);
 }
 
 -(void)calculateContentFrame:(CGSize)sourceSize{

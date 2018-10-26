@@ -146,7 +146,10 @@ namespace tfmpcore {
         char name[16];
         
         /** Use this func to free RecycleNode.val as RecycleBuffer doesn't know what T exactly is. */
-        void (*valueFreeFunc)(T *val);
+        void (*valueFreeFunc)(T *val) = nullptr;
+        
+        /** The func for comparing values to reorder nodes; If it's null, don't sort buffer */
+        int (*valueCompFunc)(T &val1, T &val2) = nullptr;
         
         void disableIO(bool disable){
             bool pre = ioDisable;
@@ -178,6 +181,37 @@ namespace tfmpcore {
             
             usedSize++;
             myStateObserver.mark(name, usedSize, false);
+            if (usedSize > 1 && valueCompFunc) {
+                pthread_mutex_lock(&mutex);
+                RecycleNode *cur = frontNode->next;
+                
+                //If the new value is less than cur node's, compare next node until cur node is greater than the new value.
+                while (cur != backNode->next &&
+                       valueCompFunc(frontNode->val, cur->val) < 0) {
+                    cur = cur->next;
+                }
+                
+                //unbind front node and move it to right position where is previous position of cur.
+                if (cur != frontNode->next) {
+                    
+                    auto moveNode = frontNode;
+                    frontNode = frontNode->next;
+                    
+                    moveNode->next->pre = moveNode->pre;
+                    moveNode->pre->next = moveNode->next;
+                    
+                    moveNode->pre = cur->pre;
+                    cur->pre->next = moveNode;
+                    moveNode->next = cur;
+                    cur->pre = moveNode;
+                    
+                    if (moveNode == backNode->next) {
+                        backNode = moveNode;
+                    }
+                }
+                
+                pthread_mutex_unlock(&mutex);
+            }
             
             RecycleBufferLog("insert: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             

@@ -22,7 +22,12 @@
 
 #elif TARGET_OS_IOS
 
+#import "TFMPUtilities.h"
+#if KAdoptES2
+#include <OpenGLES/ES2/gl.h>
+#else
 #include <OpenGLES/ES3/gl.h>
+#endif
 
 #endif
 

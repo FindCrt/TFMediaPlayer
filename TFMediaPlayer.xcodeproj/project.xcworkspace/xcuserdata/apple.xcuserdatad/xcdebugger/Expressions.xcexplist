@@ -3,6 +3,26 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "mov_read_header:mov.c">
+         <PersistentStrings>
+            <PersistentString
+               value = "(AVFormatContext*)0x0000000102812600">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "mov_read_default:mov.c">
+      </ContextState>
+      <ContextState
+         contextName = "tfmpcore::PlayController::connectAndOpenMedia(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;):PlayController.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "avformat_find_stream_info:utils.c">
+      </ContextState>
+      <ContextState
+         contextName = "avformat_open_input:utils.c">
+      </ContextState>
+      <ContextState
          contextName = "output_frame [inlined]:h264dec.c">
          <PersistentStrings>
             <PersistentString

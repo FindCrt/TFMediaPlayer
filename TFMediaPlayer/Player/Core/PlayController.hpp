@@ -17,15 +17,18 @@ extern "C"{
 #include <stdio.h>
 #include <string>
 #include "Decoder.hpp"
+#include "VTBDecoder.h"
 #include <pthread.h>
 #include <functional>
 #include "DisplayController.hpp"
 #include "TFMPAVFormat.h"
 #include "AudioResampler.hpp"
+#include "TFMPDebugFuncs.h"
+#include "TFMPFrame.h"
 
 namespace tfmpcore {
     
-    bool videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
+    bool videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
     static int playResumeSize = 20;
@@ -42,7 +45,11 @@ namespace tfmpcore {
         int audioStream = -1;
         int subTitleStream = -1;
         
+#if EnableVTBDecode
+        VTBDecoder *videoDecoder = nullptr;
+#else
         Decoder *videoDecoder = nullptr;
+#endif
         Decoder *audioDecoder = nullptr;
         Decoder *subtitleDecoder = nullptr;
         
@@ -116,7 +123,7 @@ namespace tfmpcore {
         
         friend void frameEmpty(Decoder *decoder, void* context);
         
-        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<AVFrame *> *buffer, int curSize, bool isGreater,void *observer);
+        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
         
         /** controls **/
         

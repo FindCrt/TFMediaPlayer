@@ -16,6 +16,7 @@ extern "C"{
 #include <libavutil/time.h>
 }
 
+#include "TFMPFrame.h"
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
@@ -31,9 +32,9 @@ namespace tfmpcore {
         
         AVCodecContext *codecCtx;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(50, true);
+        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(2000, true);
         
-        RecycleBuffer<AVFrame*> frameBuffer = RecycleBuffer<AVFrame *>(50, true);
+        RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(30, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
@@ -50,6 +51,23 @@ namespace tfmpcore {
         pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
         
+        inline static void freePacket(AVPacket **pkt){
+            av_packet_free(pkt);
+        }
+        
+        inline static void freeFrame(TFMPFrame **tfmpFrameP){
+            TFMPFrame *tfmpFrame = *tfmpFrameP;
+            av_frame_free(&tfmpFrame->frame);
+            
+            delete tfmpFrame->displayBuffer;
+            
+            delete tfmpFrame;
+            *tfmpFrameP = nullptr;
+        }
+        
+        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
+        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio);
+        
     public:
         string name;
         AVMediaType type;
@@ -59,7 +77,7 @@ namespace tfmpcore {
             freeResources();
         }
         
-        RecycleBuffer<AVFrame*> *sharedFrameBuffer(){
+        RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };
         
@@ -70,13 +88,15 @@ namespace tfmpcore {
         void startDecode();
         void stopDecode();
         
+        void insertPacket(AVPacket *packet);
+        
         void activeBlock(bool flag);
         void flush();
         void freeResources();
         
         bool bufferIsEmpty();
         
-        void decodePacket(AVPacket *packet);
+        
         
 #if DEBUG
         AVRational timebase;

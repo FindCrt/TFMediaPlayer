@@ -143,13 +143,9 @@ inline static uint8_t extractbits(uint8_t num, short start, short end){
  uu
  vv
  */
-inline void yuv420sp_to_yuv420p(unsigned char* yuv420sp, unsigned char* yuv420p, int width, int height)
+inline void nv12_to_yuv420p(unsigned char* y, unsigned char *uv, unsigned char* yuv420p, int width, int height)
 {
-    int i, j;
     int y_size = width * height;
-    
-    unsigned char* y = yuv420sp;
-    unsigned char* uv = yuv420sp + y_size;
     
     unsigned char* y_tmp = yuv420p;
     unsigned char* u_tmp = yuv420p + y_size;
@@ -158,7 +154,8 @@ inline void yuv420sp_to_yuv420p(unsigned char* yuv420sp, unsigned char* yuv420p,
     // y
     memcpy(y_tmp, y, y_size);
     
-    // u
+    // u v
+    int i, j;
     for (j = 0, i = 0; j < y_size/2; j+=2, i++)
     {
         u_tmp[i] = uv[j];

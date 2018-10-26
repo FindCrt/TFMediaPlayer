@@ -28,6 +28,7 @@ typedef enum{
     TFMP_VIDEO_PIX_FMT_NV12,
     TFMP_VIDEO_PIX_FMT_NV21,
     TFMP_VIDEO_PIX_FMT_RGB32,
+    TFMP_VIDEO_PIX_FMT_NV12_VTB,
 }TFMPVideoPixelFormat;
 
 typedef struct{
@@ -40,10 +41,11 @@ typedef struct{
     uint8_t *pixels[8];
     int linesize[8];
     
+    void *opaque;
+    
 }TFMPVideoFrameBuffer;
 
 typedef int (*TFMPVideoFrameDisplayFunc)(TFMPVideoFrameBuffer *, void *context);
-
 
 /** audio */
 
