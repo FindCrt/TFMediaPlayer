@@ -138,6 +138,8 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     GLuint VBO;
     GLuint textures[3];
     
+    CVOpenGLESTextureRef CVTextures[2];
+    
     BOOL _renderConfiged;
     
     CGSize _lastFrameSize;
@@ -351,9 +353,15 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
         if (!CVTextureCache) {
             CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, self.context, NULL, &CVTextureCache);
         }else{
+            for (int i = 0; i<2; i++) {
+                CFRelease(CVTextures[i]);
+            }
             CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
         }
-        genTextures_NV12_CV(frameBuf, textures, width, height, frameBuf->linesize, CVTextureCache);
+        genTextures_NV12_CV(frameBuf, CVTextures, width, height, frameBuf->linesize, CVTextureCache);
+        for (int i = 0; i<2; i++) {
+            textures[i] = CVOpenGLESTextureGetName(CVTextures[i]);
+        }
     }
     
     [self rendering:frameBuf->format];
@@ -443,22 +451,18 @@ inline void genTextures_NV12(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, i
 }
 
 /** generate textures with color space NV12 by core video library's functions */
-inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, GLuint *textures, int width, int height, int *linesize, CVOpenGLESTextureCacheRef textureCache){
+inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, CVOpenGLESTextureRef *CVTextures, int width, int height, int *linesize, CVOpenGLESTextureCacheRef textureCache){
     //nv12 has 2 planes: y and interleaved u v. U plane and v plane have half width and height of y plane.
-    
-    CVOpenGLESTextureRef CVTextures[2];
     
     CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frameBuf->opaque;
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     
     CVReturn retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0, &CVTextures[0]);
-    textures[0] = CVOpenGLESTextureGetName(CVTextures[0]);
     if (retval != kCVReturnSuccess) {
         NSLog(@"create luma texture error: %d",retval);
     }
     
     retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, width/2, height/2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 1, &CVTextures[1]);
-    textures[1] = CVOpenGLESTextureGetName(CVTextures[1]);
     if (retval != kCVReturnSuccess) {
         NSLog(@"create chroma texture error: %d",retval);
     }
