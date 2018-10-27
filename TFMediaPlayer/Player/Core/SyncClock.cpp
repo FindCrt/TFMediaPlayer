@@ -12,71 +12,34 @@
 
 extern "C"{
 #include <libavutil/time.h>
+#include <libavutil/rational.h>
+#include <libavutil/avutil.h>
 }
 
 using namespace tfmpcore;
 
-static double timeDen = 1000000;
-
 void SyncClock::reset(){
-    ptsCorrection = -1;
+    
 }
 
-double SyncClock::presentTimeForVideo(int64_t videoPts, AVRational timeBase){
-    
-    double sourcePts = videoPts *av_q2d(timeBase);
-    
-    
-    if (sourcePts < minMediaTime) {
-        return 0;  //discard this frame
+double SyncClock::getTime(){
+    if (paused) {
+        return mediaTime;
     }
     
-    if (ptsCorrection < 0) {
-        
-        return av_gettime_relative()/timeDen;
-    }
-    
-    
-    return ptsCorrection/timeDen+sourcePts;
+    double realTime = av_gettime_relative()/AV_TIME_BASE;
+    return realTime-realDiff;
 }
 
-double SyncClock::presentTimeForAudio(int64_t audioPts, AVRational timeBase){
+void SyncClock::updateTime(double time, int serial){
     
-    double sourcePts = audioPts *av_q2d(timeBase);
+    this->serial = serial;
+    mediaTime = time;
     
-    
-    if (sourcePts < minMediaTime) {
-        return 0; //discard this frame
-    }
-    
-    if (ptsCorrection < 0) {
-        return av_gettime_relative()/timeDen;
-    }
-    return ptsCorrection/timeDen+sourcePts;
+    double realTime = av_gettime_relative()/AV_TIME_BASE;
+    realDiff = realTime-mediaTime;
 }
 
-//TODO: remain time is much bigger than the duration of frame, discard it and correct ptsCorrection's value.
-double SyncClock::remainTimeForVideo(int64_t videoPts, AVRational timeBase){
-    
-    return presentTimeForVideo(videoPts, timeBase) - av_gettime_relative()/timeDen;
-}
-
-double SyncClock::remainTimeForAudio(int64_t audioPts, AVRational timeBase){
-    return presentTimeForAudio(audioPts, timeBase) - av_gettime_relative()/timeDen;
-}
-
-void SyncClock::presentVideo(int64_t videoPts, AVRational timeBase){
-    if (isAudioMajor) {
-        return;
-    }
-    
-    ptsCorrection = av_gettime_relative() - videoPts*av_q2d(timeBase)*timeDen;
-}
-
-void SyncClock::presentAudio(int64_t audioPts, AVRational timeBase, double delay){
-    if (!isAudioMajor) {
-        return;
-    }
-    
-    ptsCorrection = av_gettime_relative() + delay - audioPts*av_q2d(timeBase)*timeDen;
+double SyncClock::getDelay(double pts){
+    return getTime()
 }

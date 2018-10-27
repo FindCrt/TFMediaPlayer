@@ -151,8 +151,7 @@ namespace tfmpcore {
         double getDuration();
         double getCurrentTime();
         
-        //the real value is affect by realDisplayMediaType. For example, there is no audio stream, isAudioMajor couldn't be true.
-        bool isAudioMajor = true;
+        TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
         
         void setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMediaType);
         TFMPMediaType getRealDisplayMediaType(){

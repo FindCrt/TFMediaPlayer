@@ -430,11 +430,12 @@ double PlayController::getDuration(){
 }
 
 double PlayController::getCurrentTime(){
-
     
-    double playTime = displayer->getPlayTime();
+    double playTime = 0;
     if (seeking || paused || playTime < 0) {  //invalid time
         playTime = markTime;
+    }else{
+        playTime = displayer->getPlayTime();
     }
     
     return fmin(fmax(playTime, 0), duration);
@@ -469,15 +470,18 @@ void PlayController::setDesiredDisplayMediaType(TFMPMediaType desiredDisplayMedi
 }
 
 void PlayController::setupSyncClock(){
-    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) && isAudioMajor) isAudioMajor = false;
-    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) && !isAudioMajor) isAudioMajor = true;
     
-    if (displayer->syncClock) {
-        displayer->syncClock->isAudioMajor = isAudioMajor;
-    }else{
-        displayer->syncClock = new SyncClock(isAudioMajor);
+    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
+        clockMajor == TFMP_SYNC_CLOCK_MAJOR_AUDIO) {
+        clockMajor = TFMP_SYNC_CLOCK_MAJOR_VIDEO;
     }
     
+    if (!(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
+        clockMajor == TFMP_SYNC_CLOCK_MAJOR_VIDEO){
+        clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
+    }
+    
+    displayer->clockMajor = clockMajor;
 }
 
 void PlayController::resolveAudioStreamFormat(){
@@ -612,9 +616,6 @@ bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int cu
             pthread_create(&controller->signalThread, nullptr, PlayController::signalPlayFinished, controller);
             pthread_detach(controller->signalThread);
         }else{
-            
-            
-            
             //buffer has ran out.We must stop playing until buffer is full again.
             if (controller->bufferingStateChanged) {
                 controller->bufferingStateChanged(controller, true);

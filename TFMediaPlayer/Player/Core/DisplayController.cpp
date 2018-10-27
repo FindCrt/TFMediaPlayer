@@ -55,7 +55,8 @@ void DisplayController::pause(bool flag){
     }
     
     paused = flag;
-    syncClock->reset();
+    videoClock->paused = flag;
+    audioClock->paused = flag;
     
     if (!paused) {
         TFMPCondSignal(video_pause_cond, video_pause_mutex)
@@ -161,7 +162,8 @@ void *DisplayController::displayLoop(void *context){
             continue;
         }
 
-        double remainTime = displayer->syncClock->remainTimeForVideo(videoFrame->pts, displayer->videoTimeBase);
+        double pts = videoFrame->pts*av_q2d(displayer->videoTimeBase);
+        double remainTime = displayer->videoClock->getDelay(pts);
         
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);

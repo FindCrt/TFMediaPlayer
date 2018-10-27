@@ -60,7 +60,6 @@
         _playController = new tfmpcore::PlayController();
         
         _playController->setDesiredDisplayMediaType(TFMP_MEDIA_TYPE_ALL_AVIABLE);
-        _playController->isAudioMajor = true;
         
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;

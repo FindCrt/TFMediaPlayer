@@ -76,7 +76,8 @@ namespace tfmpcore {
         ~DisplayController(){
             freeResources();
             delete audioResampler;
-            delete syncClock;
+            delete videoClock;
+            delete audioClock;
         }
         
         int serial = 0;
@@ -100,7 +101,11 @@ namespace tfmpcore {
         
         
         //sync and play time
-        SyncClock *syncClock = nullptr;
+        TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
+        SyncClock *videoClock = new SyncClock();
+        SyncClock *audioClock = new SyncClock();
+//        SyncClock *otherClock = new SyncClock();
+        
         double getPlayTime();
         void resetPlayTime(){
             lastPts = -1;
