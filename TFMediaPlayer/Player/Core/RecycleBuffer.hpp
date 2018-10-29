@@ -235,7 +235,7 @@ namespace tfmpcore {
                 }
             }
             
-            
+            myStateObserver.mark(name, usedSize);
             return true;
         }
         
@@ -273,6 +273,8 @@ namespace tfmpcore {
                     }
                 }
             }
+            
+            myStateObserver.mark(name, usedSize);
             
             return true;
         }

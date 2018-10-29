@@ -14,6 +14,7 @@
 
 namespace tfmpcore {
     class SyncClock{
+        /** 现实时间和媒体时间的差值，代表两个时间流的关系 */
         double realDiff = 0;
         double mediaTime = 0;
         
@@ -22,10 +23,8 @@ namespace tfmpcore {
         bool paused = false;
         
         double getTime();
-        void updateTime(double time, int serial);
+        void updateTime(double time, int serial, double updateTime = -1);
         double getDelay(double pts);
-        
-        void reset();
     };
 }
 

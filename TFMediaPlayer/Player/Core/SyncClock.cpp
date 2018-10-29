@@ -18,28 +18,26 @@ extern "C"{
 
 using namespace tfmpcore;
 
-void SyncClock::reset(){
-    
-}
-
 double SyncClock::getTime(){
-    if (paused) {
+    if (paused || mediaTime == 0) {
         return mediaTime;
     }
     
-    double realTime = av_gettime_relative()/AV_TIME_BASE;
+    double realTime = (double)av_gettime_relative()/AV_TIME_BASE;
     return realTime-realDiff;
 }
 
-void SyncClock::updateTime(double time, int serial){
+void SyncClock::updateTime(double time, int serial, double realTime){
     
     this->serial = serial;
     mediaTime = time;
     
-    double realTime = av_gettime_relative()/AV_TIME_BASE;
+    if (realTime < 0) {
+        realTime = (double)av_gettime_relative()/AV_TIME_BASE;
+    }
     realDiff = realTime-mediaTime;
 }
 
 double SyncClock::getDelay(double pts){
-    return getTime()
+    return pts-getTime();
 }

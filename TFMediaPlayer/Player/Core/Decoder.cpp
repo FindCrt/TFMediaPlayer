@@ -220,6 +220,7 @@ void *Decoder::decodeLoop(void *context){
         }
         
         int retval = avcodec_send_packet(decoder->codecCtx, packet.pkt);
+        TFMPDLOG_C("packet: %.6f, %d,%d\n",packet.pkt->pts*av_q2d(decoder->timebase), packet.serial,retval);
         if (retval < 0) {
             TFCheckRetval("avcodec send packet");
             
@@ -253,16 +254,10 @@ void *Decoder::decodeLoop(void *context){
                     continue;
                 }
                 
-                if (decoder->shouldDecode) {
+                if (decoder->shouldDecode && packet.serial == decoder->serial) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
-//                    av_usleep(50000);
-                    
-                    if (decoder->frameBuffer.isEmpty()) {
-                        
-                    }
                     decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true, decoder->serial));
-                    
                 }else{
                     av_frame_unref(frame);
                 }
@@ -311,13 +306,10 @@ void *Decoder::decodeLoop(void *context){
                     continue;
                 }
                 
-                if (decoder->shouldDecode) {
+                if (decoder->shouldDecode && packet.serial == decoder->serial) {
                     AVFrame *refFrame = av_frame_alloc();
                     av_frame_ref(refFrame, frame);
-                    if (decoder->frameBuffer.isEmpty()) {
-                        
-                    }
-                    
+                    TFMPDLOG_C("[%d,%d]%.6f\n",packet.serial,decoder->serial,frame->pts*av_q2d(decoder->timebase));
                     decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false, decoder->serial));
                     
                 }else{

@@ -51,6 +51,7 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
 #endif
             videoDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             videoDecoder->name = "videoDecoder";
+            videoDecoder->timebase = fmtCtx->streams[i]->time_base;
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
@@ -196,113 +197,6 @@ void PlayController::stop(){
     pthread_create(&freeThread, nullptr, freeResources, this);
 }
 
-void *PlayController::seekOperation(void *context){
-    double time;
-    PlayController *playController;
-    
-    playController->checkingEnd = false;
-    playController->seeking = true;
-    playController->markTime = time;
-    
-    
-    
-    //Flushing all old frames and packets. Firstly, stop reading new packets.
-    //1. turn off inlet
-    if (playController->videoDecoder) {
-        playController->videoDecoder->activeBlock(false);
-    }
-    if (playController->audioDecoder) {
-        playController->audioDecoder->activeBlock(false);
-    }
-    if (playController->subtitleDecoder) {
-        playController->subtitleDecoder->activeBlock(false);
-    }
-    
-    playController->readable = false;
-    pthread_mutex_lock(&playController->waitLoopMutex);
-//    if (playController->reading) {
-//        pthread_cond_wait(&playController->waitLoopCond, &playController->waitLoopMutex);
-//    }
-    pthread_mutex_unlock(&playController->waitLoopMutex);
-    
-    //2. flush all buffers
-    if (playController->videoDecoder) {
-        playController->videoDecoder->flush();
-    }
-    if (playController->audioDecoder) {
-        playController->audioDecoder->flush();
-    }
-    if (playController->subtitleDecoder) {
-        playController->subtitleDecoder->flush();
-    }
-    
-    playController->displayer->flush();
-    
-    //3. enable mediaTimeFilter to filter unqualified frames whose pts is earlier than seeking time.
-    if (playController->videoDecoder) {
-        playController->videoDecoder->mediaTimeFilter->enable = true;
-        playController->videoDecoder->mediaTimeFilter->minMediaTime = time;
-    }
-    if (playController->audioDecoder) {
-        playController->audioDecoder->mediaTimeFilter->enable = true;
-        playController->audioDecoder->mediaTimeFilter->minMediaTime = time;
-    }
-    
-    //3. turn off outlet
-    if (playController->videoDecoder) {
-        playController->videoDecoder->activeBlock(true);
-    }
-    if (playController->audioDecoder) {
-        playController->audioDecoder->activeBlock(true);
-    }
-    if (playController->subtitleDecoder) {
-        playController->subtitleDecoder->activeBlock(true);
-    }
-    playController->displayer->pause(true);
-    playController->displayer->resetPlayTime();
-    
-    
-    
-    //4. seek stream to new position
-    int retval = -1;
-    if (playController->videoStrem >= 0) {
-        retval = av_seek_frame(playController->fmtCtx, playController->videoStrem, time/av_q2d(playController->fmtCtx->streams[playController->videoStrem]->time_base), AVSEEK_FLAG_BACKWARD);
-        TFCheckRetval("seek video");
-    }else if (playController->audioStream >= 0){
-        retval = av_seek_frame(playController->fmtCtx, playController->audioStream, time/av_q2d(playController->fmtCtx->streams[playController->audioStream]->time_base), AVSEEK_FLAG_BACKWARD);
-        TFCheckRetval("seek audio");
-    }
-    
-    if (retval < 0) { //seek failed
-        if (playController->audioDecoder) {
-            playController->audioDecoder->mediaTimeFilter->enable = false;
-        }
-        if (playController->videoDecoder) {
-            playController->videoDecoder->mediaTimeFilter->enable = false;
-        }
-        
-        playController->seeking = false;
-        playController->displayer->pause(false);
-        
-        if (playController->seekingEndNotify) {
-            playController->seekingEndNotify(playController);
-        }
-    }
-    
-    //5. turn on inlet
-    playController->readable = true;
-    TFMPCondSignal(playController->read_cond, playController->read_mutex);
-    
-    
-    playController->displayer->pause(false);
-    
-    
-    free(context);
-    
-    
-    return 0;
-}
-
 void PlayController::seekTo(double time){
     
     if (time >= duration) {
@@ -325,14 +219,6 @@ void PlayController::bufferDone(){
     
     if (bufferingStateChanged) {
         bufferingStateChanged(this, false);
-    }
-    
-    if (seeking) {
-        seeking = false;
-        
-        if (seekingEndNotify) {
-            seekingEndNotify(this);
-        }
     }
 }
 
@@ -431,11 +317,9 @@ double PlayController::getDuration(){
 
 double PlayController::getCurrentTime(){
     
-    double playTime = 0;
+    double playTime = displayer->getPlayTime();
     if (seeking || paused || playTime < 0) {  //invalid time
         playTime = markTime;
-    }else{
-        playTime = displayer->getPlayTime();
     }
     
     return fmin(fmax(playTime, 0), duration);
@@ -500,11 +384,7 @@ void PlayController::resolveAudioStreamFormat(){
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
     
     //resample source audio to real-play audio format.
-    auto adoptedAudioDesc = negotiateAdoptedPlayAudioDesc(sourceDesc);
-    
-    auto audioResampler = new AudioResampler();
-    audioResampler->adoptedAudioDesc = adoptedAudioDesc;
-    displayer->setAudioResampler(audioResampler);
+    displayer->setAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
 }
 
 void PlayController::startReadingFrames(){
@@ -526,19 +406,20 @@ void * PlayController::readFrame(void *context){
             
             controller->pause(true);
             int retval = avformat_seek_file(controller->fmtCtx, -1, INT64_MIN, controller->seekPos*AV_TIME_BASE, INT64_MAX, 0);
-            if (retval != 0) {
-                //TODO: seek error
-            }
             
-            if (controller->audioDecoder) {
-                controller->audioDecoder->serial++;
+            if (retval == 0) {
+                if (controller->audioDecoder) {
+                    controller->audioDecoder->serial++;
+                }
+                if (controller->videoDecoder) {
+                    controller->videoDecoder->serial++;
+                }
+                controller->displayer->serial++;
             }
-            if (controller->videoDecoder) {
-                controller->videoDecoder->serial++;
-            }
-            controller->displayer->serial++;
             
             controller->seeking = false;
+            controller->seekingEndNotify(controller);
+            controller->pause(false);
         }
         
         packet = av_packet_alloc();
@@ -560,7 +441,6 @@ void * PlayController::readFrame(void *context){
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
-            
             controller->videoDecoder->insertPacket(packet);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
@@ -574,6 +454,8 @@ void * PlayController::readFrame(void *context){
             
             controller->subtitleDecoder->insertPacket(packet);
         }
+        
+        myStateObserver.timeMark("read frame");
         
     }
     

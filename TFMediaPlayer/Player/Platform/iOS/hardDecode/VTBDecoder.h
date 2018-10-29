@@ -34,7 +34,6 @@ namespace tfmpcore {
         AVFormatContext *fmtCtx;
         int steamIndex;
         AVCodecContext *codecCtx;
-        AVRational timebase;
         
         RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(30, true);
         RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame*>(30, true);
@@ -122,6 +121,8 @@ namespace tfmpcore {
         void activeBlock(bool flag);
         void flush();
         void freeResources();
+        
+        AVRational timebase;
     };
 }
 

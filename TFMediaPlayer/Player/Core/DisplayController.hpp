@@ -66,16 +66,12 @@ namespace tfmpcore {
         
         static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
         
-        AudioResampler *audioResampler = nullptr;
-        
-        int64_t lastPts = 0;
-        bool lastIsAudio = true;
+        AudioResampler audioResampler;
         
     public:
         
         ~DisplayController(){
             freeResources();
-            delete audioResampler;
             delete videoClock;
             delete audioClock;
         }
@@ -89,8 +85,8 @@ namespace tfmpcore {
         TFMPVideoFrameDisplayFunc displayVideoFrame;
         TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         
-        void setAudioResampler(AudioResampler *audioResampler){
-            this->audioResampler = audioResampler;
+        void setAudioDesc(TFMPAudioStreamDescription audioDesc){
+            audioResampler.adoptedAudioDesc = audioDesc;
         }
         
         RecycleBuffer<TFMPFrame*> *shareVideoBuffer;
@@ -98,19 +94,23 @@ namespace tfmpcore {
         
         AVRational videoTimeBase;
         AVRational audioTimeBase;
-        
+        double playerBufferDelay = 0;  //上层播放器的缓冲区数据播放延迟
         
         //sync and play time
         TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
         SyncClock *videoClock = new SyncClock();
         SyncClock *audioClock = new SyncClock();
-//        SyncClock *otherClock = new SyncClock();
+        SyncClock *getMajorClock(){
+            if (clockMajor == TFMP_SYNC_CLOCK_MAJOR_AUDIO) {
+                return audioClock;
+            }else if (clockMajor == TFMP_SYNC_CLOCK_MAJOR_VIDEO){
+                return videoClock;
+            }else{
+                return nil;
+            }
+        };
         
         double getPlayTime();
-        void resetPlayTime(){
-            lastPts = -1;
-            lastIsAudio = false;
-        }
 
         //controls
         void startDisplay();

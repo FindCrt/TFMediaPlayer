@@ -79,6 +79,9 @@
     _resultSpecifics.ffmpeg_channel_layout = channelLayoutForChannels(_resultSpecifics.channelsPerFrame);
     
     _resultSpecifics.bufferSize = _resultSpecifics.bitsPerChannel/8 * _resultSpecifics.channelsPerFrame * _resultSpecifics.samples;
+    
+    //这个延迟是调用填充数据方法时，播放器的缓冲区里的数据播放需要的时间，也就是对新填充的数据而言，从现在到被播放的时间
+    _resultSpecifics.bufferDelay = (TFAudioQueueBufferCount-1)*_resultSpecifics.bufferSize/(double)(_resultSpecifics.sampleRate*_resultSpecifics.bitsPerChannel/8*_resultSpecifics.channelsPerFrame);
 }
 
 static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc, TFMPAudioStreamDescription *specifics){

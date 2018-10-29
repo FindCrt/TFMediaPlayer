@@ -64,6 +64,7 @@ typedef struct{
     
     int bufferSize;
     int samples;
+    double bufferDelay;
     
 }TFMPAudioStreamDescription;
 

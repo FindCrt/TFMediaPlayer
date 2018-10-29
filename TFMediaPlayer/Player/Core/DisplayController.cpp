@@ -64,17 +64,15 @@ void DisplayController::pause(bool flag){
 }
 
 double DisplayController::getPlayTime(){
-    if (videoTimeBase.den == 0 || videoTimeBase.num == 0 || lastPts < 0) {
-        return invalidPlayTime;
+    //serial不同，说明同步钟还是seek之间的数据，它里面的时间不可用
+    if (getMajorClock()->serial != serial) {
+        return -1;
     }
-    
-    return lastPts * av_q2d(lastIsAudio?audioTimeBase:videoTimeBase);
+    return getMajorClock()->getTime();
 }
 
 void DisplayController::flush(){
-    
     paused = true;
-    
     
     bool handleVideo = processingVideo, handleAudio = fillingAudio;
     if (handleVideo) {
@@ -114,7 +112,7 @@ void DisplayController::freeResources(){
         sem_wait(wait_display_sem);
     }
     
-    if(audioResampler) audioResampler->freeResources();
+    audioResampler.freeResources();
     
     free(remainingAudioBuffers.head);
     remainingAudioBuffers.validSize = 0;
@@ -131,10 +129,6 @@ void *DisplayController::displayLoop(void *context){
     DisplayController *displayer = (DisplayController *)context;
     
     TFMPFrame *videoFrame = nullptr;
-    
-    double time = 0;
-    uint64_t lastpts = 0;
-    
     
     while (displayer->shouldDisplay) {
         
@@ -163,7 +157,16 @@ void *DisplayController::displayLoop(void *context){
         }
 
         double pts = videoFrame->pts*av_q2d(displayer->videoTimeBase);
-        double remainTime = displayer->videoClock->getDelay(pts);
+        double remainTime = 0;
+        if (displayer->getMajorClock()->serial == displayer->serial) {
+            remainTime = displayer->getMajorClock()->getDelay(pts);
+        }
+        
+        myStateObserver.mark("video remain", remainTime);
+        
+        if (remainTime>10) {
+            TFMPDLOG_C("remain: %.6f, frame_se: %d, clock_se:%d\n",remainTime, videoFrame->serial, displayer->getMajorClock()->serial);
+        }
         
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
@@ -176,11 +179,7 @@ void *DisplayController::displayLoop(void *context){
             
             displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
             if(!displayer->paused) {
-                if (!displayer->syncClock->isAudioMajor) {
-                    displayer->lastPts = videoFrame->pts;
-                    displayer->lastIsAudio = false;
-                }
-                displayer->syncClock->presentVideo(videoFrame->pts, displayer->videoTimeBase);
+                displayer->videoClock->updateTime(pts, displayer->serial);
             }
         }
         
@@ -193,6 +192,7 @@ void *DisplayController::displayLoop(void *context){
 int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context){
     
     DisplayController *displayer = (DisplayController *)context;
+    SyncClock *majorClock = displayer->getMajorClock();
     
     if (!displayer->shouldDisplay){
         return 0;
@@ -206,6 +206,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     }
     
     displayer->fillingAudio = true;
+    double startRealTime = (double)av_gettime_relative()/AV_TIME_BASE;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
     uint32_t unreadSize = remainingBuffer->unreadSize();
@@ -232,6 +233,9 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         uint8_t *dataBuffer = nullptr;
         int linesize = 0, outSamples = 0;
         
+        TFMPAudioStreamDescription audioDesc = displayer->audioResampler.adoptedAudioDesc;
+        int bytesPerSec = audioDesc.sampleRate*audioDesc.bitsPerChannel*audioDesc.channelsPerFrame/8;
+        
         while (needReadSize > 0) {
             
             audioFrame = nullptr;
@@ -245,23 +249,13 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
                 displayer->displayingAudio = audioFrame;
             }
-            
-            //TODO: need more calm way to wait
+            TFMPDLOG_C("%d--%d\n",audioFrame->serial, displayer->serial);
             if (audioFrame == nullptr || audioFrame->serial != displayer->serial) continue;
             
-            
-            double remainTime = displayer->syncClock->remainTimeForAudio(audioFrame->pts, displayer->audioTimeBase);
-            
-            if (remainTime < -minExeTime){
-                audioFrame->freeFrameFunc(&audioFrame);
-                
-                continue;
-            }
-            
             AVFrame *frame = audioFrame->frame;
-            if (displayer->audioResampler->isNeedResample(frame)) {
-                if (displayer->audioResampler->reampleAudioFrame(frame, &outSamples, &linesize)) {
-                    dataBuffer = displayer->audioResampler->resampledBuffers;
+            if (displayer->audioResampler.isNeedResample(frame)) {
+                if (displayer->audioResampler.reampleAudioFrame(frame, &outSamples, &linesize)) {
+                    dataBuffer = displayer->audioResampler.resampledBuffers;
                     resample = true;
                     
 //                    TFMPBufferReadLog("resample %d, %d",linesize, outSamples);
@@ -277,20 +271,24 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 continue;
             }
             
-            int filledSize = oneLineSize - needReadSize;
-            int destSampleRate = displayer->audioResampler->adoptedAudioDesc.sampleRate;
-            int destBytesPerChannel =  displayer->audioResampler->adoptedAudioDesc.bitsPerChannel/8;
-            double preBufferDuration = (filledSize/destBytesPerChannel)/destSampleRate;
+            int unplaySize = (oneLineSize-needReadSize)+linesize;
+            double unplayDelay = (double)unplaySize/bytesPerSec+audioDesc.bufferDelay; //还未播的缓冲区数据的时间
+            double pts = audioFrame->frame->pts*av_q2d(displayer->audioTimeBase);
             
-            //update sync clock
-            
-            if(!displayer->paused) {
-                if (displayer->syncClock->isAudioMajor) {
-                    displayer->lastPts = frame->pts;
-                    displayer->lastIsAudio = true;
-                }
-                displayer->syncClock->presentAudio(frame->pts, displayer->audioTimeBase, preBufferDuration);
+            //serial不同时，剩余时间就为0，即立即装载播放
+            double remainTime = 0;
+            if (majorClock->serial == displayer->serial) {
+                remainTime = displayer->getMajorClock()->getDelay(pts)-unplayDelay; //当前帧播放时间剩余
             }
+            
+            if (remainTime < -minExeTime){
+                TFMPDLOG_C("slow: %.6f\n",remainTime);
+                audioFrame->freeFrameFunc(&audioFrame);
+                continue;
+            }
+            
+            //当前内容的时间(pts)-未播的数据延迟(unplayDelay) = 刚播完的数据时间; 对应的现实时间传入方法刚调用的时间
+            displayer->audioClock->updateTime(pts-unplayDelay, displayer->serial, startRealTime);
             
             if (needReadSize >= linesize) {
                 
