@@ -80,11 +80,13 @@
         
         _playController->seekingEndNotify = [self](tfmpcore::PlayController *playController){
             
-            if (_pauseMarked) { //The user intent to don't play, so pause it.
-                self.state = TFMediaPlayerStatePaused;
-            }else{
-                self.state = TFMediaPlayerStatePlaying;
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (_pauseMarked) { //The user intent to don't play, so pause it.
+                    self.state = TFMediaPlayerStatePaused;
+                }else{
+                    self.state = TFMediaPlayerStatePlaying;
+                }
+            });
         };
         
         _playController->bufferingStateChanged = [self](tfmpcore::PlayController *playController, bool isBuffering){

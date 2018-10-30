@@ -162,8 +162,7 @@ void *DisplayController::displayLoop(void *context){
             remainTime = displayer->getMajorClock()->getDelay(pts);
         }
         
-        myStateObserver.mark("video remain", remainTime);
-        
+        TFMPDLOG_C("pts: %.6f, %d, %d\n",pts, videoFrame->serial, displayer->serial);
         if (remainTime>10) {
             TFMPDLOG_C("remain: %.6f, frame_se: %d, clock_se:%d\n",remainTime, videoFrame->serial, displayer->getMajorClock()->serial);
         }

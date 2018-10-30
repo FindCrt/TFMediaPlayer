@@ -69,40 +69,6 @@ namespace tfmpcore {
         
         std::vector<UsedSizeObserver *> observers;
         
-        bool expand(){
-            if (allocedSize >= limitSize) {
-                return false;
-            }
-            if (allocedSize == 0) {
-                allocedSize = defaultInitAllocSize;
-                initAlloc();
-                return true;
-            }
-            
-            long expandSize = allocedSize < (limitSize-allocedSize) ? allocedSize : (limitSize-allocedSize);
-            
-            RecycleNode *nextNode = frontNode;
-            RecycleNode *closeNode = frontNode->pre;
-            
-            //construct from next to pre.  new node(pre) <----- front(next).
-            for (long i = 0; i<expandSize; i++) {
-                RecycleNode *node = new RecycleNode();
-                nextNode->pre = node;
-                node->next = nextNode;
-                
-                if (i == expandSize-1) { //link last node with the other node of break.
-                    node->pre = closeNode;
-                    closeNode->next = node;
-                }
-                
-                nextNode = node;
-            }
-            
-            allocedSize += expandSize;
-            
-            return true;
-        }
-        
         void initAlloc(){
             frontNode = new RecycleNode();
             RecycleNode *lastNode = frontNode;
@@ -170,10 +136,11 @@ namespace tfmpcore {
         
         bool insert(T val){
             if (usedSize >= allocedSize) {
-                if (!expand()) {
-                    //stop pushing until there is unused node.
-                    return false;
-                }
+                return false;
+            }
+            
+            if (frontNode->pre == backNode) {
+                
             }
             
             frontNode->pre->val = val;
@@ -182,7 +149,6 @@ namespace tfmpcore {
             usedSize++;
             
             if (usedSize > 1 && valueCompFunc) {
-                pthread_mutex_lock(&mutex);
                 RecycleNode *cur = frontNode->next;
                 
                 //If the new value is less than cur node's, compare next node until cur node is greater than the new value.
@@ -209,8 +175,6 @@ namespace tfmpcore {
                         backNode = moveNode;
                     }
                 }
-                
-                pthread_mutex_unlock(&mutex);
             }
             
             RecycleBufferLog("insert: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
@@ -286,12 +250,11 @@ namespace tfmpcore {
          */
         void blockInsert(T val){
             
+            pthread_mutex_lock(&mutex);
             if (!ioDisable && usedSize >= limitSize) {
                 RecycleBufferLog("***************************lock full %s\n",name);
                 insertingVal = &val;
-                pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&inCond, &mutex);
-                pthread_mutex_unlock(&mutex);
                 RecycleBufferLog("---------------------------unlock full %s\n",name);
             }
             
@@ -302,21 +265,21 @@ namespace tfmpcore {
 //                pthread_cond_signal(&cond);
             }
             insertingVal = nullptr;
+            pthread_mutex_unlock(&mutex);
         }
         
         void blockGetOut(T *valP){
-
+            pthread_mutex_lock(&mutex);
             if (!ioDisable && usedSize == 0) {
                 RecycleBufferLog("***************************lock empty %s\n",name);
-                pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&outCond, &mutex);
-                pthread_mutex_unlock(&mutex);
                 RecycleBufferLog("---------------------------unlock empty %s[%d,%d]\n",name,usedSize,allocedSize);
             }
             
             if (!ioDisable) {
                 getOut(valP);
             }
+            pthread_mutex_unlock(&mutex);
         }
         
         bool back(T *valP){
@@ -411,6 +374,13 @@ namespace tfmpcore {
             ioDisable = true;
             RecycleBufferLog("ioDisable false\n");
             RecycleBufferLog("ioDisable end\n");
+        }
+        
+        void log(){
+            printf("u:%ld, a:%ld, l: %ld\n",usedSize, allocedSize, limitSize);
+            if (usedSize == 2000) {
+                
+            }
         }
     };
 }

@@ -203,128 +203,67 @@ void *Decoder::decodeLoop(void *context){
     
     decoder->isDecoding = true;
     
-    TFMPPacket packet;
-    AVFrame *frame = av_frame_alloc();
-    
-    bool frameDelay = false;
-    bool delayFramesReleasing = false;
+    TFMPPacket packet = {0, nullptr};
+    bool packetPending = false;
+    AVFrame *frame = nullptr;
     
     string name = decoder->name;
     while (decoder->shouldDecode) {
         
-        packet.pkt = nullptr;
-        decoder->pktBuffer.blockGetOut(&packet);
+        //TODO: AVERROR_EOF
+        int retval = AVERROR(EAGAIN);
         
-        if (packet.pkt == nullptr || packet.serial != decoder->serial) {
-            continue;
-        }
-        
-        int retval = avcodec_send_packet(decoder->codecCtx, packet.pkt);
-        TFMPDLOG_C("packet: %.6f, %d,%d\n",packet.pkt->pts*av_q2d(decoder->timebase), packet.serial,retval);
-        if (retval < 0) {
-            TFCheckRetval("avcodec send packet");
+        do {
+            frame = av_frame_alloc();
+            retval = avcodec_receive_frame(decoder->codecCtx, frame);
             
-            av_packet_free(&packet.pkt);
-            continue;
-        }
+            if (retval == AVERROR(EAGAIN)){
+                av_frame_free(&frame);
+                break;
+            }else if (retval != 0){
+                av_frame_free(&frame);
+            }
+        } while (retval != 0);
         
-        if (decoder->type == AVMEDIA_TYPE_AUDIO) {
-            
-            //may many frames in one packet.
-            while (retval == 0) {
-                
-                retval = avcodec_receive_frame(decoder->codecCtx, frame);
-                if (retval == AVERROR(EAGAIN)) {
-                    break;
-                }
-                
-                if (retval != 0 && retval != AVERROR_EOF) {
-                    TFCheckRetval("avcodec receive frame");
-                    av_frame_unref(frame);
-                    continue;
-                }
-                if (frame->extended_data == nullptr) {
-                    printf("audio frame data is null\n");
-                    av_frame_unref(frame);
-                    continue;
-                }
-                
-                if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
-                    av_frame_unref(frame);
-                    continue;
-                }
-                
-                if (decoder->shouldDecode && packet.serial == decoder->serial) {
-                    AVFrame *refFrame = av_frame_alloc();
-                    av_frame_ref(refFrame, frame);
-                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, true, decoder->serial));
-                }else{
-                    av_frame_unref(frame);
+        
+        int loopCount = 0;
+        do {
+            loopCount++;
+            if (packetPending) {  //上一轮packet有遗留，就先不取
+                packetPending = false;
+            }else{
+                if (packet.pkt) av_packet_free(&(packet.pkt));
+                decoder->pktBuffer.blockGetOut(&packet);
+                if (packet.pkt == nullptr) break;
+                if (decoder->timebase.den) {
+                    TFMPDLOG_C("[%s]packet: %.6f, %d,%d\n",decoder->name.c_str(),packet.pkt->pts*av_q2d(decoder->timebase), packet.serial,decoder->serial);
                 }
             }
-        }else{
-            
-            //frame type: i p     b b b b            p                b b              p
-            //status:    normal->frameDelay->delayFramesReleasing->frameDelay->delayFramesReleasing
-            
-            int releaseTime = 0;
-            do {
-                
-                releaseTime++;
-                retval = avcodec_receive_frame(decoder->codecCtx, frame);
-                
-                if (retval == AVERROR(EAGAIN)) {  //encounter B-frame
-                    
-                    frameDelay = true;
-                    delayFramesReleasing = false;
-                    av_frame_unref(frame);
-                    break;
-                }else if (retval != 0) {  //other error
-                    TFCheckRetval("avcodec receive frame");
-                    delayFramesReleasing = false;
-                    av_frame_unref(frame);
-                    break;
-                }
-                
-                if (frameDelay) {
-                    
-                    delayFramesReleasing = true;
-                    frameDelay = false;
-                }
-                
-
-                
-                if (frame->extended_data == nullptr) {
-                    printf("video frame data is null\n");
-                    av_frame_unref(frame);
-                    continue;
-                }
-                
-                if (!decoder->mediaTimeFilter->checkFrame(frame, false)) {
-                    
-                    av_frame_unref(frame);
-                    continue;
-                }
-                
-                if (decoder->shouldDecode && packet.serial == decoder->serial) {
-                    AVFrame *refFrame = av_frame_alloc();
-                    av_frame_ref(refFrame, frame);
-                    TFMPDLOG_C("[%d,%d]%.6f\n",packet.serial,decoder->serial,frame->pts*av_q2d(decoder->timebase));
-                    decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(refFrame, false, decoder->serial));
-                    
-                }else{
-                    av_frame_unref(frame);
-                }
-            } while (delayFramesReleasing);
+        } while (packet.serial != decoder->serial);
+        
+        if (decoder->timebase.den) {
+            decoder->pktBuffer.log();
         }
         
-        if (packet.pkt != nullptr)  av_packet_free(&(packet.pkt));
+        if (loopCount > 1) {  //经历serial变化的阶段，之前的packet不可用
+            avcodec_flush_buffers(decoder->codecCtx);
+            if (frame) av_frame_free(&frame);
+        }else if (frame) {
+            //这一句和上面while判断之间，decoder的serial可能会变，但packet的serial不会变
+            //没变时，两个值是一样的；变了，这个frame是更早的packet的数据，它的serial肯定是跟packet相同而不是跟decoder相同
+            decoder->frameBuffer.blockInsert(tfmpFrameFromAVFrame(frame, true, packet.serial));
+        }
+        
+        retval = avcodec_send_packet(decoder->codecCtx, packet.pkt);
+        
+        if (retval==AVERROR(EAGAIN)) { //现在接收不了数据，要先取frame
+            packetPending = true;
+        }else if (retval != 0 && packet.pkt){
+            av_packet_free(&(packet.pkt));
+        }
     }
     
-    
-    av_frame_free(&frame);
     decoder->isDecoding = false;
-    TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
     
     return 0;
 }

@@ -206,6 +206,8 @@ void PlayController::seekTo(double time){
     markTime = time;
     seekPos = time;
     seeking = true;
+    
+    TFMPDLOG_C("seeking to %.6f\n",seekPos);
 }
 
 void PlayController::seekByForward(double interval){
@@ -403,10 +405,10 @@ void * PlayController::readFrame(void *context){
     while (!controller->stoping) {
         
         if (controller->seeking) {
-            
+            myStateObserver.mark("read_frame", 1);
             controller->pause(true);
             int retval = avformat_seek_file(controller->fmtCtx, -1, INT64_MIN, controller->seekPos*AV_TIME_BASE, INT64_MAX, 0);
-            
+            myStateObserver.mark("read_frame", 2);
             if (retval == 0) {
                 if (controller->audioDecoder) {
                     controller->audioDecoder->serial++;
@@ -416,46 +418,52 @@ void * PlayController::readFrame(void *context){
                 }
                 controller->displayer->serial++;
             }
-            
+            myStateObserver.mark("read_frame", 3);
             controller->seeking = false;
             controller->seekingEndNotify(controller);
             controller->pause(false);
         }
         
         packet = av_packet_alloc();
+        myStateObserver.mark("read_frame", 7);
         int retval = av_read_frame(controller->fmtCtx, packet);
+        myStateObserver.mark("read_frame", 8);
 
         if(retval < 0){
+            myStateObserver.mark("read_frame", 9);
             if (retval == AVERROR_EOF) {
                 endFile = true;
                 
                 controller->startCheckPlayFinish();
-                
-                TFMPCondWait(controller->read_cond, controller->read_mutex)
+                myStateObserver.mark("read_frame", 10);
+//                TFMPCondWait(controller->read_cond, controller->read_mutex)
+                av_usleep(100); //等下之后的处理，可能还会继续seek
             }else{
+                myStateObserver.mark("read_frame", 11);
                 av_packet_free(&packet);
                 continue;
             }
         }
         
-        
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
+            myStateObserver.mark("read_frame", 4);
             controller->videoDecoder->insertPacket(packet);
+            TFMPDLOG_C("[read] %.6f, %d\n",packet->pts*av_q2d(controller->videoDecoder->timebase), controller->videoDecoder->serial);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
-            
+            myStateObserver.mark("read_frame", 5);
             controller->audioDecoder->insertPacket(packet);
             
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
                   packet->stream_index == controller->subTitleStream){
-            
+            myStateObserver.mark("read_frame", 6);
             controller->subtitleDecoder->insertPacket(packet);
         }
         
-        myStateObserver.timeMark("read frame");
+        myStateObserver.timeMark("read frame time");
         
     }
     
