@@ -86,7 +86,7 @@ namespace tfmpcore {
         void bufferDone();
         
         //3. stop
-        bool stoping = false;
+        bool abortRequest = false;
         
         //4. media resource is going to end. catch play ending
         bool checkingEnd = false;
@@ -107,8 +107,6 @@ namespace tfmpcore {
         double markTime = 0;  //The media time that seek to or start to pause.
         
         //6. free
-        pthread_t freeThread;
-        static void * freeResources(void *context);
         void resetStatus();
         pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -138,7 +136,7 @@ namespace tfmpcore {
         
         void play();
         void pause(bool flag);
-        void stop();
+        void stop();  //大概率阻塞线程，注意在非主线程调用
         
         void seekTo(double time);
         void seekByForward(double interval);

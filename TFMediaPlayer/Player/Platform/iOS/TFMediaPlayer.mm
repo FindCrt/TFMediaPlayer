@@ -309,13 +309,21 @@
             _playController->cancelConnecting();
             break;
         case TFMediaPlayerStateReady:
+        {
             _autoPlayWhenReady = false;
             _innerPlayWhenReady = false;
-            _playController->stop();
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                _playController->stop();
+            });
+        }
             break;
         case TFMediaPlayerStatePlaying:
         case TFMediaPlayerStateLoading:
-            _playController->stop();
+        {
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                _playController->stop();
+            });
+        }
             break;
         default:
             break;

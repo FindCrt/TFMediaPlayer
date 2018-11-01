@@ -104,85 +104,17 @@ bool Decoder::prepareDecode(){
 
 void Decoder::startDecode(){
     pthread_create(&decodeThread, NULL, decodeLoop, this);
-    pthread_detach(decodeThread);
 }
 
 void Decoder::stopDecode(){
     shouldDecode = false;
-}
-
-void Decoder::activeBlock(bool flag){
-    pktBuffer.disableIO(!flag);
-    frameBuffer.disableIO(!flag);
-}
-
-void Decoder::flush(){
     
-//    string stateName = name+" flush";
-//
-//    //1. prevent from starting next decode loop
-//    pause = true;
-//
-//    //2. disable buffer's in and out to invalid the frame or packet in current loop.
-//
-//    pktBuffer.disableIO(true);
-//    frameBuffer.disableIO(true);
-//
-//
-//    //3. wait for the end of current loop
-//    pthread_mutex_lock(&waitLoopMutex);
-//    if (isDecoding) {
-//
-//        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-//    }else{
-//
-//    }
-//    pthread_mutex_unlock(&waitLoopMutex);
-//
-//
-//    //4. flush all reserved buffers
-//    pktBuffer.flush();
-//
-//    frameBuffer.flush();
-//
-//
-//    //5. flush FFMpeg's buffer.
-//    //If dont'f call this, there are some new packets which contains old frames.
-//    avcodec_flush_buffers(codecCtx);
-//
-//
-//    //6. resume the decode loop
-//    pktBuffer.disableIO(false);
-//    frameBuffer.disableIO(false);
-//
-//    pause = false;
-//
-//    TFMPCondSignal(pauseCond, pauseMutex);
-    
-    
-    
-}
-
-bool Decoder::bufferIsEmpty(){
-    return pktBuffer.isEmpty() && frameBuffer.isEmpty();
-}
-
-void Decoder::freeResources(){
-    shouldDecode = false;
-    
-    //2. disable buffer's in and out to invalid the frame or packet in current loop.
+    //2. disable buffer's IO to prevent decode thread from blocking.
     pktBuffer.disableIO(true);
     frameBuffer.disableIO(true);
-    //3. wait for the end of current loop
     
-    pthread_mutex_lock(&waitLoopMutex);
-    if (isDecoding) {
-        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-        
-    }else{
-        
-    }
-    pthread_mutex_unlock(&waitLoopMutex);
+    //3. wait for the end of current loop
+    pthread_join(decodeThread, nullptr);
     
     //4. flush all reserved buffers
     pktBuffer.flush();
@@ -200,8 +132,6 @@ void Decoder::insertPacket(AVPacket *packet){
 void *Decoder::decodeLoop(void *context){
     
     Decoder *decoder = (Decoder *)context;
-    
-    decoder->isDecoding = true;
     
     TFMPPacket packet = {0, nullptr};
     bool packetPending = false;
@@ -262,8 +192,6 @@ void *Decoder::decodeLoop(void *context){
             av_packet_free(&(packet.pkt));
         }
     }
-    
-    decoder->isDecoding = false;
     
     return 0;
 }

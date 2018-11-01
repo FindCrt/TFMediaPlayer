@@ -41,13 +41,31 @@ void DisplayController::startDisplay(){
     
     if (showVideo) {
         pthread_create(&dispalyThread, nullptr, displayLoop, this);
-        pthread_detach(dispalyThread);
     }
 }
 
 void DisplayController::stopDisplay(){
     shouldDisplay = false;
+    paused = false;
     printf("shouldDisplay to false\n");
+    
+    TFMPCondSignal(video_pause_cond, video_pause_mutex)
+    
+    pthread_join(dispalyThread, nullptr);
+    
+    audioResampler.freeResources();
+    
+    free(remainingAudioBuffers.head);
+    remainingAudioBuffers.validSize = 0;
+    remainingAudioBuffers.readIndex = 0;
+    
+    displayContext = nullptr;
+    shareVideoBuffer = nullptr;
+    shareAudioBuffer = nullptr;
+    displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
+    
+    delete videoClock;
+    delete audioClock;
 }
 
 void DisplayController::pause(bool flag){
@@ -72,59 +90,6 @@ double DisplayController::getPlayTime(){
     return getMajorClock()->getTime();
 }
 
-void DisplayController::flush(){
-    paused = true;
-    
-    bool handleVideo = processingVideo, handleAudio = fillingAudio;
-    if (handleVideo) {
-        
-        shareVideoBuffer->disableIO(true);
-        sem_wait(wait_display_sem);
-    }
-    if (handleAudio) {
-        
-        shareAudioBuffer->disableIO(true);
-        sem_wait(wait_display_sem);
-    }
-    
-    
-    remainingAudioBuffers.validSize = 0;
-    remainingAudioBuffers.readIndex = 0;
-    
-    if (handleVideo) {
-        shareVideoBuffer->disableIO(false);
-    }
-    if (handleAudio) {
-        shareAudioBuffer->disableIO(false);
-    }
-    paused = false;
-    TFMPCondSignal(video_pause_cond, video_pause_mutex)
-}
-
-void DisplayController::freeResources(){
-    
-    shouldDisplay = false;
-    paused = false;
-    
-    if (processingVideo) {
-        sem_wait(wait_display_sem);
-    }
-    if (fillingAudio) {
-        sem_wait(wait_display_sem);
-    }
-    
-    audioResampler.freeResources();
-    
-    free(remainingAudioBuffers.head);
-    remainingAudioBuffers.validSize = 0;
-    remainingAudioBuffers.readIndex = 0;
-    
-    displayContext = nullptr;
-    shareVideoBuffer = nullptr;
-    shareAudioBuffer = nullptr;
-    displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
-}
-
 void *DisplayController::displayLoop(void *context){
     
     DisplayController *displayer = (DisplayController *)context;
@@ -135,18 +100,14 @@ void *DisplayController::displayLoop(void *context){
     while (displayer->shouldDisplay) {
         
         videoFrame = nullptr; //reset it
-        displayer->processingVideo = true;
         
         if (displayer->paused) {
             
             pthread_mutex_lock(&displayer->video_pause_mutex);
-            displayer->processingVideo = false;
             if (displayer->paused) {  //must put condition inside the lock.
-                sem_post(displayer->wait_display_sem);
                 
                 pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
             }
-            displayer->processingVideo = true;
             
             pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
@@ -209,7 +170,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         return 0;
     }
     
-    displayer->fillingAudio = true;
     double startRealTime = (double)av_gettime_relative()/AV_TIME_BASE;
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
@@ -219,8 +179,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         memcpy(buffer, remainingBuffer->readingPoint(), oneLineSize);
         
         remainingBuffer->readIndex += oneLineSize;
-        
-        
     }else{
         int needReadSize = oneLineSize;
         if (unreadSize > 0) {
@@ -241,7 +199,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         while (needReadSize > 0) {
             
             audioFrame = nullptr;
-            displayer->displayingAudio = nullptr;
             
             if (displayer->shareAudioBuffer->isEmpty() || displayer->paused) {
                 //fill remain buffer to 0.
@@ -249,7 +206,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 break;
             }else{
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
-                displayer->displayingAudio = audioFrame;
             }
             
             if (audioFrame == nullptr) continue;
@@ -329,19 +285,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 
                 audioFrame->freeFrameFunc(&audioFrame);
             }
-            
-            displayer->displayingAudio = nullptr;
         }
     }
-    
-    
-    if (displayer->paused) {
-        displayer->fillingAudio = false;
-        sem_post(displayer->wait_display_sem);
-    }
-    
-    
-    displayer->fillingAudio = false;
     
     return 0;
 }

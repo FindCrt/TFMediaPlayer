@@ -48,19 +48,11 @@ namespace tfmpcore {
         
         pthread_t dispalyThread;
         static void *displayLoop(void *context);
-        static void *VTBDisplayLoop(void *context);
         
         bool shouldDisplay = false;
         bool paused = false;
         pthread_cond_t video_pause_cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t video_pause_mutex = PTHREAD_MUTEX_INITIALIZER;
-        
-        sem_t *wait_display_sem = sem_open("wait_display_sem", 2);
-        bool fillingAudio = false;
-        bool processingVideo = false;
-        
-        TFMPFrame *displayingVideo = nullptr;
-        TFMPFrame *displayingAudio = nullptr;
         
         TFMPRemainingBuffer remainingAudioBuffers;
         
@@ -70,36 +62,37 @@ namespace tfmpcore {
         
     public:
         
-        ~DisplayController(){
-            freeResources();
-            delete videoClock;
-            delete audioClock;
-        }
+        /*** display ***/
         
-        int serial = 0;
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
         void *displayContext = nullptr;
-        
-        //the real display function different with different platform
+        //video display func
         TFMPVideoFrameDisplayFunc displayVideoFrame;
+        //audio display func
         TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         
+        //audio output format
         void setAudioDesc(TFMPAudioStreamDescription audioDesc){
             audioResampler.adoptedAudioDesc = audioDesc;
         }
-        
+        //decoded media buffers
         RecycleBuffer<TFMPFrame*> *shareVideoBuffer;
         RecycleBuffer<TFMPFrame*> *shareAudioBuffer;
+        
+        
+        /*** sync and play time ***/
+        
+        int serial = 0;
         
         AVRational videoTimeBase;
         AVRational audioTimeBase;
         double averageAudioDu;
         double averageVideoDu;
         double playerBufferDelay = 0;  //上层播放器的缓冲区数据播放延迟
-        double filterTime = 0;
+        double filterTime = 0;      //准确的seek需要时间过滤
         
-        //sync and play time
+        //sync clock
         TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
         SyncClock *videoClock = new SyncClock();
         SyncClock *audioClock = new SyncClock();
@@ -112,7 +105,6 @@ namespace tfmpcore {
                 return nil;
             }
         };
-        
         double getPlayTime();
 
         //controls
@@ -121,11 +113,6 @@ namespace tfmpcore {
         
         void pause(bool flag);
         bool isPaused(){ return paused;};
-        
-        //release
-        void flush();
-        void freeResources();
-        
     };
 }
 

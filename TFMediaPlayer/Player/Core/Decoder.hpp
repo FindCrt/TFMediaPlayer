@@ -32,21 +32,12 @@ namespace tfmpcore {
         AVCodecContext *codecCtx;
         
         RecycleBuffer<TFMPPacket> pktBuffer = RecycleBuffer<TFMPPacket>(2000, true);
-        
         RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(30, true);
         
         pthread_t decodeThread;
         static void *decodeLoop(void *context);
         
         bool shouldDecode = false;
-        /** decode loop is running */
-        bool isDecoding = false;
-        
-        pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
-        
-        pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
         
         inline static void freePacket(TFMPPacket *packet){
             av_packet_free(&(packet->pkt));
@@ -67,13 +58,13 @@ namespace tfmpcore {
         static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, int serial);
         
     public:
+#if DEBUG
         string name;
+        AVRational timebase;
+#endif
+        
         AVMediaType type;
         Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
-        
-        ~Decoder(){
-            freeResources();
-        }
         
         RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
@@ -82,24 +73,10 @@ namespace tfmpcore {
         int serial = 0;
         
         bool prepareDecode();
-        
         void startDecode();
         void stopDecode();
         
         void insertPacket(AVPacket *packet);
-        
-        void activeBlock(bool flag);
-        void flush();
-        void freeResources();
-        
-        bool bufferIsEmpty();
-        
-        
-        
-#if DEBUG
-        AVRational timebase;
-#endif
-        
     };
 }
 
