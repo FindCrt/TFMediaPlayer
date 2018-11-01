@@ -94,7 +94,10 @@ namespace tfmpcore {
         
         AVRational videoTimeBase;
         AVRational audioTimeBase;
+        double averageAudioDu;
+        double averageVideoDu;
         double playerBufferDelay = 0;  //上层播放器的缓冲区数据播放延迟
+        double filterTime = 0;
         
         //sync and play time
         TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;

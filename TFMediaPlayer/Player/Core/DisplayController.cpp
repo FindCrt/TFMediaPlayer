@@ -21,6 +21,7 @@ extern "C"{
 using namespace tfmpcore;
 
 static double minExeTime = 0.01; //seconds
+static double maxRemainTime = 5;
 
 void DisplayController::startDisplay(){
     
@@ -129,6 +130,7 @@ void *DisplayController::displayLoop(void *context){
     DisplayController *displayer = (DisplayController *)context;
     
     TFMPFrame *videoFrame = nullptr;
+    SyncClock *majorClock = displayer->getMajorClock();
     
     while (displayer->shouldDisplay) {
         
@@ -155,16 +157,23 @@ void *DisplayController::displayLoop(void *context){
             videoFrame->freeFrameFunc(&videoFrame);
             continue;
         }
-
+        
         double pts = videoFrame->pts*av_q2d(displayer->videoTimeBase);
-        double remainTime = 0;
-        if (displayer->getMajorClock()->serial == displayer->serial) {
-            remainTime = displayer->getMajorClock()->getDelay(pts);
+        
+        //使用了时间筛选，早于这个时间的都去掉
+        if (displayer->filterTime && pts<displayer->filterTime) {
+            videoFrame->freeFrameFunc(&videoFrame);
+            continue;
         }
         
-        TFMPDLOG_C("pts: %.6f, %d, %d\n",pts, videoFrame->serial, displayer->serial);
-        if (remainTime>10) {
-            TFMPDLOG_C("remain: %.6f, frame_se: %d, clock_se:%d\n",remainTime, videoFrame->serial, displayer->getMajorClock()->serial);
+        double remainTime = 0;
+        if (videoFrame->serial == majorClock->serial) {
+            remainTime = majorClock->getRemainTime(pts);
+        }
+        
+        if (remainTime>maxRemainTime) {
+            //计算失误或者某些特殊情况导致视频进度远快于主钟进度，不能直接卡死视频，延迟调为平均时长的两倍，稍微的减慢速度，多个帧逐渐的拉平差距
+            remainTime = displayer->averageVideoDu*2;
         }
         
         if (remainTime < -minExeTime){
@@ -173,14 +182,10 @@ void *DisplayController::displayLoop(void *context){
         }else if (remainTime > minExeTime) {
             av_usleep(remainTime*1000000);
         }
+        
         TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
-        if (displayer->shouldDisplay){
-            
-            displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
-            if(!displayer->paused) {
-                displayer->videoClock->updateTime(pts, displayer->serial);
-            }
-        }
+        displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
+        displayer->videoClock->updateTime(pts, displayer->serial);
         
         videoFrame->freeFrameFunc(&videoFrame);
     }
@@ -227,8 +232,6 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
         }
         
         TFMPFrame *audioFrame = nullptr;
-        
-        bool resample = false;
         uint8_t *dataBuffer = nullptr;
         int linesize = 0, outSamples = 0;
         
@@ -248,18 +251,26 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
                 displayer->displayingAudio = audioFrame;
             }
-            TFMPDLOG_C("%d--%d\n",audioFrame->serial, displayer->serial);
-            if (audioFrame == nullptr || audioFrame->serial != displayer->serial) continue;
             
+            if (audioFrame == nullptr) continue;
+            if (audioFrame->serial != displayer->serial) {
+                audioFrame->freeFrameFunc(&audioFrame);
+                continue;
+            }
+            
+            double pts = audioFrame->frame->pts*av_q2d(displayer->audioTimeBase);
+            //使用了时间筛选，早于这个时间的都去掉
+            if (displayer->filterTime && pts<displayer->filterTime) {
+                audioFrame->freeFrameFunc(&audioFrame);
+                continue;
+            }
+            
+            //重采样
             AVFrame *frame = audioFrame->frame;
             if (displayer->audioResampler.isNeedResample(frame)) {
                 if (displayer->audioResampler.reampleAudioFrame(frame, &outSamples, &linesize)) {
                     dataBuffer = displayer->audioResampler.resampledBuffers;
-                    resample = true;
-                    
-//                    TFMPBufferReadLog("resample %d, %d",linesize, outSamples);
                 }
-                
             }else{
                 dataBuffer = frame->extended_data[0];
                 linesize = frame->linesize[0];
@@ -272,12 +283,10 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             
             int unplaySize = (oneLineSize-needReadSize)+linesize;
             double unplayDelay = (double)unplaySize/bytesPerSec+audioDesc.bufferDelay; //还未播的缓冲区数据的时间
-            double pts = audioFrame->frame->pts*av_q2d(displayer->audioTimeBase);
             
-            //serial不同时，剩余时间就为0，即立即装载播放
             double remainTime = 0;
             if (majorClock->serial == displayer->serial) {
-                remainTime = displayer->getMajorClock()->getDelay(pts)-unplayDelay; //当前帧播放时间剩余
+                remainTime = majorClock->getRemainTime(pts)-unplayDelay; //当前帧播放时间剩余
             }
             
             if (remainTime < -minExeTime){
@@ -287,7 +296,7 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             }
             
             //当前内容的时间(pts)-未播的数据延迟(unplayDelay) = 刚播完的数据时间; 对应的现实时间传入方法刚调用的时间
-            displayer->audioClock->updateTime(pts-unplayDelay, displayer->serial, startRealTime);
+            displayer->audioClock->updateTime(pts-unplayDelay, audioFrame->serial, startRealTime);
             
             if (needReadSize >= linesize) {
                 

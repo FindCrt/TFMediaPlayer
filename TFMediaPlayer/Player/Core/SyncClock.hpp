@@ -22,9 +22,14 @@ namespace tfmpcore {
         int serial = 0;
         bool paused = false;
         
+        /** 获取这个同步钟的媒体时间 */
         double getTime();
+        
+        /** 更新这个同步钟的媒体时间，serial作为seek的标记 */
         void updateTime(double time, int serial, double updateTime = -1);
-        double getDelay(double pts);
+        
+        /** 传入的pts需要多久才可以播 */
+        double getRemainTime(double pts);
     };
 }
 

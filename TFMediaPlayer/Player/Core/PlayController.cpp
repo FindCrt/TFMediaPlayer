@@ -49,14 +49,12 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
 #else
             videoDecoder = new Decoder(fmtCtx, i, type);
 #endif
-            videoDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             videoDecoder->name = "videoDecoder";
             videoDecoder->timebase = fmtCtx->streams[i]->time_base;
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
             audioDecoder = new Decoder(fmtCtx, i, type);
             audioDecoder->name = "audioDecoder";
-            audioDecoder->mediaTimeFilter = new MediaTimeFilter(fmtCtx->streams[i]->time_base);
             audioStream = i;
         }else if (type == AVMEDIA_TYPE_SUBTITLE){
             subtitleDecoder = new Decoder(fmtCtx, i, type);

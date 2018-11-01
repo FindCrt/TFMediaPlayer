@@ -21,8 +21,6 @@ extern "C"{
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
-#include <vector>
-#include "MediaTimeFilter.hpp"
 
 namespace tfmpcore {
     
@@ -80,8 +78,6 @@ namespace tfmpcore {
         RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };
-        
-        MediaTimeFilter *mediaTimeFilter;
         
         int serial = 0;
         

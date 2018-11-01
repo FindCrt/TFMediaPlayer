@@ -37,7 +37,6 @@
 		184C8E12200B481D0063EAC3 /* pure1.caf in Resources */ = {isa = PBXBuildFile; fileRef = 184C8E11200B481D0063EAC3 /* pure1.caf */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */; };
 		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
-		1853B373206DD607002DA5BF /* MediaTimeFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */; };
 		18554531202A91FD0014D7CE /* netMedias.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18554530202A91FD0014D7CE /* netMedias.plist */; };
 		18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18554533202A9B1B0014D7CE /* TFAudioQueueController.mm */; };
 		18554537202A9B1B0014D7CE /* TFAudioUnitPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18554535202A9B1B0014D7CE /* TFAudioUnitPlayer.mm */; };
@@ -132,8 +131,6 @@
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
-		1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaTimeFilter.cpp; sourceTree = "<group>"; };
-		1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MediaTimeFilter.hpp; sourceTree = "<group>"; };
 		18547D292020478900FE24AB /* buffer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer_internal.h; path = ../../buffer_internal.h; sourceTree = "<group>"; };
 		18547D2A202047C000FE24AB /* thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../thread.h; sourceTree = "<group>"; };
 		18554530202A91FD0014D7CE /* netMedias.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = netMedias.plist; sourceTree = "<group>"; };
@@ -615,8 +612,6 @@
 				18415A341FF62648007095AC /* SyncClock.hpp */,
 				180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */,
 				18415A2F1FF61B90007095AC /* TFMPAVFormat.h */,
-				1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */,
-				1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */,
 				181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */,
 				1871CF562183044E00AC638F /* TFMPPacket.h */,
 			);
@@ -1025,7 +1020,6 @@
 				18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */,
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,
-				1853B373206DD607002DA5BF /* MediaTimeFilter.cpp in Sources */,
 				18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */,
 				18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */,
 				18415A2C1FF6130D007095AC /* TFGLView.m in Sources */,

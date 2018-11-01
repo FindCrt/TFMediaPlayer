@@ -38,6 +38,6 @@ void SyncClock::updateTime(double time, int serial, double realTime){
     realDiff = realTime-mediaTime;
 }
 
-double SyncClock::getDelay(double pts){
+double SyncClock::getRemainTime(double pts){
     return pts-getTime();
 }

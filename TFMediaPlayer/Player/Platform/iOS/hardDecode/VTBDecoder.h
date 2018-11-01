@@ -20,7 +20,6 @@ extern "C"{
 #include <VideoToolbox/VideoToolbox.h>
 
 #include "RecycleBuffer.hpp"
-#include "MediaTimeFilter.hpp"
 #include "TFMPAVFormat.h"
 #include "TFMPFrame.h"
 
@@ -107,8 +106,6 @@ namespace tfmpcore {
         RecycleBuffer<TFMPFrame*> * sharedFrameBuffer(){
             return &frameBuffer;
         };
-        
-        MediaTimeFilter * mediaTimeFilter;
         
         bool prepareDecode();
         void startDecode();
