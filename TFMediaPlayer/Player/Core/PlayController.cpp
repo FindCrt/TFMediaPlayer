@@ -372,10 +372,8 @@ void * PlayController::readFrame(void *context){
     while (!controller->abortRequest) {
         
         if (controller->seeking) {
-            myStateObserver.mark("read_frame", 1);
             controller->pause(true);
             int retval = avformat_seek_file(controller->fmtCtx, -1, INT64_MIN, controller->seekPos*AV_TIME_BASE, INT64_MAX, 0);
-            myStateObserver.mark("read_frame", 2);
             if (retval == 0) {
                 if (controller->audioDecoder) {
                     controller->audioDecoder->serial++;
@@ -384,28 +382,22 @@ void * PlayController::readFrame(void *context){
                     controller->videoDecoder->serial++;
                 }
                 controller->displayer->serial++;
+                controller->displayer->filterTime = controller->seekPos;
             }
-            myStateObserver.mark("read_frame", 3);
             controller->seeking = false;
             controller->seekingEndNotify(controller);
             controller->pause(false);
         }
         
         packet = av_packet_alloc();
-        myStateObserver.mark("read_frame", 7);
         int retval = av_read_frame(controller->fmtCtx, packet);
-        myStateObserver.mark("read_frame", 8);
-
+        
         if(retval < 0){
-            myStateObserver.mark("read_frame", 9);
             if (retval == AVERROR_EOF) {
                 endFile = true;
-                
                 controller->startCheckPlayFinish();
-                myStateObserver.mark("read_frame", 10);
                 av_usleep(100); //等下之后的处理，可能还会继续seek
             }else{
-                myStateObserver.mark("read_frame", 11);
                 av_packet_free(&packet);
                 continue;
             }
