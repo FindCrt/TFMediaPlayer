@@ -11,11 +11,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 namespace tfmpcore {
     class SyncClock{
         /** 现实时间和媒体时间的差值，代表两个时间流的关系 */
-        double realDiff = 0;
+        double realDiff = NAN;
         double mediaTime = 0;
         
     public:

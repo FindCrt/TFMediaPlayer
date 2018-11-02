@@ -72,13 +72,15 @@
                 [self stop];
             }else if (reason == TFMP_STOP_REASON_USER_STOP && self.state == TFMediaPlayerStateStoping){
                 self.state = TFMediaPlayerStateStoped;
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.stopedView.hidden = NO;
-                });
+                
                 if (_nextMedia) {  //a new media is waiting to play.
                     _mediaURL = _nextMedia;
                     _nextMedia = nil;
                     [self preparePlay];
+                }else{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.stopedView.hidden = NO;
+                    });
                 }
             }
         };

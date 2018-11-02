@@ -19,7 +19,7 @@ extern "C"{
 using namespace tfmpcore;
 
 double SyncClock::getTime(){
-    if (paused || mediaTime == 0) {
+    if (paused || mediaTime == 0 || realDiff == NAN) {
         return mediaTime;
     }
     

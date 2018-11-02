@@ -278,6 +278,7 @@ void PlayController::resetStatus(){
     readable = false;
     seeking = false;
     markTime = 0;
+    prapareOK = false;
 }
 
 #pragma mark - properties
