@@ -32,21 +32,6 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
-        /** Use this to observe the change of usedsize. It makes you know RecycleBuffer's status and helping you do specific things.
-         * if return true, observer'll be removed.
-         */
-        typedef bool (*ObserverNotifyFunc)(RecycleBuffer *buffer, int curSize, bool isGreater, void *context);
-        class UsedSizeObserver{
-            void *observer = nullptr;
-            int checkSize = defaultInitAllocSize;
-            bool isGreater = true;
-            ObserverNotifyFunc notifyFunc = nullptr;
-            
-            friend RecycleBuffer;
-            
-            UsedSizeObserver(void *observer, int checkSize, bool isGreater, ObserverNotifyFunc notifyFunc):observer(observer),checkSize(checkSize),isGreater(isGreater),notifyFunc(notifyFunc){};
-        };
-        
         const static int defaultInitAllocSize = 8;
         int outLimit = 3;
         int inLimit = LONG_MAX;
@@ -66,8 +51,6 @@ namespace tfmpcore {
         pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
         bool ioDisable = false;
-        
-        std::vector<UsedSizeObserver *> observers;
         
         void initAlloc(){
             frontNode = new RecycleNode();
@@ -183,22 +166,6 @@ namespace tfmpcore {
                 pthread_cond_signal(&outCond);
             }
             
-            if (!observers.empty()) {
-                for (auto iter = observers.begin(); iter != observers.end();) {
-                    UsedSizeObserver *ob = *iter;
-                    if (ob->isGreater && ob->checkSize < usedSize) {
-                        bool shouldRemove = ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
-                        if (shouldRemove) {
-                            iter = observers.erase(iter);
-                        }else{
-                            iter++;
-                        }
-                    }else{
-                        iter++;
-                    }
-                }
-            }
-            
             myStateObserver.mark(name, usedSize);
             return true;
         }
@@ -215,27 +182,10 @@ namespace tfmpcore {
             
             usedSize--;
             
-            
             RecycleBufferLog("getout: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
             if (usedSize <= inLimit) {
                 pthread_cond_signal(&inCond);
-            }
-            
-            if (!observers.empty()) {
-                for (auto iter = observers.begin(); iter != observers.end();) {
-                    UsedSizeObserver *ob = *iter;
-                    if (!ob->isGreater && ob->checkSize > usedSize) {
-                        bool shouldRemove = ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
-                        if (shouldRemove) {
-                            iter = observers.erase(iter);
-                        }else{
-                            iter++;
-                        }
-                    }else{
-                        iter++;
-                    }
-                }
             }
             
             myStateObserver.mark(name, usedSize);
@@ -300,26 +250,6 @@ namespace tfmpcore {
             return true;
         }
         
-        void addObserver(void *observer, int checkSize, bool isGreater, ObserverNotifyFunc notifyFunc){
-            if (notifyFunc == nullptr) {
-                return;
-            }
-            observers.push_back(new UsedSizeObserver(observer, checkSize, isGreater, notifyFunc));
-        }
-        
-        void removeObserver(void *observer, int checkSize, bool isGreater){
-            
-            for (auto iter = observers.begin(); iter != observers.end(); iter++) {
-                auto ob = *iter;
-                if (ob->observer == observer &&
-                    ob->checkSize == checkSize &&
-                    ob->isGreater == isGreater) {
-                    observers.erase(iter);
-                    break;
-                }
-            }
-        }
-        
         /** remove all inserted data */
         void flush(){
             RecycleBufferLog("signalAllBlock 1\n");
@@ -368,8 +298,6 @@ namespace tfmpcore {
             backNode = nullptr;
             
             allocedSize = 0;
-            
-            observers.clear();
             
             ioDisable = true;
             RecycleBufferLog("ioDisable false\n");

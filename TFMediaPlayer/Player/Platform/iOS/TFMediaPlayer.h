@@ -67,4 +67,6 @@ static NSString *TFMPStateChangedNotification = @"TFMPStateChangedNotification";
 
 @property (nonatomic, strong) UIView *controlView;
 
+@property (nonatomic) UIView *stopedView;
+
 @end

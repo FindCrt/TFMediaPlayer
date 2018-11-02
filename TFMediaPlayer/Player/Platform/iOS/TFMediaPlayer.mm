@@ -40,6 +40,8 @@
     TFOPGLESDisplayView *_displayView;
     
     NSURL *_nextMedia;
+    
+    UIView *_stopedView;
 }
 
 /**
@@ -66,10 +68,13 @@
         
         _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
             
-            if (reason == 0 && _state != TFMediaPlayerStateStoping) {
+            if (reason == TFMP_STOP_REASON_END_OF_FILE && _state != TFMediaPlayerStateStoping) {
                 [self stop];
-            }else if (reason == 1 && self.state == TFMediaPlayerStateStoping){
+            }else if (reason == TFMP_STOP_REASON_USER_STOP && self.state == TFMediaPlayerStateStoping){
                 self.state = TFMediaPlayerStateStoped;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.stopedView.hidden = NO;
+                });
                 if (_nextMedia) {  //a new media is waiting to play.
                     _mediaURL = _nextMedia;
                     _nextMedia = nil;
@@ -113,6 +118,7 @@
         };
         
         [self setupDefaultPlayControlView];
+        self.stopedView = self.stopedView;
     }
     
     return self;
@@ -144,6 +150,28 @@
     _controlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     [self.displayView addSubview:_controlView];
+}
+
+-(void)setStopedView:(UIView *)stopedView{
+    _stopedView = stopedView;
+    _stopedView.hidden = YES;
+    
+    [self.displayView insertSubview:_stopedView belowSubview:_controlView];
+}
+
+-(UIView *)stopedView{
+    if (!_stopedView) {
+        UILabel *label = [[UILabel alloc] initWithFrame:self.displayView.bounds];
+        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        label.font = [UIFont boldSystemFontOfSize:20];
+        label.textColor = [UIColor redColor];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.text = @"Game Over";
+        
+        _stopedView = label;
+    }
+    
+    return _stopedView;
 }
 
 -(UIView *)displayView{
@@ -239,6 +267,8 @@
     if (_playController->getRealDisplayMediaType() != _mediaType) {
         _playController->setDesiredDisplayMediaType(_mediaType);
     }
+    
+    self.stopedView.hidden = YES;
     
     if (self.state == TFMediaPlayerStateNone ||
         self.state == TFMediaPlayerStateStoped) {

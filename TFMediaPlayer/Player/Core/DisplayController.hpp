@@ -81,6 +81,15 @@ namespace tfmpcore {
         RecycleBuffer<TFMPFrame*> *shareAudioBuffer;
         
         
+        //controls
+        void startDisplay();
+        void stopDisplay();
+        void pause(bool flag);
+        bool isPaused(){ return paused;};
+        
+        void *encounterEndContext;
+        bool (*encounterEndCallBack)(void *context);
+        
         /*** sync and play time ***/
         
         int serial = 0;
@@ -106,13 +115,8 @@ namespace tfmpcore {
             }
         };
         double getPlayTime();
-
-        //controls
-        void startDisplay();
-        void stopDisplay();
         
-        void pause(bool flag);
-        bool isPaused(){ return paused;};
+        bool checkingEnd = false;
     };
 }
 

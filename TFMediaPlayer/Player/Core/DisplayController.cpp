@@ -112,6 +112,14 @@ void *DisplayController::displayLoop(void *context){
             pthread_mutex_unlock(&displayer->video_pause_mutex);
         }
         
+        if (displayer->checkingEnd && displayer->shareVideoBuffer->isEmpty()) {
+            
+            //回调给PlayController，返回true表明确实结束了，退出播放
+            if (displayer->encounterEndCallBack(displayer->encounterEndContext)) {
+                break;
+            }
+        }
+        
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
         if (videoFrame == nullptr ) continue;
         if (videoFrame->serial != displayer->serial){

@@ -28,7 +28,6 @@ extern "C"{
 
 namespace tfmpcore {
     
-    bool videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
     static int playResumeSize = 20;
@@ -87,12 +86,7 @@ namespace tfmpcore {
         
         //3. stop
         bool abortRequest = false;
-        
-        //4. media resource is going to end. catch play ending
-        bool checkingEnd = false;
-        void startCheckPlayFinish();
-        pthread_t signalThread;
-        static void *signalPlayFinished(void *context);
+        static bool checkEnd(void *context);
         
         //5. seek
         pthread_t seekThread;
@@ -120,8 +114,6 @@ namespace tfmpcore {
         
         friend void frameEmpty(Decoder *decoder, void* context);
         
-        friend bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer);
-        
         /** controls **/
         
         bool connectAndOpenMedia(std::string mediaPath);
@@ -132,7 +124,7 @@ namespace tfmpcore {
          *  0 reaching file end
          *  1 stop by calling func stop()
          */
-        std::function<void(PlayController*, int)> playStoped;
+        std::function<void(PlayController*, TFMPStopReason)> playStoped;
         
         void play();
         void pause(bool flag);

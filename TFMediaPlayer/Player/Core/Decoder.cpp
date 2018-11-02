@@ -129,6 +129,10 @@ void Decoder::insertPacket(AVPacket *packet){
     pktBuffer.blockInsert({serial, packet});
 }
 
+bool Decoder::isEmpty(){
+    return pktBuffer.isEmpty() && frameBuffer.isEmpty();
+}
+
 void *Decoder::decodeLoop(void *context){
     
     Decoder *decoder = (Decoder *)context;

@@ -14,7 +14,6 @@
 
 using namespace tfmpcore;
 
-
 bool PlayController::connectAndOpenMedia(std::string mediaPath){
     
     this->mediaPath = mediaPath;
@@ -110,6 +109,9 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     calculateRealDisplayMediaType();
     setupSyncClock();
     
+    displayer->encounterEndContext = this;
+    displayer->encounterEndCallBack = checkEnd;
+    
     duration = fmtCtx->duration/(double)AV_TIME_BASE;
     
     prapareOK = true;
@@ -150,19 +152,6 @@ void PlayController::play(){
     }
     
     displayer->startDisplay();
-    
-    
-    //observe the exhaustion of buffers.
-    Decoder *checkDecoder = nullptr;
-    
-    if (realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) {
-        audioDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
-        audioDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
-    }else if(realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO){
-//        videoDecoder->sharedFrameBuffer()->addObserver(this, bufferEmptySize, false, videoFrameSizeNotified);
-//        videoDecoder->sharedFrameBuffer()->addObserver(this, playResumeSize, true, videoFrameSizeNotified);
-    }
-    
 }
 
 
@@ -225,7 +214,7 @@ void PlayController::stop(){
     resetStatus();
     //notify others
     if (playStoped) {
-        playStoped(this, 1);
+        playStoped(this, TFMP_STOP_REASON_USER_STOP);
     }
 }
 
@@ -249,6 +238,27 @@ void PlayController::seekByForward(double interval){
     seekTo(seekTime);
 }
 
+bool PlayController::checkEnd(void *context){
+    PlayController *controller = (PlayController *)context;
+    
+    bool flag = false;
+    if (controller->videoDecoder &&
+        controller->videoDecoder->isEmpty()) {
+        flag = true;
+    }
+    
+    if (controller->audioDecoder &&
+        controller->audioDecoder->isEmpty()) {
+        flag = true;
+    }
+    
+    if (flag) {
+        controller->playStoped(controller, TFMP_STOP_REASON_END_OF_FILE);
+    }
+    
+    return flag;
+}
+
 void PlayController::bufferDone(){
     
     if (bufferingStateChanged) {
@@ -266,10 +276,8 @@ void PlayController::resetStatus(){
     
     abortRequest = false;
     readable = false;
-    checkingEnd = false;
     seeking = false;
     markTime = 0;
-    
 }
 
 #pragma mark - properties
@@ -367,8 +375,6 @@ void * PlayController::readFrame(void *context){
     
     AVPacket *packet = nullptr;
     
-    bool endFile = false;
-    
     while (!controller->abortRequest) {
         
         if (controller->seeking) {
@@ -383,6 +389,8 @@ void * PlayController::readFrame(void *context){
                 }
                 controller->displayer->serial++;
                 controller->displayer->filterTime = controller->seekPos;
+                //seek之后，从新的地方开始读取，不确定是否结束；如果还是结束，等再次遇到AVERROR_EOF错误还会重新标记，这里先重置
+                controller->displayer->checkingEnd = false;
             }
             controller->seeking = false;
             controller->seekingEndNotify(controller);
@@ -394,9 +402,12 @@ void * PlayController::readFrame(void *context){
         
         if(retval < 0){
             if (retval == AVERROR_EOF) {
-                endFile = true;
-                controller->startCheckPlayFinish();
+                controller->displayer->checkingEnd = true;
+                
+                av_packet_free(&packet);
                 av_usleep(100); //等下之后的处理，可能还会继续seek
+                TFMPDLOG_C("end of file\n");
+                continue;
             }else{
                 av_packet_free(&packet);
                 continue;
@@ -405,76 +416,19 @@ void * PlayController::readFrame(void *context){
         
         if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_VIDEO) &&
             packet->stream_index == controller->videoStrem) {
-            myStateObserver.mark("read_frame", 4);
-            controller->videoDecoder->insertPacket(packet);
-            TFMPDLOG_C("[read] %.6f, %d\n",packet->pts*av_q2d(controller->videoDecoder->timebase), controller->videoDecoder->serial);
             
+            controller->videoDecoder->insertPacket(packet);
+           
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_AUDIO) &&
                   packet->stream_index == controller->audioStream){
-            myStateObserver.mark("read_frame", 5);
-            controller->audioDecoder->insertPacket(packet);
             
+            controller->audioDecoder->insertPacket(packet);
             
         }else if ((controller->realDisplayMediaType & TFMP_MEDIA_TYPE_SUBTITLE) &&
                   packet->stream_index == controller->subTitleStream){
-            myStateObserver.mark("read_frame", 6);
             controller->subtitleDecoder->insertPacket(packet);
         }
-        
-        myStateObserver.timeMark("read frame time");
-        
-    }
-    
-    TFMPCondSignal(controller->waitLoopCond, controller->waitLoopMutex);
-    
-    return 0;
-}
-
-/** file has reach the end, if the data in packet buffer and frame buffer are used, all resources is showed then now it's need to stop.*/
-void PlayController::startCheckPlayFinish(){
-    
-    //start to observe frame buffer's size. When the size is less than 1, in other words the buffer is empty, it's really time when video stops.
-    if (!checkingEnd) {
-        checkingEnd = true;
-    }
-}
-
-void *PlayController::signalPlayFinished(void *context){
-    
-    PlayController *controller = (PlayController *)context;
-    if (controller->playStoped) {
-        controller->playStoped(controller, 0);
     }
     
     return 0;
-}
-
-#pragma mark -
-
-
-bool tfmpcore::videoFrameSizeNotified(RecycleBuffer<TFMPFrame *> *buffer, int curSize, bool isGreater,void *observer){
-    
-    PlayController *controller = (PlayController *)observer;
-    
-    if (curSize <= bufferEmptySize) {
-        
-        if (controller->checkingEnd){
-            TFMPCondSignal(controller->read_cond, controller->read_mutex);
-            
-            pthread_create(&controller->signalThread, nullptr, PlayController::signalPlayFinished, controller);
-            pthread_detach(controller->signalThread);
-        }else{
-            //buffer has ran out.We must stop playing until buffer is full again.
-            if (controller->bufferingStateChanged) {
-                controller->bufferingStateChanged(controller, true);
-            }
-        }
-
-    }else if (curSize >= playResumeSize){
-        
-        controller->bufferDone();
-        
-    }
-
-    return false;
 }

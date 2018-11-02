@@ -25,6 +25,12 @@ typedef enum{
     TFMP_SYNC_CLOCK_MAJOR_OTHER
 } TFMPSyncClockMajor;
 
+typedef enum{
+    TFMP_STOP_REASON_ERROR = -1,
+    TFMP_STOP_REASON_END_OF_FILE,
+    TFMP_STOP_REASON_USER_STOP,
+}TFMPStopReason;
+
 /** video */
 
 typedef enum{

@@ -77,6 +77,8 @@ namespace tfmpcore {
         void stopDecode();
         
         void insertPacket(AVPacket *packet);
+        
+        bool isEmpty();
     };
 }
 
