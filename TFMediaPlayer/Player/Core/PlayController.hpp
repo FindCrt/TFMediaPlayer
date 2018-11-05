@@ -40,11 +40,7 @@ namespace tfmpcore {
         int audioStream = -1;
         int subTitleStream = -1;
         
-#if EnableVTBDecode
-        VTBDecoder *videoDecoder = nullptr;
-#else
         Decoder *videoDecoder = nullptr;
-#endif
         Decoder *audioDecoder = nullptr;
         Decoder *subtitleDecoder = nullptr;
         
@@ -96,6 +92,14 @@ namespace tfmpcore {
         ~PlayController(){
             stop();
             delete displayer;
+        }
+        
+        void setVideoDecoder(Decoder *decoder){
+            videoDecoder = decoder;
+        }
+        
+        void setAudioDecoder(Decoder *decoder){
+            audioDecoder = decoder;
         }
         
         /** controls **/

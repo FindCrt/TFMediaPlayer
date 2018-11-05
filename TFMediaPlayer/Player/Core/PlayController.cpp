@@ -11,6 +11,7 @@
 #include "TFMPUtilities.h"
 #include "FFmpegInternalDebug.h"
 #include "TFStateObserver.hpp"
+#include "FFmpegDecoder.hpp"
 
 using namespace tfmpcore;
 
@@ -43,20 +44,21 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
         
         AVMediaType type = fmtCtx->streams[i]->codecpar->codec_type;
         if (type == AVMEDIA_TYPE_VIDEO) {
-#if EnableVTBDecode
-            videoDecoder = new VTBDecoder(fmtCtx, i, type);
-#else
-            videoDecoder = new Decoder(fmtCtx, i, type);
-#endif
+            if (!videoDecoder) {
+                videoDecoder = new FFmpegDecoder();
+            }
+            videoDecoder->init(fmtCtx, i, type);
             videoDecoder->name = "videoDecoder";
             videoDecoder->timebase = fmtCtx->streams[i]->time_base;
             videoStrem = i;
         }else if (type == AVMEDIA_TYPE_AUDIO){
-            audioDecoder = new Decoder(fmtCtx, i, type);
+            audioDecoder = new FFmpegDecoder();
+            audioDecoder->init(fmtCtx, i, type);
             audioDecoder->name = "audioDecoder";
             audioStream = i;
         }else if (type == AVMEDIA_TYPE_SUBTITLE){
-            subtitleDecoder = new Decoder(fmtCtx, i, type);
+            subtitleDecoder = new FFmpegDecoder();
+            subtitleDecoder->init(fmtCtx, i, type);
             subTitleStream = i;
         }
     }

@@ -26,8 +26,9 @@ namespace tfmpcore {
     
     class Decoder{
         
+    protected:
         AVFormatContext *fmtCtx;
-        int steamIndex;
+        int streamIndex;
         
         AVCodecContext *codecCtx;
         
@@ -35,7 +36,6 @@ namespace tfmpcore {
         RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(30, true);
         
         pthread_t decodeThread;
-        static void *decodeLoop(void *context);
         
         bool shouldDecode = false;
         
@@ -54,8 +54,7 @@ namespace tfmpcore {
             *tfmpFrameP = nullptr;
         }
         
-        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
-        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, int serial);
+        void *(*decodeLoopFunc)(void *context);
         
     public:
 #if DEBUG
@@ -64,7 +63,11 @@ namespace tfmpcore {
 #endif
         
         AVMediaType type;
-        Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
+        void init(AVFormatContext *fmtCtx, int streamIndex, AVMediaType type){
+            this->fmtCtx = fmtCtx;
+            this->streamIndex = streamIndex;
+            this->type = type;
+        };
         
         RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
@@ -72,11 +75,11 @@ namespace tfmpcore {
         
         int serial = 0;
         
-        bool prepareDecode();
-        void startDecode();
-        void stopDecode();
+        virtual bool prepareDecode();
+        virtual void startDecode();
+        virtual void stopDecode();
         
-        void insertPacket(AVPacket *packet);
+        virtual void insertPacket(AVPacket *packet);
         
         bool isEmpty();
     };

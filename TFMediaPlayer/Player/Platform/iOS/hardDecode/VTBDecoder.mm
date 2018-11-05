@@ -14,6 +14,30 @@ using namespace tfmpcore;
 
 #pragma mark -
 
+inline static void freePacket(AVPacket **pkt){
+    av_packet_free(pkt);
+}
+
+inline static void freeFrame(TFMPFrame **frameP){
+    TFMPFrame *frame = *frameP;
+    
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->displayBuffer->opaque;
+    CVPixelBufferRelease(pixelBuffer);
+    
+    delete frame->displayBuffer;
+    
+    delete frame;
+    *frameP = nullptr;
+}
+
+inline static int frameCompare(TFMPFrame *&frame1, TFMPFrame *&frame2){
+    if (frame1->pts < frame2->pts) {
+        return -1;
+    }else{
+        return 1;
+    }
+}
+
 TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer){
     
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
@@ -68,25 +92,28 @@ static void CFDictionarySetData(CFMutableDictionaryRef dict, CFStringRef key, ui
 
 void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,void * CM_NULLABLE sourceFrameRefCon,OSStatus status,VTDecodeInfoFlags infoFlags,CM_NULLABLE CVImageBufferRef imageBuffer,CMTime presentationTimeStamp,CMTime presentationDuration ){
     
-    
+    TFMPPacket *packet = (TFMPPacket*)sourceFrameRefCon;
     if (status != 0) {
+        av_packet_free(&(packet->pkt));
+        delete packet;
         return;
     }
     
     VTBDecoder *decoder = (VTBDecoder *)decompressionOutputRefCon;
     
     if (decoder->shouldDecode) {
-        AVPacket *pkt = (AVPacket*)sourceFrameRefCon;
-        
         TFMPFrame *tfmpFrame = new TFMPFrame();
-        tfmpFrame->serial = decoder->serial;
+        tfmpFrame->serial = packet->serial;  //直接从packet继承serial,那么一定不会错
         tfmpFrame->type = TFMPFrameTypeVTBVideo;
-        tfmpFrame->pts = pkt->pts;
+        tfmpFrame->pts = packet->pkt->pts;
         tfmpFrame->freeFrameFunc = VTBDecoder::freeFrame;
         tfmpFrame->displayBuffer = VTBDecoder::displayBufferFromPixelBuffer(imageBuffer);
         
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }
+    
+    av_packet_free(&(packet->pkt));
+    delete packet;
 }
 
 #pragma mark -
@@ -138,9 +165,11 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(CMVideoCodecT
         return NULL;
 }
 
+#pragma mark -
+
 bool VTBDecoder::prepareDecode(){
     
-    AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[steamIndex]->codecpar->codec_id);
+    AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[streamIndex]->codecpar->codec_id);
     if (codec == nullptr) {
         printf("find codec type: %d error\n",type);
         return false;
@@ -152,9 +181,9 @@ bool VTBDecoder::prepareDecode(){
         return false;
     }
     
-    avcodec_parameters_to_context(codecCtx, fmtCtx->streams[steamIndex]->codecpar);
+    avcodec_parameters_to_context(codecCtx, fmtCtx->streams[streamIndex]->codecpar);
     
-    AVCodecParameters *codecpar = fmtCtx->streams[steamIndex]->codecpar;
+    AVCodecParameters *codecpar = fmtCtx->streams[streamIndex]->codecpar;
     uint8_t *extradata = codecpar->extradata;
     
     if (extradata[0] == 1) {
@@ -177,7 +206,7 @@ bool VTBDecoder::prepareDecode(){
     
     VTDecompressionOutputCallbackRecord callback = {decodeCallback, this};
     
-    VTDecompressionSessionCreate(
+    OSStatus status = VTDecompressionSessionCreate(
                                   kCFAllocatorDefault,
                                   _videoFmtDesc,
                                   NULL,
@@ -185,7 +214,7 @@ bool VTBDecoder::prepareDecode(){
                                   &callback,
                                   &_decodeSession);
     
-    shouldDecode = true;
+    shouldDecode = status == 0 && _decodeSession;
     
 #if DEBUG
     if (type == AVMEDIA_TYPE_AUDIO) {
@@ -207,77 +236,41 @@ bool VTBDecoder::prepareDecode(){
     return true;
 }
 
-void VTBDecoder::startDecode(){
-    pthread_create(&decodeThread, NULL, decodeLoop, this);
-    pthread_detach(decodeThread);
-}
-
-void VTBDecoder::stopDecode(){
-    shouldDecode = false;
-}
-
 void *VTBDecoder::decodeLoop(void *context){
+    
     VTBDecoder *decoder = (VTBDecoder *)context;
     
-    decoder->isDecoding = true;
-    
-    AVPacket *pkt = nullptr;
-    
-    string name = decoder->name;
+    TFMPPacket *packet;
     while (decoder->shouldDecode) {
+        do {
+            packet = new TFMPPacket(0, nullptr);
+            decoder->pktBuffer.blockGetOut(packet);
+            if (packet->pkt == nullptr) {
+                delete packet;
+                break;
+            };
+        } while (packet->serial != decoder->serial);
         
-        if (decoder->pause) {
-            
-            decoder->isDecoding = false;
-            TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
-            
-            
-            pthread_mutex_lock(&decoder->pauseMutex);
-            if (decoder->pause) {
-                
-                pthread_cond_wait(&decoder->pauseCond, &decoder->pauseMutex);
-            }else{
-                
-            }
-            pthread_mutex_unlock(&decoder->pauseMutex);
-            decoder->isDecoding = true;
+        if (packet) {
+            decoder->decodePacket(packet);
         }
-        
-        pkt = nullptr;
-        
-        decoder->pktBuffer.blockGetOut(&pkt);
-        
-        if (pkt == nullptr) continue;
-        
-        
-        if (decoder->_decodeSession) {
-            decoder->decodePacket(pkt);
-        }
-        
-        if (pkt != nullptr)  av_packet_free(&pkt);
     }
-    
-    
-    decoder->isDecoding = false;
-    TFMPCondSignal(decoder->waitLoopCond, decoder->waitLoopMutex);
-    
     return 0;
 }
 
-void VTBDecoder::decodePacket(AVPacket *pkt){
+void VTBDecoder::decodePacket(TFMPPacket *packet){
+    
+    AVPacket *pkt = packet->pkt;
+    
     int size = pkt->size;
     CMBlockBufferRef buffer = NULL;
     OSStatus status = CMBlockBufferCreateWithMemoryBlock(NULL, pkt->data, size, kCFAllocatorNull, NULL, 0, size, 0, &buffer);
     if (status) {
         TFMPDLOG_C("create block buffer error!");
+        av_packet_free(&(packet->pkt));
+        delete packet;
         return;
     }
-    
-//    uint32_t len = CFSwapInt32BigToHost((uint32_t)size-4);
-//    status = CMBlockBufferReplaceDataBytes(&len, buffer, 0, 4);
-//    if (status != 0) {
-//        TFMPDLOG_C("replace buffer header error!");
-//    }
     
     CMSampleBufferRef sample = NULL;
     //    const size_t sampleSize[] = {size};
@@ -287,109 +280,25 @@ void VTBDecoder::decodePacket(AVPacket *pkt){
                                   _videoFmtDesc,
                                   1,0,NULL, 0, NULL, &sample);
     if (status || sample == nil) {
-        TFMPDLOG_C("create sample buffer error!");
+        av_packet_free(&(packet->pkt));
+        delete packet;
         return;
     }
     VTDecodeInfoFlags outFlags;
-    status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, pkt, &outFlags);
+    status = VTDecompressionSessionDecodeFrame(_decodeSession, sample, 0, packet, &outFlags);
     if (status) {
         TFMPDLOG_C("decode frame error: %d",status);
     }
 }
 
-void VTBDecoder::insertPacket(AVPacket *packet){
+void VTBDecoder::stopDecode(){
+    Decoder::stopDecode();
     
-    AVPacket *refPkt = av_packet_alloc();
-    av_packet_ref(refPkt, packet);
+    //释放vtb相关资源
+    VTDecompressionSessionInvalidate(_decodeSession);
+    CFRelease(_decodeSession);
     
-    pktBuffer.blockInsert(refPkt);
-    
-    
+    CFRelease(_videoFmtDesc);
 }
-
-void VTBDecoder::activeBlock(bool flag){
-    pktBuffer.disableIO(!flag);
-    frameBuffer.disableIO(!flag);
-}
-
-void VTBDecoder::flush(){
-    
-    string stateName = name+" flush";
-    
-    //1. prevent from starting next decode loop
-    pause = true;
-    
-    //2. disable buffer's in and out to invalid the frame or packet in current loop.
-    
-    pktBuffer.disableIO(true);
-    frameBuffer.disableIO(true);
-    
-    
-    //3. wait for the end of current loop
-    pthread_mutex_lock(&waitLoopMutex);
-    if (isDecoding) {
-        
-        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-    }else{
-        
-    }
-    pthread_mutex_unlock(&waitLoopMutex);
-    
-    
-    //4. flush all reserved buffers
-    pktBuffer.flush();
-    
-    frameBuffer.flush();
-    
-    
-    //5. flush FFMpeg's buffer.
-    //If dont'f call this, there are some new packets which contains old frames.
-    flushContext();
-    
-    
-    //6. resume the decode loop
-    pktBuffer.disableIO(false);
-    frameBuffer.disableIO(false);
-    
-    pause = false;
-    
-    TFMPCondSignal(pauseCond, pauseMutex);
-    
-}
-
-void VTBDecoder::flushContext(){
-    
-}
-
-bool VTBDecoder::bufferIsEmpty(){
-    return pktBuffer.isEmpty() && frameBuffer.isEmpty();
-}
-
-void VTBDecoder::freeResources(){
-    shouldDecode = false;
-    
-    //2. disable buffer's in and out to invalid the frame or packet in current loop.
-    pktBuffer.disableIO(true);
-    frameBuffer.disableIO(true);
-    //3. wait for the end of current loop
-    
-    pthread_mutex_lock(&waitLoopMutex);
-    if (isDecoding) {
-        pthread_cond_wait(&waitLoopCond, &waitLoopMutex);
-        
-    }else{
-        
-    }
-    pthread_mutex_unlock(&waitLoopMutex);
-    
-    //4. flush all reserved buffers
-    pktBuffer.flush();
-    frameBuffer.flush();
-    
-    flushContext();
-}
-
-
-#pragma mark -
 
 

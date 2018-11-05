@@ -14,6 +14,7 @@
 #import "UIDevice+ForceChangeOrientation.h"
 #import "TFMPPlayControlView.h"
 #import "TFMPPlayCmdResolver.h"
+#import "VTBDecoder.h"
 
 #if TFMPUseAudioUnitPlayer
 #import "TFAudioUnitPlayer.h"
@@ -55,7 +56,13 @@
 @implementation TFMediaPlayer
 
 -(instancetype)init{
+    return [self initWithParams:nil];
+}
+
+-(instancetype)initWithParams:(NSDictionary *)params{
     if (self = [super init]) {
+        
+        [self setValuesForKeysWithDictionary:params];
         
         _displayView = [[TFOPGLESDisplayView alloc] init];
         
@@ -66,6 +73,11 @@
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
         _playController->clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
+//        _playController->accurateSeek = false;
+        
+        if (_activeVTB) {
+            _playController->setVideoDecoder(new tfmpcore::VTBDecoder());
+        }
         
         _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
             

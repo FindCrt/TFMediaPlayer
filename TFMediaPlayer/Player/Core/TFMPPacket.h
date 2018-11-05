@@ -17,6 +17,12 @@ namespace tfmpcore {
     struct TFMPPacket{
         int serial;
         AVPacket *pkt;
+        
+        TFMPPacket(){
+            serial = 0;
+            pkt = nullptr;
+        };
+        TFMPPacket(int serial, AVPacket *pkt):serial(serial),pkt(pkt){};
     };
 }
 

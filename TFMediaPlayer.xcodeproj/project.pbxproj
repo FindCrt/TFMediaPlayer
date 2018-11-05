@@ -53,6 +53,7 @@
 		18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18706DC3215396EA009C21BE /* TFDebugStateShower.mm */; };
 		1870E462215C929F00EB1CD8 /* Wizard.h264 in Resources */ = {isa = PBXBuildFile; fileRef = 1870E461215C928400EB1CD8 /* Wizard.h264 */; };
 		18736736215DC88D0045E0D8 /* VTBDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18736734215DC88D0045E0D8 /* VTBDecoder.mm */; };
+		187B7CCA21903BFA00821D67 /* FFmpegDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */; };
 		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
 		18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */; };
 		18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */; };
@@ -163,6 +164,8 @@
 		18736734215DC88D0045E0D8 /* VTBDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VTBDecoder.mm; sourceTree = "<group>"; };
 		18736735215DC88D0045E0D8 /* VTBDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VTBDecoder.h; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
+		187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FFmpegDecoder.cpp; sourceTree = "<group>"; };
+		187B7CC921903BFA00821D67 /* FFmpegDecoder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FFmpegDecoder.hpp; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18887A0B215B26E700DD6BBA /* TFHardDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecoder.h; sourceTree = "<group>"; };
 		18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFHardDecoder.mm; sourceTree = "<group>"; };
@@ -614,6 +617,8 @@
 				18415A2F1FF61B90007095AC /* TFMPAVFormat.h */,
 				181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */,
 				1871CF562183044E00AC638F /* TFMPPacket.h */,
+				187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */,
+				187B7CC921903BFA00821D67 /* FFmpegDecoder.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1021,6 +1026,7 @@
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,
 				18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */,
+				187B7CCA21903BFA00821D67 /* FFmpegDecoder.cpp in Sources */,
 				18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */,
 				18415A2C1FF6130D007095AC /* TFGLView.m in Sources */,
 				18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */,
