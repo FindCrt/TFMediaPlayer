@@ -42,6 +42,11 @@ void DisplayController::startDisplay(){
     if (showVideo) {
         pthread_create(&dispalyThread, nullptr, displayLoop, this);
     }
+    
+#if DEBUG
+    audioClock->name = "audioClock";
+    videoClock->name = "videoClock";
+#endif
 }
 
 void DisplayController::stopDisplay(){
@@ -145,6 +150,8 @@ void *DisplayController::displayLoop(void *context){
             remainTime = displayer->averageVideoDu*2;
         }
         
+        TFMPDLOG_C("video remain: %.6f\n",remainTime);
+        
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
             continue;
@@ -154,7 +161,8 @@ void *DisplayController::displayLoop(void *context){
         
         TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
         displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
-        displayer->videoClock->updateTime(pts, displayer->serial);
+        //传入videoFrame的serial而不是displayer的是关键一步，保持clock和上次显示的frame的serial一致，和上面`getRemainTime`时的判断条件一致
+        displayer->videoClock->updateTime(pts, videoFrame->serial);
         
         videoFrame->freeFrameFunc(&videoFrame);
     }
@@ -179,6 +187,8 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
     }
     
     double startRealTime = (double)av_gettime_relative()/AV_TIME_BASE;
+    
+    TFMPDLOG_C("%.6f\n",startRealTime);
     
     TFMPRemainingBuffer *remainingBuffer = &(displayer->remainingAudioBuffers);
     uint32_t unreadSize = remainingBuffer->unreadSize();
@@ -254,9 +264,17 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
             }
             
             if (remainTime < -minExeTime){
-                TFMPDLOG_C("slow: %.6f\n",remainTime);
+                TFMPDLOG_C("slow: %.3f\n",remainTime);
                 audioFrame->freeFrameFunc(&audioFrame);
                 continue;
+            }else if (remainTime > 0.5){
+                //音频超前时不能直接阻塞线程，会导致播放不了（具体原因再看），插入空白数据段会更好，相当于一段静音
+                //但是这个静音的时长需要斟酌，太短如0.01s会破坏原本的音频，太长会有明显的卡顿
+                size_t slientSize = min((int)(bytesPerSec*remainTime), needReadSize);
+                memset(buffer+(oneLineSize - needReadSize), 0, slientSize);
+                needReadSize -= slientSize;
+                
+                unplayDelay += slientSize/bytesPerSec;
             }
             
             //当前内容的时间(pts)-未播的数据延迟(unplayDelay) = 刚播完的数据时间; 对应的现实时间传入方法刚调用的时间

@@ -169,15 +169,8 @@ void *Decoder::decodeLoop(void *context){
                 if (packet.pkt) av_packet_free(&(packet.pkt));
                 decoder->pktBuffer.blockGetOut(&packet);
                 if (packet.pkt == nullptr) break;
-                if (decoder->timebase.den) {
-                    TFMPDLOG_C("[%s]packet: %.6f, %d,%d\n",decoder->name.c_str(),packet.pkt->pts*av_q2d(decoder->timebase), packet.serial,decoder->serial);
-                }
             }
         } while (packet.serial != decoder->serial);
-        
-        if (decoder->timebase.den) {
-            decoder->pktBuffer.log();
-        }
         
         if (loopCount > 1) {  //经历serial变化的阶段，之前的packet不可用
             avcodec_flush_buffers(decoder->codecCtx);

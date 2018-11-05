@@ -65,6 +65,7 @@
         
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
+        _playController->clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
         
         _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
             
@@ -218,12 +219,11 @@
         return;
     }
     _state = state;
+    myStateObserver.mark("play state", state);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{TFMPStateChangedKey:@(state)}];
     });
-    
-    
 }
 
 -(BOOL)isPlaying{
@@ -270,7 +270,9 @@
         _playController->setDesiredDisplayMediaType(_mediaType);
     }
     
-    self.stopedView.hidden = YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.stopedView.hidden = YES;
+    });
     
     if (self.state == TFMediaPlayerStateNone ||
         self.state == TFMediaPlayerStateStoped) {

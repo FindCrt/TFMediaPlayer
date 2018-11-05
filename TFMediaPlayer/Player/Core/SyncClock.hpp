@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string>
 
 namespace tfmpcore {
     class SyncClock{
@@ -20,6 +21,9 @@ namespace tfmpcore {
         double mediaTime = 0;
         
     public:
+#if DEBUG
+        std::string name;
+#endif
         int serial = 0;
         bool paused = false;
         

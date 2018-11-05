@@ -36,6 +36,8 @@ void SyncClock::updateTime(double time, int serial, double realTime){
         realTime = (double)av_gettime_relative()/AV_TIME_BASE;
     }
     realDiff = realTime-mediaTime;
+    
+    myStateObserver.labelMark(name, to_string(mediaTime));
 }
 
 double SyncClock::getRemainTime(double pts){
