@@ -112,6 +112,9 @@ bool PlayController::connectAndOpenMedia(std::string mediaPath){
     displayer->encounterEndContext = this;
     displayer->encounterEndCallBack = checkEnd;
     
+    displayer->newFrameContext = this;
+    displayer->newFrameCallBack = seekEnd;
+    
     duration = fmtCtx->duration/(double)AV_TIME_BASE;
     
     prapareOK = true;
@@ -138,9 +141,8 @@ void PlayController::play(){
         return;
     }
     printf("start Play: %s\n",mediaPath.c_str());
-    readable = true;
     
-    startReadingFrames();
+    pthread_create(&readThread, nullptr, readFrame, this);
     if (videoDecoder) {
         videoDecoder->startDecode();
     }
@@ -157,15 +159,10 @@ void PlayController::play(){
 
 void PlayController::pause(bool flag){
     
-    if (flag) {
-        markTime = getCurrentTime();
-    }
-    
     paused = flag;
     
     //just change state of displaying, don't change state of reading.
     displayer->pause(flag);
-    //TODO: resume readable if paused is false.
 }
 
 void PlayController::stop(){
@@ -224,7 +221,6 @@ void PlayController::seekTo(double time){
         time = duration-0.1;
     }
     
-    markTime = time;
     seekPos = time;
     seeking = true;
     
@@ -236,6 +232,13 @@ void PlayController::seekByForward(double interval){
     
     double seekTime = currentTime + interval;
     seekTo(seekTime);
+}
+
+void PlayController::seekEnd(void *context){
+    PlayController *controller = (PlayController *)context;
+    
+    controller->seeking = false;
+    if (controller->seekingEndNotify) controller->seekingEndNotify(controller);
 }
 
 bool PlayController::checkEnd(void *context){
@@ -259,12 +262,7 @@ bool PlayController::checkEnd(void *context){
     return flag;
 }
 
-void PlayController::bufferDone(){
-    
-    if (bufferingStateChanged) {
-        bufferingStateChanged(this, false);
-    }
-}
+
 
 void PlayController::resetStatus(){
     desiredDisplayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
@@ -275,9 +273,7 @@ void PlayController::resetStatus(){
     subTitleStream = -1;
     
     abortRequest = false;
-    readable = false;
     seeking = false;
-    markTime = 0;
     prapareOK = false;
 }
 
@@ -297,8 +293,8 @@ double PlayController::getDuration(){
 double PlayController::getCurrentTime(){
     
     double playTime = displayer->getPlayTime();
-    if (seeking || paused || playTime < 0) {  //invalid time
-        playTime = markTime;
+    if (seeking || playTime < 0) {
+        playTime = seekPos;
     }
     
     return fmin(fmax(playTime, 0), duration);
@@ -366,10 +362,6 @@ void PlayController::resolveAudioStreamFormat(){
     displayer->setAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
 }
 
-void PlayController::startReadingFrames(){
-    pthread_create(&readThread, nullptr, readFrame, this);
-}
-
 void * PlayController::readFrame(void *context){
     
     PlayController *controller = (PlayController *)context;
@@ -389,12 +381,17 @@ void * PlayController::readFrame(void *context){
                     controller->videoDecoder->serial++;
                 }
                 controller->displayer->serial++;
-                controller->displayer->filterTime = controller->seekPos;
+                
+                if (controller->accurateSeek){
+                    controller->displayer->filterTime = controller->seekPos;
+                }else{
+                    controller->displayer->filterTime = 0;
+                }
                 //seek之后，从新的地方开始读取，不确定是否结束；如果还是结束，等再次遇到AVERROR_EOF错误还会重新标记，这里先重置
                 controller->displayer->checkingEnd = false;
             }
             controller->seeking = false;
-            controller->seekingEndNotify(controller);
+//            controller->seekingEndNotify(controller);
             controller->pause(false);
         }
         

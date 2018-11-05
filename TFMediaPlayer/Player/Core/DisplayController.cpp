@@ -79,12 +79,15 @@ void DisplayController::pause(bool flag){
     }
     
     paused = flag;
-    videoClock->paused = flag;
-    audioClock->paused = flag;
     
     if (!paused) {
+        videoClock->updateDiff();
+        audioClock->updateDiff();
         TFMPCondSignal(video_pause_cond, video_pause_mutex)
     }
+    
+    videoClock->paused = flag;
+    audioClock->paused = flag;
 }
 
 double DisplayController::getPlayTime(){
@@ -143,6 +146,11 @@ void *DisplayController::displayLoop(void *context){
         double remainTime = 0;
         if (videoFrame->serial == majorClock->serial) {
             remainTime = majorClock->getRemainTime(pts);
+        }
+        
+        if (videoFrame->serial != displayer->videoClock->serial) {
+            //新旧frame的临界点,表明seek正式结束
+            displayer->newFrameCallBack(displayer->newFrameContext);
         }
         
         if (remainTime>maxRemainTime) {

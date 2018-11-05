@@ -32,6 +32,8 @@ namespace tfmpcore {
         
         /** 更新这个同步钟的媒体时间，serial作为seek的标记 */
         void updateTime(double time, int serial, double updateTime = -1);
+        /** 媒体时间没变，显示时间变了，更新两者的关系 */
+        void updateDiff();
         
         /** 传入的pts需要多久才可以播 */
         double getRemainTime(double pts);

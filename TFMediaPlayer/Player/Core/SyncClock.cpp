@@ -40,6 +40,10 @@ void SyncClock::updateTime(double time, int serial, double realTime){
     myStateObserver.labelMark(name, to_string(mediaTime));
 }
 
+void SyncClock::updateDiff(){
+    updateTime(getTime(), serial);
+}
+
 double SyncClock::getRemainTime(double pts){
     return pts-getTime();
 }

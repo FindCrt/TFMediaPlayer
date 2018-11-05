@@ -116,6 +116,10 @@ namespace tfmpcore {
         };
         double getPlayTime();
         
+        //碰到seek后的第一个新的frame时回调
+        void *newFrameContext;
+        void (*newFrameCallBack)(void *context);
+        
         bool checkingEnd = false;
     };
 }

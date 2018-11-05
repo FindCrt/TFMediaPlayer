@@ -30,15 +30,11 @@ namespace tfmpcore {
     
     typedef int (*FillAudioBufferFunc)(void *buffer, int64_t size, void *context);
     
-    static int playResumeSize = 20;
-    static int bufferEmptySize = 1;
-    
     class PlayController{
         
         std::string mediaPath;
         
         AVFormatContext *fmtCtx;
-        AVPacket packet;
         
         int videoStrem = -1;
         int audioStream = -1;
@@ -72,25 +68,18 @@ namespace tfmpcore {
         void setupSyncClock();
         
         //1. start
-        void startReadingFrames();
         pthread_t readThread;
         static void * readFrame(void *context);
         
         //2. pause and resume
         bool paused = false;   //It's order from outerside, not state of player. In other word, it's a mark.
-        bool readable = false;  //It's ability to read.
-        pthread_cond_t read_cond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t read_mutex = PTHREAD_MUTEX_INITIALIZER;
-        //Stop playing and start buffering when buffer is empty or seeking. This func'll be called when buffer is full again.
-        void bufferDone();
         
         //3. stop
         bool abortRequest = false;
         static bool checkEnd(void *context);
         
         //5. seek
-        pthread_t seekThread;
-        static void * seekOperation(void *context);
+        static void seekEnd(void *context);
         /**
          * The state of seeking.
          * It becomes true when the user drags the progressBar and loose fingers.
@@ -98,12 +87,9 @@ namespace tfmpcore {
          */
         bool seeking = false;
         double seekPos = 0;
-        double markTime = 0;  //The media time that seek to or start to pause.
         
         //6. free
         void resetStatus();
-        pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
 
     public:
         
@@ -111,8 +97,6 @@ namespace tfmpcore {
             stop();
             delete displayer;
         }
-        
-        friend void frameEmpty(Decoder *decoder, void* context);
         
         /** controls **/
         
@@ -130,6 +114,7 @@ namespace tfmpcore {
         void pause(bool flag);
         void stop();  //大概率阻塞线程，注意在非主线程调用
         
+        bool accurateSeek = true;
         void seekTo(double time);
         void seekByForward(double interval);
         std::function<void(PlayController*)>seekingEndNotify;
