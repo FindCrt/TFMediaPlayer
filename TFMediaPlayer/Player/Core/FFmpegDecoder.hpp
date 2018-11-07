@@ -18,10 +18,21 @@ namespace tfmpcore{
         static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
         static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, int serial);
         
+        inline static void freeFrame(TFMPFrame **tfmpFrameP){
+            TFMPFrame *tfmpFrame = *tfmpFrameP;
+            av_frame_free(&(tfmpFrame->frame));
+            
+            delete tfmpFrame->displayBuffer;
+            
+            delete tfmpFrame;
+            *tfmpFrameP = nullptr;
+        }
+        
     public:
         FFmpegDecoder(){
             decodeLoopFunc = decodeLoop;
         }
+        virtual bool prepareDecode();
         static void *decodeLoop(void *context);
     };
 }

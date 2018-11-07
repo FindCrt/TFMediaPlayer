@@ -163,13 +163,13 @@
 static int mediaIndex = 0;
 -(void)switchMediaSource{
     
-    NSURL *videoURL1 = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
-    NSURL *videoURL2 = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
-    NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"无心法师" withExtension:@"mp4"];
-
+//    NSURL *videoURL1 = [[NSBundle mainBundle] URLForResource:@"game" withExtension:@"mp4"];
+//    NSURL *videoURL2 = [[NSBundle mainBundle] URLForResource:@"cocosvideo" withExtension:@"mp4"];
+//    NSURL *videoURL3 = [[NSBundle mainBundle] URLForResource:@"无心法师" withExtension:@"mp4"];
+//
     NSURL *videoURL4 = [[NSBundle mainBundle] URLForResource:@"111" withExtension:@"mp3"];
-
-    NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"ninja" withExtension:@"mp4"];
+//
+//    NSURL *videoURL5 = [[NSBundle mainBundle] URLForResource:@"ninja" withExtension:@"mp4"];
     
     NSArray *mediaSources = @[videoURL4];
     

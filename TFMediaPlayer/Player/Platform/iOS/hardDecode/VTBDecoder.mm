@@ -14,30 +14,6 @@ using namespace tfmpcore;
 
 #pragma mark -
 
-inline static void freePacket(AVPacket **pkt){
-    av_packet_free(pkt);
-}
-
-inline static void freeFrame(TFMPFrame **frameP){
-    TFMPFrame *frame = *frameP;
-    
-    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->displayBuffer->opaque;
-    CVPixelBufferRelease(pixelBuffer);
-    
-    delete frame->displayBuffer;
-    
-    delete frame;
-    *frameP = nullptr;
-}
-
-inline static int frameCompare(TFMPFrame *&frame1, TFMPFrame *&frame2){
-    if (frame1->pts < frame2->pts) {
-        return -1;
-    }else{
-        return 1;
-    }
-}
-
 TFMPVideoFrameBuffer * VTBDecoder::displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer){
     
     TFMPVideoFrameBuffer *frame = new TFMPVideoFrameBuffer();
@@ -108,7 +84,8 @@ void VTBDecoder::decodeCallback(void * CM_NULLABLE decompressionOutputRefCon,voi
         tfmpFrame->pts = packet->pkt->pts;
         tfmpFrame->freeFrameFunc = VTBDecoder::freeFrame;
         tfmpFrame->displayBuffer = VTBDecoder::displayBufferFromPixelBuffer(imageBuffer);
-        
+
+        myStateObserver.mark("video gen", 1, true);
         decoder->frameBuffer.blockInsert(tfmpFrame);
     }
     
@@ -240,19 +217,25 @@ void *VTBDecoder::decodeLoop(void *context){
     
     VTBDecoder *decoder = (VTBDecoder *)context;
     
-    TFMPPacket *packet;
+    TFMPPacket *packet = nullptr;
     while (decoder->shouldDecode) {
         do {
+            if (packet) {
+                av_packet_free(&(packet->pkt));
+                delete packet;
+            }
             packet = new TFMPPacket(0, nullptr);
             decoder->pktBuffer.blockGetOut(packet);
             if (packet->pkt == nullptr) {
                 delete packet;
+                packet = nullptr;
                 break;
             };
         } while (packet->serial != decoder->serial);
         
         if (packet) {
             decoder->decodePacket(packet);
+            packet = nullptr;
         }
     }
     return 0;
@@ -261,14 +244,19 @@ void *VTBDecoder::decodeLoop(void *context){
 void VTBDecoder::decodePacket(TFMPPacket *packet){
     
     AVPacket *pkt = packet->pkt;
+    if (pkt == nullptr) {
+        return;
+    }
     
     int size = pkt->size;
     CMBlockBufferRef buffer = NULL;
     OSStatus status = CMBlockBufferCreateWithMemoryBlock(NULL, pkt->data, size, kCFAllocatorNull, NULL, 0, size, 0, &buffer);
+    
     if (status) {
         TFMPDLOG_C("create block buffer error!");
         av_packet_free(&(packet->pkt));
         delete packet;
+        CFRelease(buffer);
         return;
     }
     
@@ -279,6 +267,7 @@ void VTBDecoder::decodePacket(TFMPPacket *packet){
                                   true, 0, 0,
                                   _videoFmtDesc,
                                   1,0,NULL, 0, NULL, &sample);
+    CFRelease(buffer);
     if (status || sample == nil) {
         av_packet_free(&(packet->pkt));
         delete packet;
@@ -289,6 +278,7 @@ void VTBDecoder::decodePacket(TFMPPacket *packet){
     if (status) {
         TFMPDLOG_C("decode frame error: %d",status);
     }
+    CFRelease(sample);
 }
 
 void VTBDecoder::stopDecode(){

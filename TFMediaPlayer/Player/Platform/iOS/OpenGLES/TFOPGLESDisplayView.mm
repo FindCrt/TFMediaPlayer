@@ -335,10 +335,10 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
         pixelFormat = frameBuf->format;
         [self configRenderData];
     }
-    
+
     float width = frameBuf->width;
     float height = frameBuf->height;
-    
+
     //TODO: view mode must be runed on main thread
     if (width != _lastFrameSize.width || height != _lastFrameSize.height) {
         [self calculateContentFrame:CGSizeMake(width, height)];
@@ -365,7 +365,7 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     }
     
     [self rendering:frameBuf->format];
-    
+
     [EAGLContext setCurrentContext:preContex];
 }
 
@@ -375,7 +375,7 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
     _frameProgram->use();
-    
+
     if (format == TFMP_VIDEO_PIX_FMT_YUV420P) {
         useTexturesForProgram_YUV420P(_frameProgram, textures);
     }else if (format == TFMP_VIDEO_PIX_FMT_NV12 ||
@@ -394,10 +394,20 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
 -(void)dealloc{
     
     if (_renderConfiged) {
+        delete _frameProgram;
+        
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         
         glDeleteTextures(texturesCount, textures);
+        
+        if (CVTextureCache) {
+            for (int i = 0; i<2; i++) {
+                if (CVTextures[i]) CFRelease(CVTextures[i]);
+            }
+            CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
+            CFRelease(CVTextureCache);
+        }
     }
 }
 
@@ -459,11 +469,13 @@ inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, CVOpenGLESTextur
     
     CVReturn retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0, &CVTextures[0]);
     if (retval != kCVReturnSuccess) {
+        CFRelease(CVTextures[0]);
         NSLog(@"create luma texture error: %d",retval);
     }
     
     retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, width/2, height/2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 1, &CVTextures[1]);
     if (retval != kCVReturnSuccess) {
+        CFRelease(CVTextures[1]);
         NSLog(@"create chroma texture error: %d",retval);
     }
     

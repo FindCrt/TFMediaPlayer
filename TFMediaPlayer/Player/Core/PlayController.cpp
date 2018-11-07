@@ -246,18 +246,18 @@ void PlayController::seekEnd(void *context){
 bool PlayController::checkEnd(void *context){
     PlayController *controller = (PlayController *)context;
     
-    bool flag = false;
+    bool flag = true;
     if (controller->videoDecoder &&
-        controller->videoDecoder->isEmpty()) {
-        flag = true;
+        !controller->videoDecoder->isEmpty()) {
+        flag = false;
     }
     
     if (controller->audioDecoder &&
-        controller->audioDecoder->isEmpty()) {
-        flag = true;
+        !controller->audioDecoder->isEmpty()) {
+        flag = false;
     }
     
-    if (flag) {
+    if (flag && controller->playStoped) {
         controller->playStoped(controller, TFMP_STOP_REASON_END_OF_FILE);
     }
     
@@ -361,7 +361,11 @@ void PlayController::resolveAudioStreamFormat(){
     sourceDesc.ffmpeg_channel_layout = codecpar->channel_layout;
     
     //resample source audio to real-play audio format.
-    displayer->setAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
+    if (negotiateAdoptedPlayAudioDesc) {
+        displayer->setAudioDesc(negotiateAdoptedPlayAudioDesc(sourceDesc));
+    }else{
+        displayer->setAudioDesc(sourceDesc);
+    }
 }
 
 void * PlayController::readFrame(void *context){

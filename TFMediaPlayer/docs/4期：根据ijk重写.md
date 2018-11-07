@@ -18,3 +18,14 @@
 13. 在packetQueue很大时,还没播放结束，文件就已经读取完了，这时怎么处理播放？结束还是等待，如何等待以保证可以正确结束又可以再seek回去？结束+释放资源的问题还要重新处理。
 14. 音频播放的延迟在最开始的时候，上层播放器的缓冲区是空的，延迟是0，这个就不再是固定的而是变动的，但是完全按变动的来处理又损失太大，因为只有最开始的2-3次是不确定的，后面都是固定的。
 15. 将packet的serial传给frame,将frame的serial传给clock，这样就完全不用害怕多线程的问题了；前一步保证frame的serial一定是正确的，后一步保证不会使用错误的clock。**这一点真的是神器**
+16. 内存管理：进来不播每次增长0.5M，播了在VTBSession那里增加0.3M。
+17. `TFMediaPlayer`对象没释放,一开始的问题是playerController的lambda函数捕获引用了self,去掉后，进入页面不播放就可以释放了
+18. 进入页面如果播放了，`TFMediaPlayer `还是没释放，最后找到`VTDecompressionSessionDecodeFrame`调用就不释放，不调用才会释放。完全看不出这两者之间的关系。而且跟解码回调函数无关。
+19. 虽然不知道`VTDecompressionSessionDecodeFrame `是怎么影响结果的，但实际问题是stop的时候，在display loop里卡在了从frame缓冲区里取出据的那一步里，因为缓冲区空了。然后stop没有返回，导致self被GCD的block引用住，从而没有释放。
+20. 也是神奇bug，终于明白为什么关闭硬解码会影响结果：
+ 
+  * 关闭硬解码，视频处理速度非常快，一下就到底了，video loop会再第一次就卡在blockOut那里，因为一个frame都没有。在decoder stop的时候，会释放缓冲区的IO锁，这个时候video loop就会解开。
+  * 在循环会来时，`checkingEnd`为true，且frame buffer都清空了，这时video loop就退出了。所以不会卡顿。
+  * 而开启了解码，哪怕没有回调，速度也会变慢，所以退出的时候，文件还没读取结束，`checkingEnd`为NO,所以video loop还不会退出，在decode stop的时候，把frame buffer flush掉了，这时video loop就会进入blockGetOut的卡顿。最后结束不掉。
+
+  总结：**我们看到一个东西匪夷所思的影响了另一个东西，很可能是因为这个东西要影响了第三者，第三者变化再转回来我们看到的结果，甚至可能有第4者、第5者，有一个长长的影响链。在这些东西里，有些是真的原因，有些只是绊脚石罢了。绊脚石不需要被修正，但它却可以帮助我们找到真的原因**

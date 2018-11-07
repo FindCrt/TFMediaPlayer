@@ -40,6 +40,28 @@ namespace tfmpcore {
         
         static TFMPVideoFrameBuffer *displayBufferFromPixelBuffer(CVPixelBufferRef pixelBuffer);
         
+        inline static void freeFrame(TFMPFrame **frameP){
+            TFMPFrame *frame = *frameP;
+            
+            CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)frame->displayBuffer->opaque;
+            CVPixelBufferRelease(pixelBuffer);
+            
+            delete frame->displayBuffer;
+            
+            delete frame;
+            *frameP = nullptr;
+            
+            myStateObserver.mark("video free", 1, true);
+        }
+        
+        inline static int frameCompare(TFMPFrame *&frame1, TFMPFrame *&frame2){
+            if (frame1->pts < frame2->pts) {
+                return -1;
+            }else{
+                return 1;
+            }
+        }
+        
     public:
         VTBDecoder(){
             decodeLoopFunc = decodeLoop;

@@ -72,20 +72,23 @@
         
         _playController->displayContext = (__bridge void *)self;
         _playController->displayVideoFrame = displayVideoFrame_iOS;
-        _playController->clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
+//        _playController->clockMajor = TFMP_SYNC_CLOCK_MAJOR_VIDEO;
 //        _playController->accurateSeek = false;
         
         if (_activeVTB) {
             _playController->setVideoDecoder(new tfmpcore::VTBDecoder());
         }
-        
-        _playController->playStoped = [self](tfmpcore::PlayController *playController, int reason){
-            
+
+        __weak typeof(self) weakSelf = self;
+        _playController->playStoped = [weakSelf](tfmpcore::PlayController *playController, int reason){
+
+            __strong typeof(weakSelf) self = weakSelf;
+
             if (reason == TFMP_STOP_REASON_END_OF_FILE && _state != TFMediaPlayerStateStoping) {
                 [self stop];
             }else if (reason == TFMP_STOP_REASON_USER_STOP && self.state == TFMediaPlayerStateStoping){
                 self.state = TFMediaPlayerStateStoped;
-                
+
                 if (_nextMedia) {  //a new media is waiting to play.
                     _mediaURL = _nextMedia;
                     _nextMedia = nil;
@@ -97,9 +100,9 @@
                 }
             }
         };
-        
-        _playController->seekingEndNotify = [self](tfmpcore::PlayController *playController){
-            
+
+        _playController->seekingEndNotify = [weakSelf](tfmpcore::PlayController *playController){
+            __strong typeof(weakSelf) self = weakSelf;
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (_pauseMarked) { //The user intent to don't play, so pause it.
                     self.state = TFMediaPlayerStatePaused;
@@ -108,16 +111,19 @@
                 }
             });
         };
-        
-        _playController->bufferingStateChanged = [self](tfmpcore::PlayController *playController, bool isBuffering){
+
+        _playController->bufferingStateChanged = [weakSelf](tfmpcore::PlayController *playController, bool isBuffering){
+//            __strong typeof(weakSelf) self = weakSelf;
 //            if (isBuffering) {
 //                [_audioPlayer pause];
 //            }else{
 //                [_audioPlayer play];
 //            }
         };
-        
-        _playController->negotiateAdoptedPlayAudioDesc = [self](TFMPAudioStreamDescription sourceDesc){
+
+        _playController->negotiateAdoptedPlayAudioDesc = [weakSelf](TFMPAudioStreamDescription sourceDesc){
+
+            __strong typeof(weakSelf) self = weakSelf;
 #if TFMPUseAudioUnitPlayer
             _audioPlayer = [[TFAudioUnitPlayer alloc] init];
             _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
@@ -127,11 +133,11 @@
             _audioPlayer = [[TFAudioQueueController alloc] initWithSpecifics:sourceDesc];
             _audioPlayer.shareAudioStruct = _shareAudioStruct;
             _audioPlayer.fillStruct = _playController->getFillAudioBufferStruct();
-            
+
             return _audioPlayer.resultSpecifics;
 #endif
         };
-        
+
         [self setupDefaultPlayControlView];
         self.stopedView = self.stopedView;
     }
@@ -142,13 +148,13 @@
 -(void)setupDefaultPlayControlView{
     _defaultControlView = [[TFMPPlayControlView alloc] init];
     _defaultControlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
+
     TFMPPlayCmdResolver *defaultPlayResolver = [[TFMPPlayCmdResolver alloc] init];
     defaultPlayResolver.player = self;
     _defaultControlView.delegate = defaultPlayResolver;
-    
+
     _defaultControlView.swipeSeekDuration = 15;
-    
+
     self.controlView = _defaultControlView;
 }
 
@@ -156,21 +162,21 @@
     if (_controlView == controlView) {
         return;
     }
-    
+
     if (_controlView) {
         [_controlView removeFromSuperview];
     }
-    
+
     _controlView = controlView;
     _controlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
+
     [self.displayView addSubview:_controlView];
 }
 
 -(void)setStopedView:(UIView *)stopedView{
     _stopedView = stopedView;
     _stopedView.hidden = YES;
-    
+
     [self.displayView insertSubview:_stopedView belowSubview:_controlView];
 }
 
@@ -182,10 +188,10 @@
         label.textColor = [UIColor redColor];
         label.textAlignment = NSTextAlignmentCenter;
         label.text = @"Game Over";
-        
+
         _stopedView = label;
     }
-    
+
     return _stopedView;
 }
 
@@ -198,10 +204,10 @@
         return;
     }
     
-//    if (_state != TFMediaPlayerStateNone &&
-//        _state != TFMediaPlayerStateStoped) {
-//        [self switchToNewMedia:mediaURL];
-//    }
+    if (_state != TFMediaPlayerStateNone &&
+        _state != TFMediaPlayerStateStoped) {
+        [self switchToNewMedia:mediaURL];
+    }
     
     _mediaURL = mediaURL;
 }
@@ -209,17 +215,6 @@
 -(void)setMediaType:(TFMPMediaType)mediaType{
     _mediaType = mediaType;
     _playController->setDesiredDisplayMediaType(mediaType);
-    
-    
-//    if ((_playController->getRealDisplayMediaType() & TFMP_MEDIA_TYPE_AUDIO)) {
-//        if (_audioPlayer.state == TFAudioQueueStateUnplay) {
-//            [_audioPlayer play];
-//        }
-//    }else{
-//        if (_audioPlayer.state == TFAudioQueueStatePlaying) {
-//            [_audioPlayer stop];
-//        }
-//    }
 }
 
 -(TFMPMediaType)mediaType{
@@ -232,7 +227,7 @@
     }
     _state = state;
     myStateObserver.mark("play state", state);
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:TFMPStateChangedNotification object:self userInfo:@{TFMPStateChangedKey:@(state)}];
     });
@@ -318,7 +313,7 @@
 -(void)pause{
     
     _pauseMarked = true;
-    
+
     switch (_state) {
         case TFMediaPlayerStateConnecting:
             //TODO: stop connecting
@@ -336,7 +331,7 @@
                 [_audioPlayer pause];
             }
             self.state = TFMediaPlayerStatePaused;
-            
+
             break;
         default:
             break;
@@ -347,7 +342,7 @@
 -(void)stop{
     
     [_audioPlayer stop];
-    
+
     switch (_state) {
         case TFMediaPlayerStateConnecting:
             _autoPlayWhenReady = false;
@@ -374,7 +369,7 @@
         default:
             break;
     }
-    
+
     _pauseMarked = false;
     self.state = TFMediaPlayerStateStoping;
 }
@@ -423,7 +418,7 @@
 
 int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
     TFMediaPlayer *player = (__bridge TFMediaPlayer *)context;
-    
+
     [player->_displayView displayFrameBuffer:frameBuf];
     return 0;
 }
@@ -449,7 +444,7 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
         _state == TFMediaPlayerStateStoped) {
         return;
     }
-    
+
     _playController->seekByForward(interval);
     self.state = TFMediaPlayerStateLoading;
 }
@@ -470,6 +465,11 @@ int displayVideoFrame_iOS(TFMPVideoFrameBuffer *frameBuf, void *context){
     }else{
         return 0;
     }
+}
+
+-(void)dealloc{
+    delete _playController;
+    NSLog(@"%@ dealloc",[self class]);
 }
 
 @end

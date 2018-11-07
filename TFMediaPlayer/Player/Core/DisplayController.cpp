@@ -1,4 +1,4 @@
-//
+ //
 //  DisplayController.cpp
 //  TFMediaPlayer
 //
@@ -113,7 +113,6 @@ void *DisplayController::displayLoop(void *context){
             
             pthread_mutex_lock(&displayer->video_pause_mutex);
             if (displayer->paused) {  //must put condition inside the lock.
-                
                 pthread_cond_wait(&displayer->video_pause_cond, &displayer->video_pause_mutex);
             }
             
@@ -129,6 +128,7 @@ void *DisplayController::displayLoop(void *context){
         }
         
         displayer->shareVideoBuffer->blockGetOut(&videoFrame);
+        
         if (videoFrame == nullptr ) continue;
         if (videoFrame->serial != displayer->serial){
             videoFrame->freeFrameFunc(&videoFrame);
@@ -145,7 +145,7 @@ void *DisplayController::displayLoop(void *context){
         
         double remainTime = 0;
         if (videoFrame->serial == majorClock->serial) {
-            remainTime = majorClock->getRemainTime(pts);
+//            remainTime = majorClock->getRemainTime(pts);
         }
         
         if (videoFrame->serial != displayer->videoClock->serial) {
@@ -158,8 +158,6 @@ void *DisplayController::displayLoop(void *context){
             remainTime = displayer->averageVideoDu*2;
         }
         
-        TFMPDLOG_C("video remain: %.6f\n",remainTime);
-        
         if (remainTime < -minExeTime){
             videoFrame->freeFrameFunc(&videoFrame);
             continue;
@@ -169,6 +167,7 @@ void *DisplayController::displayLoop(void *context){
         
         TFMPVideoFrameBuffer *displayBuffer = videoFrame->displayBuffer;
         displayer->displayVideoFrame(displayBuffer, displayer->displayContext);
+        
         //传入videoFrame的serial而不是displayer的是关键一步，保持clock和上次显示的frame的serial一致，和上面`getRemainTime`时的判断条件一致
         displayer->videoClock->updateTime(pts, videoFrame->serial);
         
@@ -231,6 +230,16 @@ int DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int
                 memset(buffer+(oneLineSize - needReadSize), 0, needReadSize);
                 break;
             }else{
+                if (displayer->checkingEnd && displayer->shareAudioBuffer->isEmpty()) {
+                    
+                    //回调给PlayController，返回true表明确实结束了，退出播放
+                    if (displayer->encounterEndCallBack(displayer->encounterEndContext)) {
+                        //剩余部分填充空值，结束
+                        memset(buffer+(oneLineSize - needReadSize), 0, needReadSize);
+                        return 0;
+                    }
+                }
+                
                 displayer->shareAudioBuffer->blockGetOut(&audioFrame);
             }
             

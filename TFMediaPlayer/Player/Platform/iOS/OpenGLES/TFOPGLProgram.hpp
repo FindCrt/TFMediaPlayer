@@ -56,6 +56,12 @@ public:
     TFOPGLProgram(std::string vertexShaderPath, std::string fragmentShaderPath);
     TFOPGLProgram(const char *vertexShaderSource, const char *fragmentShaderSource);
     
+    ~TFOPGLProgram(){
+        glDeleteShader(_vertexShader);
+        glDeleteShader(_fragmentShader);
+        glDeleteProgram(_program);
+    }
+    
     bool loadFailed(){
         return _program == TFUndefinedProgram;
     }

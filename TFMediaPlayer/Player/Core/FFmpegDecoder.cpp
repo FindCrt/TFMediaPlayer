@@ -44,11 +44,53 @@ TFMPFrame * FFmpegDecoder::tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio, in
     tfmpFrame->serial = serial;
     tfmpFrame->frame  = frame;
     tfmpFrame->type = isAudio ? TFMPFrameTypeAudio:TFMPFrameTypeVideo;
-    tfmpFrame->freeFrameFunc = Decoder::freeFrame;
+    tfmpFrame->freeFrameFunc = FFmpegDecoder::freeFrame;
     tfmpFrame->pts = frame->pts;
     tfmpFrame->displayBuffer = displayBufferFromFrame(tfmpFrame);
     
     return tfmpFrame;
+}
+
+bool FFmpegDecoder::prepareDecode(){
+    AVCodec *codec = avcodec_find_decoder(fmtCtx->streams[streamIndex]->codecpar->codec_id);
+    if (codec == nullptr) {
+        printf("find codec type: %d error\n",type);
+        return false;
+    }
+    
+    codecCtx = avcodec_alloc_context3(codec);
+    if (codecCtx == nullptr) {
+        printf("alloc codecContext type: %d error\n",type);
+        return false;
+    }
+    
+    avcodec_parameters_to_context(codecCtx, fmtCtx->streams[streamIndex]->codecpar);
+    
+    int retval = avcodec_open2(codecCtx, codec, NULL);
+    if (retval < 0) {
+        printf("avcodec_open2 id: %d error\n",codec->id);
+        return false;
+    }
+    
+#if DEBUG
+    if (type == AVMEDIA_TYPE_AUDIO) {
+        strcpy(frameBuffer.name, "audio_frame");
+        strcpy(pktBuffer.name, "audio_packet");
+    }else if (type == AVMEDIA_TYPE_VIDEO){
+        strcpy(frameBuffer.name, "video_frame");
+        strcpy(pktBuffer.name, "video_packet");
+    }else{
+        strcpy(frameBuffer.name, "subtitle_frame");
+        strcpy(pktBuffer.name, "subtitle_packet");
+    }
+#endif
+    
+    shouldDecode = true;
+    
+    pktBuffer.valueFreeFunc = freePacket;
+    frameBuffer.valueFreeFunc = freeFrame;
+    
+    return true;
 }
 
 void * FFmpegDecoder::decodeLoop(void *context){

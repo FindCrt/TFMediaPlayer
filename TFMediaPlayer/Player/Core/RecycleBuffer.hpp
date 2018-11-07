@@ -253,6 +253,7 @@ namespace tfmpcore {
         /** remove all inserted data */
         void flush(){
             RecycleBufferLog("signalAllBlock 1\n");
+            bool preIoValue = ioDisable;
             ioDisable = true;
             pthread_cond_broadcast(&inCond);
             pthread_cond_broadcast(&outCond);
@@ -275,8 +276,7 @@ namespace tfmpcore {
             usedSize = 0;
             backNode = frontNode->pre;
             
-            
-            ioDisable = false;
+            ioDisable = preIoValue;
             RecycleBufferLog("ioDisable false\n");
         }
         

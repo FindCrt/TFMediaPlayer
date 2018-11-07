@@ -90,8 +90,7 @@ namespace tfmpcore {
     public:
         
         ~PlayController(){
-            stop();
-            delete displayer;
+            if (prapareOK) stop();
         }
         
         void setVideoDecoder(Decoder *decoder){

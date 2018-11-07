@@ -39,22 +39,12 @@ namespace tfmpcore {
         
         bool shouldDecode = false;
         
+        void *(*decodeLoopFunc)(void *context);
+        
         inline static void freePacket(TFMPPacket *packet){
             av_packet_free(&(packet->pkt));
             packet->pkt = nullptr;
         }
-        
-        inline static void freeFrame(TFMPFrame **tfmpFrameP){
-            TFMPFrame *tfmpFrame = *tfmpFrameP;
-            av_frame_free(&tfmpFrame->frame);
-            
-            delete tfmpFrame->displayBuffer;
-            
-            delete tfmpFrame;
-            *tfmpFrameP = nullptr;
-        }
-        
-        void *(*decodeLoopFunc)(void *context);
         
     public:
 #if DEBUG
@@ -75,7 +65,7 @@ namespace tfmpcore {
         
         int serial = 0;
         
-        virtual bool prepareDecode();
+        virtual bool prepareDecode() = 0;
         virtual void startDecode();
         virtual void stopDecode();
         
