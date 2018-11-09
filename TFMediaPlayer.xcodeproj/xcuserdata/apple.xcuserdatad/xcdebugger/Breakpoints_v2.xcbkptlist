@@ -595,22 +595,6 @@
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../AVLibraries/ffmpeg-3.4/libavformat/mov.c"
-            timestampString = "560768709.065004"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "6733"
-            endingLineNumber = "6733"
-            landmarkName = "mov_read_header"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
          <BreakpointContent
             shouldBeEnabled = "No"
@@ -689,22 +673,6 @@
                   offsetFromSymbolStart = "56">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TFMediaPlayer/Player/Core/DisplayController.cpp"
-            timestampString = "563280263.091235"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "235"
-            endingLineNumber = "235"
-            landmarkName = "DisplayController::fillAudioBuffer(uint8_t **buffersList, int lineCount, int oneLineSize, void *context)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

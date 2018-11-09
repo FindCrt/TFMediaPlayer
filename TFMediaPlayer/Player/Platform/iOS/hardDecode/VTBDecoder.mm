@@ -9,6 +9,7 @@
 #include "VTBDecoder.h"
 #include "TFMPUtilities.h"
 #include "TFMPDebugFuncs.h"
+#import <Foundation/Foundation.h>
 
 using namespace tfmpcore;
 
