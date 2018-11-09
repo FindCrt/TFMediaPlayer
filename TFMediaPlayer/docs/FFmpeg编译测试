@@ -352,6 +352,8 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 --extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
 --prefix="../compiled/arm64"
 
+大小能压到5.4M
+
 * 测试14 模拟器架构
 
 ./configure \
