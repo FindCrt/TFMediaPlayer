@@ -352,7 +352,7 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 --extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
 --prefix="../compiled/arm64"
 
-大小能压到5.4M
+大小能压到5.4M, 报错protocol not found,但模拟器的disable-protocols却是可以播放的，神奇
 
 * 测试14 模拟器架构
 
@@ -398,3 +398,40 @@ export AS="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang"
 --extra-cflags="-arch x86_64 -mios-simulator-version-min=8.0 -I/usr/local/include " \
 --extra-ldflags="-arch x86_64 -mios-simulator-version-min=8.0 -L/usr/local/lib" \
 --prefix="../compiled/simulator/"
+
+* 测试15 加回protocols
+
+./configure \
+--target-os=darwin \
+--arch=arm64 \
+--cc="xcrun -sdk iphoneos clang" \
+--as="gas-preprocessor.pl -arch aarch64 -- xcrun -sdk iphoneos clang" \
+--enable-small \
+--disable-swscale-alpha \
+--disable-programs \
+--enable-gpl \
+--enable-cross-compile \
+--disable-avdevice \
+--disable-avfilter \
+--disable-swscale \
+--disable-postproc \
+--disable-hwaccels \
+--disable-bsfs \
+--disable-devices \
+--disable-encoders \
+--disable-decoders \
+--enable-decoder=h264 \
+--enable-decoder=aac \
+--disable-muxers \
+--disable-demuxers \
+--enable-demuxer=h264 \
+--enable-demuxer=aac \
+--enable-demuxer=mov \
+--enable-demuxer=flv \
+--disable-parsers \
+--enable-parser=h264 \
+--enable-parser=aac \
+--disable-doc \
+--extra-cflags="-arch arm64 -mios-version-min=8.0 -I/Users/apple/AVLibraries/thin-x264/arm64/include -I/usr/local/include " \
+--extra-ldflags="-arch arm64 -mios-version-min=8.0 -L/Users/apple/AVLibraries/thin-x264/arm64/lib -L/usr/local/lib" \
+--prefix="../compiled/arm64"
