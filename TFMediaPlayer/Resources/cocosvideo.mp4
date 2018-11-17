@@ -1,1 +1,0 @@
-ffmpeg -i game.mp4 -codec copy -f h264 tmp.h264
