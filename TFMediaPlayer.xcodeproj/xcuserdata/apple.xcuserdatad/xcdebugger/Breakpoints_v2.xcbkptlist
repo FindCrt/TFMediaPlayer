@@ -402,7 +402,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "Yes"
             filePath = "../../AVLibraries/ffmpeg-3.4/libavutil/buffer.c"
-            timestampString = "552192447.609284"
+            timestampString = "562500942.3976099"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "102"
@@ -592,22 +592,6 @@
                   offsetFromSymbolStart = "68">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../AVLibraries/ffmpeg-3.4/libavformat/mov.c"
-            timestampString = "560768709.065004"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "6733"
-            endingLineNumber = "6733"
-            landmarkName = "mov_read_header"
-            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

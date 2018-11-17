@@ -79,6 +79,9 @@
     _resultSpecifics.ffmpeg_channel_layout = channelLayoutForChannels(_resultSpecifics.channelsPerFrame);
     
     _resultSpecifics.bufferSize = _resultSpecifics.bitsPerChannel/8 * _resultSpecifics.channelsPerFrame * _resultSpecifics.samples;
+    
+    //这个延迟是调用填充数据方法时，播放器的缓冲区里的数据播放需要的时间，也就是对新填充的数据而言，从现在到被播放的时间
+    _resultSpecifics.bufferDelay = (TFAudioQueueBufferCount-1)*_resultSpecifics.bufferSize/(double)(_resultSpecifics.sampleRate*_resultSpecifics.bitsPerChannel/8*_resultSpecifics.channelsPerFrame);
 }
 
 static void configAudioDescWithSpecifics(AudioStreamBasicDescription *audioDesc, TFMPAudioStreamDescription *specifics){
@@ -141,7 +144,7 @@ void audioQueueListen(
     })
 
     _state = TFAudioQueueStatePlaying;
-    myStateObserver.labelMark("audio player", "play");
+    
     
     [_lock unlock];
 }
@@ -157,7 +160,7 @@ void audioQueueListen(
     OSStatus status = AudioQueuePause(_audioQueue);
     NSLog(@"AudioQueuePause %d\n",status);
     _state = TFAudioQueueStatePaused;
-    myStateObserver.labelMark("audio player", "pause");
+    
     [_lock unlock];
 }
 
@@ -171,7 +174,7 @@ void audioQueueListen(
     
     AudioQueueStop(_audioQueue, YES);
     _state = TFAudioQueueStateUnplay;
-    myStateObserver.labelMark("audio player", "stop");
+    
     [_lock unlock];
 }
 

@@ -17,91 +17,61 @@ extern "C"{
 }
 
 #include "TFMPFrame.h"
+#include "TFMPPacket.h"
 #include "RecycleBuffer.hpp"
 #include <pthread.h>
 #include "TFMPAVFormat.h"
-#include <vector>
-#include "MediaTimeFilter.hpp"
 
 namespace tfmpcore {
     
     class Decoder{
         
+    protected:
         AVFormatContext *fmtCtx;
-        int steamIndex;
+        int streamIndex;
         
         AVCodecContext *codecCtx;
         
-        RecycleBuffer<AVPacket*> pktBuffer = RecycleBuffer<AVPacket*>(2000, true);
-        
+        RecycleBuffer<TFMPPacket> pktBuffer = RecycleBuffer<TFMPPacket>(2000, true);
         RecycleBuffer<TFMPFrame*> frameBuffer = RecycleBuffer<TFMPFrame *>(30, true);
         
         pthread_t decodeThread;
-        static void *decodeLoop(void *context);
         
         bool shouldDecode = false;
-        /** decode loop is running */
-        bool isDecoding = false;
         
-        bool pause = false;
+        void *(*decodeLoopFunc)(void *context);
         
-        pthread_cond_t waitLoopCond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t waitLoopMutex = PTHREAD_MUTEX_INITIALIZER;
-        
-        pthread_cond_t pauseCond = PTHREAD_COND_INITIALIZER;
-        pthread_mutex_t pauseMutex = PTHREAD_MUTEX_INITIALIZER;
-        
-        inline static void freePacket(AVPacket **pkt){
-            av_packet_free(pkt);
+        inline static void freePacket(TFMPPacket *packet){
+            av_packet_free(&(packet->pkt));
+            packet->pkt = nullptr;
         }
-        
-        inline static void freeFrame(TFMPFrame **tfmpFrameP){
-            TFMPFrame *tfmpFrame = *tfmpFrameP;
-            av_frame_free(&tfmpFrame->frame);
-            
-            delete tfmpFrame->displayBuffer;
-            
-            delete tfmpFrame;
-            *tfmpFrameP = nullptr;
-        }
-        
-        static TFMPVideoFrameBuffer *displayBufferFromFrame(TFMPFrame *tfmpFrame);
-        static TFMPFrame *tfmpFrameFromAVFrame(AVFrame *frame, bool isAudio);
         
     public:
+#if DEBUG
         string name;
-        AVMediaType type;
-        Decoder(AVFormatContext *fmtCtx, int steamIndex, AVMediaType type):fmtCtx(fmtCtx),steamIndex(steamIndex),type(type){};
+        AVRational timebase;
+#endif
         
-        ~Decoder(){
-            freeResources();
-        }
+        AVMediaType type;
+        void init(AVFormatContext *fmtCtx, int streamIndex, AVMediaType type){
+            this->fmtCtx = fmtCtx;
+            this->streamIndex = streamIndex;
+            this->type = type;
+        };
         
         RecycleBuffer<TFMPFrame*> *sharedFrameBuffer(){
             return &frameBuffer;
         };
         
-        MediaTimeFilter *mediaTimeFilter;
+        int serial = 0;
         
-        bool prepareDecode();
+        virtual bool prepareDecode() = 0;
+        virtual void startDecode();
+        virtual void stopDecode();
         
-        void startDecode();
-        void stopDecode();
+        virtual void insertPacket(AVPacket *packet);
         
-        void insertPacket(AVPacket *packet);
-        
-        void activeBlock(bool flag);
-        void flush();
-        void freeResources();
-        
-        bool bufferIsEmpty();
-        
-        
-        
-#if DEBUG
-        AVRational timebase;
-#endif
-        
+        bool isEmpty();
     };
 }
 

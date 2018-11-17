@@ -20,10 +20,24 @@
 		180FA4FF1FF4CB4400AFB5F9 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA4FE1FF4CB4400AFB5F9 /* GLKit.framework */; };
 		180FA5011FF4CB9600AFB5F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 180FA5001FF4CB9600AFB5F9 /* AudioToolbox.framework */; };
 		180FA5041FF4D16800AFB5F9 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5021FF4D16800AFB5F9 /* Decoder.cpp */; };
+		1832D0A92195784A004C45B5 /* 111.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 1863F3C221072BA90006D513 /* 111.mp3 */; };
+		1832D0AA2195784A004C45B5 /* ninja.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 188AA8AD20E2487600F36DCD /* ninja.mp4 */; };
+		1832D0AB2195784A004C45B5 /* meipai-two.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1847D87A206B827A00A7CFE8 /* meipai-two.mp4 */; };
+		1832D0AC2195784A004C45B5 /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
+		1832D0AD2195784A004C45B5 /* noheartWizard.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */; };
+		1832D0AE2195784A004C45B5 /* momei.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99E206A45FA00C5D0DB /* momei.mp4 */; };
+		1832D0AF2195784A004C45B5 /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
+		1832D0B02195784A004C45B5 /* cocosvideo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */; };
+		1832D0B12195784A004C45B5 /* Wizard.h264 in Resources */ = {isa = PBXBuildFile; fileRef = 1870E461215C928400EB1CD8 /* Wizard.h264 */; };
+		1832D0B22195784A004C45B5 /* pure1.caf in Resources */ = {isa = PBXBuildFile; fileRef = 184C8E11200B481D0063EAC3 /* pure1.caf */; };
+		1832D0B32195784A004C45B5 /* LuckyDay.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 183434172008AB3B00ED9B05 /* LuckyDay.mp3 */; };
+		1832D0B42195784A004C45B5 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
+		1832D0B52195784A004C45B5 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
+		1832D0B62195784A004C45B5 /* t1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 18946DCD2068F8F1004BDF96 /* t1.mp4 */; };
+		1832D0B72195784A004C45B5 /* lisao.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 185F7B37206CD7720028744A /* lisao.mp4 */; };
 		1834340E200851E300ED9B05 /* TFAudioFileReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 1834340D200851E300ED9B05 /* TFAudioFileReader.m */; };
 		183434122008535500ED9B05 /* TFAudioBufferData.c in Sources */ = {isa = PBXBuildFile; fileRef = 183434112008535500ED9B05 /* TFAudioBufferData.c */; };
 		18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18343415200862F400ED9B05 /* TFAudioPowerGraphView.m */; };
-		183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 183434172008AB3B00ED9B05 /* LuckyDay.mp3 */; };
 		18415A1B1FF5D5F6007095AC /* UnitTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A1A1FF5D5F6007095AC /* UnitTest.mm */; };
 		18415A2C1FF6130D007095AC /* TFGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18415A251FF6130D007095AC /* TFGLView.m */; };
 		18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A271FF6130D007095AC /* TFOPGLESDisplayView.mm */; };
@@ -32,33 +46,19 @@
 		18415A351FF62648007095AC /* SyncClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18415A331FF62648007095AC /* SyncClock.cpp */; };
 		18415A381FF64126007095AC /* TFMediaPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18415A371FF64126007095AC /* TFMediaPlayer.mm */; };
 		1843A1F2200463890053694A /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 892C13172003B63A0081CF79 /* libswresample.a */; };
-		1847D87B206B827A00A7CFE8 /* meipai-two.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1847D87A206B827A00A7CFE8 /* meipai-two.mp4 */; };
-		184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184C08E6200EFF3F0093FFF9 /* cocosvideo.mp4 */; };
-		184C8E12200B481D0063EAC3 /* pure1.caf in Resources */ = {isa = PBXBuildFile; fileRef = 184C8E11200B481D0063EAC3 /* pure1.caf */; };
 		184FF74D1FF48B22007D5826 /* TFLocalMp4ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */; };
-		184FF7511FF48BC0007D5826 /* game.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 184FF7501FF48BC0007D5826 /* game.mp4 */; };
-		1853B373206DD607002DA5BF /* MediaTimeFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */; };
 		18554531202A91FD0014D7CE /* netMedias.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18554530202A91FD0014D7CE /* netMedias.plist */; };
 		18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18554533202A9B1B0014D7CE /* TFAudioQueueController.mm */; };
 		18554537202A9B1B0014D7CE /* TFAudioUnitPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18554535202A9B1B0014D7CE /* TFAudioUnitPlayer.mm */; };
 		1856F04D1FFB804D00B4F2A7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1856F04C1FFB804D00B4F2A7 /* libx264.a */; };
 		185B7EDD2007694600ACB32D /* AudioResampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 185B7EDB2007694600ACB32D /* AudioResampler.cpp */; };
 		185EB3311FF5CD22001E37F7 /* TFMediaPlayerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 185EB3301FF5CD22001E37F7 /* TFMediaPlayerTests.mm */; };
-		185F7B38206CD7720028744A /* lisao.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 185F7B37206CD7720028744A /* lisao.mp4 */; };
-		1863F3C321072BB00006D513 /* 111.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 1863F3C221072BA90006D513 /* 111.mp3 */; };
 		1865D9C0204A4E1000E5C447 /* TFMPProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865D9BF204A4E1000E5C447 /* TFMPProgressView.m */; };
-		1868B9A0206A45FA00C5D0DB /* momei.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99E206A45FA00C5D0DB /* momei.mp4 */; };
-		1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B99F206A45FA00C5D0DB /* jonSnow.mp4 */; };
-		1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A2206A48B700C5D0DB /* noheartWizard.mp4 */; };
-		1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */ = {isa = PBXBuildFile; fileRef = 1868B9A4206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv */; };
 		18706DC4215396EA009C21BE /* TFDebugStateShower.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18706DC3215396EA009C21BE /* TFDebugStateShower.mm */; };
-		1870E462215C929F00EB1CD8 /* Wizard.h264 in Resources */ = {isa = PBXBuildFile; fileRef = 1870E461215C928400EB1CD8 /* Wizard.h264 */; };
 		18736736215DC88D0045E0D8 /* VTBDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18736734215DC88D0045E0D8 /* VTBDecoder.mm */; };
-		187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 187DFBC620084BEF002BDCB3 /* AACTest.m4a */; };
+		187B7CCA21903BFA00821D67 /* FFmpegDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */; };
 		18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */; };
 		18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18887A0F215B2A3B00DD6BBA /* TFHardDecodeViewController.m */; };
-		188AA8AE20E248CE00F36DCD /* ninja.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 188AA8AD20E2487600F36DCD /* ninja.mp4 */; };
-		18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 18946DCD2068F8F1004BDF96 /* t1.mp4 */; };
 		18C66D9A1FF0F1F6002BFBBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D991FF0F1F6002BFBBC /* main.m */; };
 		18C66D9D1FF0F1F6002BFBBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C66D9C1FF0F1F6002BFBBC /* AppDelegate.m */; };
 		18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C66DA11FF0F1F6002BFBBC /* Main.storyboard */; };
@@ -132,8 +132,6 @@
 		184FF74C1FF48B22007D5826 /* TFLocalMp4ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFLocalMp4ViewController.mm; sourceTree = "<group>"; };
 		184FF7501FF48BC0007D5826 /* game.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = game.mp4; sourceTree = "<group>"; };
 		184FF7531FF4A190007D5826 /* TFMPDebugFuncs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPDebugFuncs.h; sourceTree = "<group>"; };
-		1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaTimeFilter.cpp; sourceTree = "<group>"; };
-		1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MediaTimeFilter.hpp; sourceTree = "<group>"; };
 		18547D292020478900FE24AB /* buffer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer_internal.h; path = ../../buffer_internal.h; sourceTree = "<group>"; };
 		18547D2A202047C000FE24AB /* thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../thread.h; sourceTree = "<group>"; };
 		18554530202A91FD0014D7CE /* netMedias.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = netMedias.plist; sourceTree = "<group>"; };
@@ -162,9 +160,12 @@
 		18706DC2215396EA009C21BE /* TFDebugStateShower.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFDebugStateShower.h; sourceTree = "<group>"; };
 		18706DC3215396EA009C21BE /* TFDebugStateShower.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFDebugStateShower.mm; sourceTree = "<group>"; };
 		1870E461215C928400EB1CD8 /* Wizard.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Wizard.h264; sourceTree = "<group>"; };
+		1871CF562183044E00AC638F /* TFMPPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFMPPacket.h; sourceTree = "<group>"; };
 		18736734215DC88D0045E0D8 /* VTBDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VTBDecoder.mm; sourceTree = "<group>"; };
 		18736735215DC88D0045E0D8 /* VTBDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VTBDecoder.h; sourceTree = "<group>"; };
 		1878E1DA2028480C00F99825 /* FFmpegInternalDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegInternalDebug.h; sourceTree = "<group>"; };
+		187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FFmpegDecoder.cpp; sourceTree = "<group>"; };
+		187B7CC921903BFA00821D67 /* FFmpegDecoder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FFmpegDecoder.hpp; sourceTree = "<group>"; };
 		187DFBC620084BEF002BDCB3 /* AACTest.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = AACTest.m4a; sourceTree = "<group>"; };
 		18887A0B215B26E700DD6BBA /* TFHardDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFHardDecoder.h; sourceTree = "<group>"; };
 		18887A0C215B26E700DD6BBA /* TFHardDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TFHardDecoder.mm; sourceTree = "<group>"; };
@@ -614,9 +615,10 @@
 				18415A341FF62648007095AC /* SyncClock.hpp */,
 				180FA50A1FF4EA8200AFB5F9 /* RecycleBuffer.hpp */,
 				18415A2F1FF61B90007095AC /* TFMPAVFormat.h */,
-				1853B371206DD607002DA5BF /* MediaTimeFilter.cpp */,
-				1853B372206DD607002DA5BF /* MediaTimeFilter.hpp */,
 				181A037D2160AB4C00DFDDE3 /* TFMPFrame.h */,
+				1871CF562183044E00AC638F /* TFMPPacket.h */,
+				187B7CC821903BFA00821D67 /* FFmpegDecoder.cpp */,
+				187B7CC921903BFA00821D67 /* FFmpegDecoder.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -971,25 +973,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1870E462215C929F00EB1CD8 /* Wizard.h264 in Resources */,
-				1868B9A3206A48B700C5D0DB /* noheartWizard.mp4 in Resources */,
-				184C08E7200F0CC00093FFF9 /* cocosvideo.mp4 in Resources */,
-				1863F3C321072BB00006D513 /* 111.mp3 in Resources */,
-				1868B9A5206A4B0B00C5D0DB /* S9UJAG3QE_sd.flv in Resources */,
-				183434182008AB3B00ED9B05 /* LuckyDay.mp3 in Resources */,
-				187DFBC720084C31002BDCB3 /* AACTest.m4a in Resources */,
+				1832D0A92195784A004C45B5 /* 111.mp3 in Resources */,
+				1832D0AA2195784A004C45B5 /* ninja.mp4 in Resources */,
+				1832D0AB2195784A004C45B5 /* meipai-two.mp4 in Resources */,
+				1832D0AC2195784A004C45B5 /* S9UJAG3QE_sd.flv in Resources */,
+				1832D0AD2195784A004C45B5 /* noheartWizard.mp4 in Resources */,
+				1832D0AE2195784A004C45B5 /* momei.mp4 in Resources */,
+				1832D0AF2195784A004C45B5 /* jonSnow.mp4 in Resources */,
+				1832D0B02195784A004C45B5 /* cocosvideo.mp4 in Resources */,
+				1832D0B12195784A004C45B5 /* Wizard.h264 in Resources */,
+				1832D0B22195784A004C45B5 /* pure1.caf in Resources */,
+				1832D0B32195784A004C45B5 /* LuckyDay.mp3 in Resources */,
+				1832D0B42195784A004C45B5 /* AACTest.m4a in Resources */,
+				1832D0B52195784A004C45B5 /* game.mp4 in Resources */,
+				1832D0B62195784A004C45B5 /* t1.mp4 in Resources */,
+				1832D0B72195784A004C45B5 /* lisao.mp4 in Resources */,
 				18C66DA81FF0F1F6002BFBBC /* LaunchScreen.storyboard in Resources */,
 				18C66DA51FF0F1F6002BFBBC /* Assets.xcassets in Resources */,
-				1847D87B206B827A00A7CFE8 /* meipai-two.mp4 in Resources */,
-				1868B9A1206A45FA00C5D0DB /* jonSnow.mp4 in Resources */,
-				18946DCE2068FA18004BDF96 /* t1.mp4 in Resources */,
-				185F7B38206CD7720028744A /* lisao.mp4 in Resources */,
 				18C66DA31FF0F1F6002BFBBC /* Main.storyboard in Resources */,
-				184C8E12200B481D0063EAC3 /* pure1.caf in Resources */,
 				18554531202A91FD0014D7CE /* netMedias.plist in Resources */,
-				184FF7511FF48BC0007D5826 /* game.mp4 in Resources */,
-				1868B9A0206A45FA00C5D0DB /* momei.mp4 in Resources */,
-				188AA8AE20E248CE00F36DCD /* ninja.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1023,8 +1025,8 @@
 				18343416200862F400ED9B05 /* TFAudioPowerGraphView.m in Sources */,
 				18415A2D1FF6130D007095AC /* TFOPGLESDisplayView.mm in Sources */,
 				18415A321FF62110007095AC /* DisplayController.cpp in Sources */,
-				1853B373206DD607002DA5BF /* MediaTimeFilter.cpp in Sources */,
 				18887A10215B2A3B00DD6BBA /* TFHardDecodeViewController.m in Sources */,
+				187B7CCA21903BFA00821D67 /* FFmpegDecoder.cpp in Sources */,
 				18554536202A9B1B0014D7CE /* TFAudioQueueController.mm in Sources */,
 				18415A2C1FF6130D007095AC /* TFGLView.m in Sources */,
 				18887A0D215B26E700DD6BBA /* TFHardDecoder.mm in Sources */,

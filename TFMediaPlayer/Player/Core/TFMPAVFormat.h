@@ -19,7 +19,17 @@ typedef enum{
     TFMP_MEDIA_TYPE_ALL_AVIABLE = TFMP_MEDIA_TYPE_VIDEO | TFMP_MEDIA_TYPE_AUDIO | TFMP_MEDIA_TYPE_SUBTITLE,
 }TFMPMediaType;
 
+typedef enum{
+    TFMP_SYNC_CLOCK_MAJOR_AUDIO,
+    TFMP_SYNC_CLOCK_MAJOR_VIDEO,
+    TFMP_SYNC_CLOCK_MAJOR_OTHER
+} TFMPSyncClockMajor;
 
+typedef enum{
+    TFMP_STOP_REASON_ERROR = -1,
+    TFMP_STOP_REASON_END_OF_FILE,
+    TFMP_STOP_REASON_USER_STOP,
+}TFMPStopReason;
 
 /** video */
 
@@ -60,6 +70,7 @@ typedef struct{
     
     int bufferSize;
     int samples;
+    double bufferDelay;
     
 }TFMPAudioStreamDescription;
 

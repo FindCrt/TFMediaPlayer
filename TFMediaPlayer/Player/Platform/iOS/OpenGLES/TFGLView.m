@@ -124,7 +124,7 @@
     }
     
     if (_frameBuffer) {
-        glDeleteFramebuffers(1, &_frameBuffer);
+        glDeleteBuffers(1, &_frameBuffer);
     }
 }
 

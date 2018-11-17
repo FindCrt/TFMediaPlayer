@@ -50,7 +50,7 @@
     [self.view addSubview:_urlInputView];
     
 
-    _player = [[TFMediaPlayer alloc] init];
+    _player = [[TFMediaPlayer alloc] initWithParams:@{@"activeVTB":@(YES)}];
     _player.mediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
     _player.displayView.frame = CGRectMake(0, 100, [UIScreen mainScreen].bounds.size.width, 240);
     _player.displayView.contentMode = UIViewContentModeScaleAspectFit;

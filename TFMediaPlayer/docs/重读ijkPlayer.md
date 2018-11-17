@@ -355,7 +355,7 @@ seek就是调整进度条到新的地方开始播，这个操作会打乱原本�
 
 1. 外界seek调用到`ijkmp_seek_to_l`，然后发送消息`ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, (int)msec);`,消息捕获到后调用到`stream_seek`,然后设置`seek_req`为1，记录seek目标到`seek_pos`。
 2. 在读取函数`read_thread`里，在`is->seek_req`为true时，进入seek处理,几个核心处理:
-  * `ffp_toggle_buffering`关闭解码，packet缓冲区静止
+  * `ffp_toggle_buffering`关闭播放，通过`is->paused`影响到音频和视频的播放线程。
   * 调用`avformat_seek_file`进行seek
   * 成功之后用`packet_queue_flush`清空缓冲区，并且把`flush_pkt`插入进去，这时一个标记数据
   * 把当前的serial记录下来
@@ -406,6 +406,7 @@ if (pkt == &flush_pkt)
 	 } while (af->serial != is->audioq.serial);
  ```
  都根据serial把旧数据略过了。
+ 音视频frame的获取循环里，把frame的serial跟packetQueue的serial进行了对比，而packetQueue的serial在seek的时候就已经发生了改变。
  
  所以整体看下来，seek体系里最厉害的东西的东西就是使用了serial来标记数据，从而可以很明确的知道哪些是就数据，哪些是新数据。然后处理都是在原线程里做的处理，而不是在另外的线程里来修改相关的数据，省去了线程控制、线程通讯的麻烦的操作，稳定性也提高了。
  
@@ -494,8 +495,21 @@ if (*c->queue_serial != c->serial)
 3. 使用VTB之后，数据存在解码后获得的pixelBuffer里，而ffmpeg解码后的数据在AVFrame里，这个转化的区别就在不同的overlay创建函数里。
 
 总结：
+
 * 对于两个模块的连接处，为了统一，两边都需要封装统一的模型；
 * 在统一的模型内，又具有不同的操作细分；
 * 输入数据从A到B，那么细分操作由B来提供，应为B是接受者，它知道需要一个什么样的结果。
 * 这样在执行流程上一样的，能保持流程的稳定性；而实际执行时，在某些地方又有不同，从而又可以适应各种独特的需求。
+
+
+
+###对比修改
+
+1. 同步钟的使用对比
+
+ 我的是只有一个钟，就是主钟，然后播放一个流的时候，从主钟那里得到我的内容对应的现实时间，就是这个内容的播放时间点，比较这个时间点和当前的现实时间来确定是延迟、立即播放还是丢弃。
+ 
+ 首先有一点是共通的，就是：即将播放一个数据帧的时候，先要得到它正确的现实播放时间点，然后以这个和当前显示时间做对比。
+ 
+ ijk里的这个时间是：is->frame_timer+delay。delay初始值是和上一帧的内容时间差，如果不修改delay,这样的计算方式其实就是按照这个流(视频流)自身的钟来计算的。
  

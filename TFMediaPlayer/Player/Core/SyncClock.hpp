@@ -11,38 +11,32 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <libavutil/rational.h>
+#include <math.h>
+#include <string>
 
 namespace tfmpcore {
     class SyncClock{
-        //frame pts + correction = the real present time that come from av_gettime_relative.
-        int64_t ptsCorrection = -1;
-        
-        double minMediaTime = 0;
+        /** 现实时间和媒体时间的差值，代表两个时间流的关系 */
+        double realDiff = NAN;
+        double mediaTime = 0;
         
     public:
+#if DEBUG
+        std::string name;
+#endif
+        int serial = 0;
+        bool paused = false;
         
-        bool isAudioMajor = true;
+        /** 获取这个同步钟的媒体时间 */
+        double getTime();
         
-        SyncClock(bool isAudioMajor = true):isAudioMajor(isAudioMajor){};
+        /** 更新这个同步钟的媒体时间，serial作为seek的标记 */
+        void updateTime(double time, int serial, double updateTime = -1);
+        /** 媒体时间没变，显示时间变了，更新两者的关系 */
+        void updateDiff();
         
-        //unit is microseconds 
-        int64_t lastRealPts = 0;
-        
-        double presentTimeForVideo(int64_t videoPts, AVRational timeBase);
-        double presentTimeForAudio(int64_t audioPts, AVRational timeBase);
-        
-        double remainTimeForVideo(int64_t videoPts, AVRational timeBase);
-        double remainTimeForAudio(int64_t audioPts, AVRational timeBase);
-        
-        void presentVideo(int64_t videoPts, AVRational timeBase);
-        void presentAudio(int64_t audioPts, AVRational timeBase, double delay);
-        
-        void setMinMediaTime(double minMediaTime){
-            this->minMediaTime = minMediaTime;
-        }
-        
-        void reset();
+        /** 传入的pts需要多久才可以播 */
+        double getRemainTime(double pts);
     };
 }
 

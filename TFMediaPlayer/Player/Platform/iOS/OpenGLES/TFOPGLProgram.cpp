@@ -23,11 +23,13 @@ TFOPGLProgram::TFOPGLProgram(const char *vertexShaderSource, const char *fragmen
     bool succeed = loadShaderWithSourceString(GL_VERTEX_SHADER, vertexShaderSource, &error);
     if (!succeed) {
         printf("%s\n",error);
+        delete[] error;
         return;
     }
     succeed = loadShaderWithSourceString(GL_FRAGMENT_SHADER, fragmentShaderSource, &error);
     if (!succeed) {
         printf("%s\n",error);
+        delete[] error;
         return;
     }
     attachShadersAndlinkProgram();
@@ -57,10 +59,9 @@ bool TFOPGLProgram::loadShaderWithPathAutoLog(GLenum type, std::string path){
     if (!succeed) {
         printf("load shader error,\npath:%s \nerror:%s\n",path.c_str(),error);
     }
-    
-    free(error);
 #endif
     
+    delete [] error;
     return succeed;
 }
 
@@ -120,18 +121,19 @@ bool TFOPGLProgram::attachShadersAndlinkProgram(){
     GLint succeed = true;
     glGetProgramiv(_program, GL_LINK_STATUS, &succeed);
     
-#if DEBUG
     if (!succeed) {
         GLchar *infolog = new char[TFInfoLogLen];
         glGetProgramInfoLog(_program, TFInfoLogLen, nullptr, infolog);
+#if DEBUG
         printf("link program error:\n%s\n",infolog);
+#endif
+        delete [] infolog;
         
-        free(infolog);
+        glDeleteShader(_vertexShader);
+        glDeleteShader(_fragmentShader);
         glDeleteProgram(_program);
         _program = TFUndefinedProgram;
     }
-#endif
-    
     return succeed;
 }
 

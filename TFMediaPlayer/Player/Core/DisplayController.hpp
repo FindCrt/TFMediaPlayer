@@ -48,75 +48,79 @@ namespace tfmpcore {
         
         pthread_t dispalyThread;
         static void *displayLoop(void *context);
-        static void *VTBDisplayLoop(void *context);
         
         bool shouldDisplay = false;
         bool paused = false;
         pthread_cond_t video_pause_cond = PTHREAD_COND_INITIALIZER;
         pthread_mutex_t video_pause_mutex = PTHREAD_MUTEX_INITIALIZER;
         
-        sem_t *wait_display_sem = sem_open("wait_display_sem", 2);
-        bool fillingAudio = false;
-        bool processingVideo = false;
-        
-        TFMPFrame *displayingVideo = nullptr;
-        TFMPFrame *displayingAudio = nullptr;
-        
         TFMPRemainingBuffer remainingAudioBuffers;
         
         static int fillAudioBuffer(uint8_t **buffer, int lineCount,int oneLineSize, void *context);
         
-        AudioResampler *audioResampler = nullptr;
-        
-        int64_t lastPts = 0;
-        bool lastIsAudio = true;
+        AudioResampler audioResampler;
         
     public:
         
-        ~DisplayController(){
-            freeResources();
-            delete audioResampler;
-            delete syncClock;
-        }
+        /*** display ***/
         
         TFMPMediaType displayMediaType = TFMP_MEDIA_TYPE_ALL_AVIABLE;
         
         void *displayContext = nullptr;
-        
-        //the real display function different with different platform
+        //video display func
         TFMPVideoFrameDisplayFunc displayVideoFrame;
+        //audio display func
         TFMPFillAudioBufferStruct getFillAudioBufferStruct();
         
-        void setAudioResampler(AudioResampler *audioResampler){
-            this->audioResampler = audioResampler;
+        //audio output format
+        void setAudioDesc(TFMPAudioStreamDescription audioDesc){
+            audioResampler.adoptedAudioDesc = audioDesc;
         }
-        
+        //decoded media buffers
         RecycleBuffer<TFMPFrame*> *shareVideoBuffer;
         RecycleBuffer<TFMPFrame*> *shareAudioBuffer;
         
-        AVRational videoTimeBase;
-        AVRational audioTimeBase;
         
-        
-        //sync and play time
-        SyncClock *syncClock = nullptr;
-        double getPlayTime();
-        void resetPlayTime(){
-            lastPts = -1;
-            lastIsAudio = false;
-        }
-
         //controls
         void startDisplay();
         void stopDisplay();
-        
         void pause(bool flag);
         bool isPaused(){ return paused;};
         
-        //release
-        void flush();
-        void freeResources();
+        void *encounterEndContext;
+        bool (*encounterEndCallBack)(void *context);
         
+        /*** sync and play time ***/
+        
+        int serial = 0;
+        
+        AVRational videoTimeBase;
+        AVRational audioTimeBase;
+        double averageAudioDu;
+        double averageVideoDu;
+        double playerBufferDelay = 0;  //上层播放器的缓冲区数据播放延迟
+        double filterTime = 0;      //准确的seek需要时间过滤
+        
+        //sync clock
+        TFMPSyncClockMajor clockMajor = TFMP_SYNC_CLOCK_MAJOR_AUDIO;
+        SyncClock *videoClock = new SyncClock();
+        SyncClock *audioClock = new SyncClock();
+        SyncClock *getMajorClock(){
+            if (clockMajor == TFMP_SYNC_CLOCK_MAJOR_AUDIO) {
+                return audioClock;
+            }else if (clockMajor == TFMP_SYNC_CLOCK_MAJOR_VIDEO){
+                return videoClock;
+            }else{
+                return nil;
+            }
+        };
+        double getPlayTime();
+        
+        //碰到seek后的第一个新的frame时回调
+        void *newFrameContext;
+        void (*newFrameCallBack)(void *context);
+        
+        bool checkingEnd = false;
     };
 }
 

@@ -15,6 +15,8 @@ extern "C"{
 
 #include "TFMPAVFormat.h"
 
+//#define TFMP_EOF_SERIAL -1
+
 inline uint8_t formatFlagsFromFFmpegAudioFormat(AVSampleFormat audioFormat){
     
     if (audioFormat == AV_SAMPLE_FMT_NONE ||

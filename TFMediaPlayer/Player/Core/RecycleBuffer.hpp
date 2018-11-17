@@ -32,21 +32,6 @@ namespace tfmpcore {
             friend RecycleBuffer;
         };
         
-        /** Use this to observe the change of usedsize. It makes you know RecycleBuffer's status and helping you do specific things.
-         * if return true, observer'll be removed.
-         */
-        typedef bool (*ObserverNotifyFunc)(RecycleBuffer *buffer, int curSize, bool isGreater, void *context);
-        class UsedSizeObserver{
-            void *observer = nullptr;
-            int checkSize = defaultInitAllocSize;
-            bool isGreater = true;
-            ObserverNotifyFunc notifyFunc = nullptr;
-            
-            friend RecycleBuffer;
-            
-            UsedSizeObserver(void *observer, int checkSize, bool isGreater, ObserverNotifyFunc notifyFunc):observer(observer),checkSize(checkSize),isGreater(isGreater),notifyFunc(notifyFunc){};
-        };
-        
         const static int defaultInitAllocSize = 8;
         int outLimit = 3;
         int inLimit = LONG_MAX;
@@ -66,42 +51,6 @@ namespace tfmpcore {
         pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         
         bool ioDisable = false;
-        
-        std::vector<UsedSizeObserver *> observers;
-        
-        bool expand(){
-            if (allocedSize >= limitSize) {
-                return false;
-            }
-            if (allocedSize == 0) {
-                allocedSize = defaultInitAllocSize;
-                initAlloc();
-                return true;
-            }
-            
-            long expandSize = allocedSize < (limitSize-allocedSize) ? allocedSize : (limitSize-allocedSize);
-            
-            RecycleNode *nextNode = frontNode;
-            RecycleNode *closeNode = frontNode->pre;
-            
-            //construct from next to pre.  new node(pre) <----- front(next).
-            for (long i = 0; i<expandSize; i++) {
-                RecycleNode *node = new RecycleNode();
-                nextNode->pre = node;
-                node->next = nextNode;
-                
-                if (i == expandSize-1) { //link last node with the other node of break.
-                    node->pre = closeNode;
-                    closeNode->next = node;
-                }
-                
-                nextNode = node;
-            }
-            
-            allocedSize += expandSize;
-            
-            return true;
-        }
         
         void initAlloc(){
             frontNode = new RecycleNode();
@@ -170,19 +119,19 @@ namespace tfmpcore {
         
         bool insert(T val){
             if (usedSize >= allocedSize) {
-                if (!expand()) {
-                    //stop pushing until there is unused node.
-                    return false;
-                }
+                return false;
+            }
+            
+            if (frontNode->pre == backNode) {
+                
             }
             
             frontNode->pre->val = val;
             frontNode = frontNode->pre;
             
             usedSize++;
-            myStateObserver.mark(name, usedSize, false);
+            
             if (usedSize > 1 && valueCompFunc) {
-                pthread_mutex_lock(&mutex);
                 RecycleNode *cur = frontNode->next;
                 
                 //If the new value is less than cur node's, compare next node until cur node is greater than the new value.
@@ -209,8 +158,6 @@ namespace tfmpcore {
                         backNode = moveNode;
                     }
                 }
-                
-                pthread_mutex_unlock(&mutex);
             }
             
             RecycleBufferLog("insert: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
@@ -219,23 +166,7 @@ namespace tfmpcore {
                 pthread_cond_signal(&outCond);
             }
             
-            if (!observers.empty()) {
-                for (auto iter = observers.begin(); iter != observers.end();) {
-                    UsedSizeObserver *ob = *iter;
-                    if (ob->isGreater && ob->checkSize < usedSize) {
-                        bool shouldRemove = ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
-                        if (shouldRemove) {
-                            iter = observers.erase(iter);
-                        }else{
-                            iter++;
-                        }
-                    }else{
-                        iter++;
-                    }
-                }
-            }
-            
-            
+            myStateObserver.mark(name, usedSize);
             return true;
         }
         
@@ -250,7 +181,6 @@ namespace tfmpcore {
             backNode = backNode->pre;
             
             usedSize--;
-            myStateObserver.mark(name, usedSize, false);
             
             RecycleBufferLog("getout: %s[%ld],[%x->%x,%x->%x]\n",name,usedSize,frontNode,frontNode->val, backNode,backNode->val);
             
@@ -258,21 +188,7 @@ namespace tfmpcore {
                 pthread_cond_signal(&inCond);
             }
             
-            if (!observers.empty()) {
-                for (auto iter = observers.begin(); iter != observers.end();) {
-                    UsedSizeObserver *ob = *iter;
-                    if (!ob->isGreater && ob->checkSize > usedSize) {
-                        bool shouldRemove = ob->notifyFunc(this, ob->checkSize, ob->isGreater, ob->observer);
-                        if (shouldRemove) {
-                            iter = observers.erase(iter);
-                        }else{
-                            iter++;
-                        }
-                    }else{
-                        iter++;
-                    }
-                }
-            }
+            myStateObserver.mark(name, usedSize);
             
             return true;
         }
@@ -284,12 +200,11 @@ namespace tfmpcore {
          */
         void blockInsert(T val){
             
+            pthread_mutex_lock(&mutex);
             if (!ioDisable && usedSize >= limitSize) {
                 RecycleBufferLog("***************************lock full %s\n",name);
                 insertingVal = &val;
-                pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&inCond, &mutex);
-                pthread_mutex_unlock(&mutex);
                 RecycleBufferLog("---------------------------unlock full %s\n",name);
             }
             
@@ -300,21 +215,21 @@ namespace tfmpcore {
 //                pthread_cond_signal(&cond);
             }
             insertingVal = nullptr;
+            pthread_mutex_unlock(&mutex);
         }
         
         void blockGetOut(T *valP){
-
+            pthread_mutex_lock(&mutex);
             if (!ioDisable && usedSize == 0) {
                 RecycleBufferLog("***************************lock empty %s\n",name);
-                pthread_mutex_lock(&mutex);
                 pthread_cond_wait(&outCond, &mutex);
-                pthread_mutex_unlock(&mutex);
                 RecycleBufferLog("---------------------------unlock empty %s[%d,%d]\n",name,usedSize,allocedSize);
             }
             
             if (!ioDisable) {
                 getOut(valP);
             }
+            pthread_mutex_unlock(&mutex);
         }
         
         bool back(T *valP){
@@ -335,29 +250,10 @@ namespace tfmpcore {
             return true;
         }
         
-        void addObserver(void *observer, int checkSize, bool isGreater, ObserverNotifyFunc notifyFunc){
-            if (notifyFunc == nullptr) {
-                return;
-            }
-            observers.push_back(new UsedSizeObserver(observer, checkSize, isGreater, notifyFunc));
-        }
-        
-        void removeObserver(void *observer, int checkSize, bool isGreater){
-            
-            for (auto iter = observers.begin(); iter != observers.end(); iter++) {
-                auto ob = *iter;
-                if (ob->observer == observer &&
-                    ob->checkSize == checkSize &&
-                    ob->isGreater == isGreater) {
-                    observers.erase(iter);
-                    break;
-                }
-            }
-        }
-        
         /** remove all inserted data */
         void flush(){
             RecycleBufferLog("signalAllBlock 1\n");
+            bool preIoValue = ioDisable;
             ioDisable = true;
             pthread_cond_broadcast(&inCond);
             pthread_cond_broadcast(&outCond);
@@ -379,9 +275,8 @@ namespace tfmpcore {
             
             usedSize = 0;
             backNode = frontNode->pre;
-            myStateObserver.mark(name, usedSize);
             
-            ioDisable = false;
+            ioDisable = preIoValue;
             RecycleBufferLog("ioDisable false\n");
         }
         
@@ -404,11 +299,16 @@ namespace tfmpcore {
             
             allocedSize = 0;
             
-            observers.clear();
-            
             ioDisable = true;
             RecycleBufferLog("ioDisable false\n");
             RecycleBufferLog("ioDisable end\n");
+        }
+        
+        void log(){
+            printf("u:%ld, a:%ld, l: %ld\n",usedSize, allocedSize, limitSize);
+            if (usedSize == 2000) {
+                
+            }
         }
     };
 }
