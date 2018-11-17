@@ -74,10 +74,6 @@
         _playController->displayVideoFrame = displayVideoFrame_iOS;
 //        _playController->clockMajor = TFMP_SYNC_CLOCK_MAJOR_VIDEO;
 //        _playController->accurateSeek = false;
-        
-        if (_activeVTB) {
-            _playController->setVideoDecoder(new tfmpcore::VTBDecoder());
-        }
 
         __weak typeof(self) weakSelf = self;
         _playController->playStoped = [weakSelf](tfmpcore::PlayController *playController, int reason){
@@ -250,6 +246,9 @@
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         //local file or bundle file need a file reader which is different on different platform.
+        if (_activeVTB) {
+            _playController->setVideoDecoder(new tfmpcore::VTBDecoder());
+        }
         bool succeed = _playController->connectAndOpenMedia([[_mediaURL absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
         if (!succeed) {
             TFMPDLog(@"play media open error");

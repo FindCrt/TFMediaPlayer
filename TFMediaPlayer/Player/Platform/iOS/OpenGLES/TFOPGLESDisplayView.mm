@@ -188,6 +188,10 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     }
 }
 
+-(void)clear{
+    
+}
+
 -(BOOL)configRenderData{
     if (_renderConfiged) {
         return true;
@@ -331,6 +335,11 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     EAGLContext *preContex = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:self.context];
     
+    if (_renderConfiged && pixelFormat != frameBuf->format) {
+        _renderConfiged = NO;
+        [self freeResource];
+    }
+    
     if (!_renderConfiged) {
         pixelFormat = frameBuf->format;
         [self configRenderData];
@@ -355,6 +364,7 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
         }else{
             for (int i = 0; i<2; i++) {
                 CFRelease(CVTextures[i]);
+                CVTextures[i] = nil;
             }
             CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
         }
@@ -391,23 +401,31 @@ const GLchar *TFVideoDisplay_nv12_fs_es2 = TFGLShaderSource
     [self.context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
+-(void)freeResource{
+    delete _frameProgram;
+    
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    
+    glDeleteTextures(texturesCount, textures);
+    
+    if (CVTextureCache) {
+        for (int i = 0; i<2; i++) {
+            if (CVTextures[i]) {
+                CFRelease(CVTextures[i]);
+                CVTextures[i] = nil;
+            }
+        }
+        CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
+        CFRelease(CVTextureCache);
+        CVTextureCache = nil;
+    }
+}
+
 -(void)dealloc{
     
     if (_renderConfiged) {
-        delete _frameProgram;
-        
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        
-        glDeleteTextures(texturesCount, textures);
-        
-        if (CVTextureCache) {
-            for (int i = 0; i<2; i++) {
-                if (CVTextures[i]) CFRelease(CVTextures[i]);
-            }
-            CVOpenGLESTextureCacheFlush(CVTextureCache, 0);
-            CFRelease(CVTextureCache);
-        }
+        [self freeResource];
     }
 }
 
@@ -470,12 +488,14 @@ inline void genTextures_NV12_CV(TFMPVideoFrameBuffer *frameBuf, CVOpenGLESTextur
     CVReturn retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0, &CVTextures[0]);
     if (retval != kCVReturnSuccess) {
         CFRelease(CVTextures[0]);
+        CVTextures[0] = nil;
         NSLog(@"create luma texture error: %d",retval);
     }
     
     retval = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, NULL, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, width/2, height/2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 1, &CVTextures[1]);
     if (retval != kCVReturnSuccess) {
         CFRelease(CVTextures[1]);
+        CVTextures[1] = nil;
         NSLog(@"create chroma texture error: %d",retval);
     }
     
