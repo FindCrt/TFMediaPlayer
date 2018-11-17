@@ -145,7 +145,7 @@ void *DisplayController::displayLoop(void *context){
         
         double remainTime = 0;
         if (videoFrame->serial == majorClock->serial) {
-//            remainTime = majorClock->getRemainTime(pts);
+            remainTime = majorClock->getRemainTime(pts);
         }
         
         if (videoFrame->serial != displayer->videoClock->serial) {
