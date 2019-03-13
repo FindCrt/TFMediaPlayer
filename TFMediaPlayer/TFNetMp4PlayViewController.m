@@ -38,7 +38,7 @@
     
     NSString *mediaConfig = [[NSBundle mainBundle] pathForResource:@"netMedias" ofType:@"plist"];
     _medias = [[NSMutableArray alloc] initWithContentsOfFile:mediaConfig];
-    NSLog(@"_medias: %@",_medias);
+    NSLog(@"_medias: %@",_medias);;
     
     
     CGFloat margin = 20;
